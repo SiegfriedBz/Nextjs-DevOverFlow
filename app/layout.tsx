@@ -2,13 +2,7 @@ import type { Metadata } from "next"
 import { Inter, Space_Grotesk as spaceGrotesk } from "next/font/google"
 import React from "react"
 import "./globals.css"
-import {
-  ClerkProvider,
-  SignInButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs"
+import Providers from "@/context/Providers"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -35,25 +29,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <ClerkProvider
-      appearance={{
-        elements: {
-          formButtonPrimary: "primary-gradient",
-          footerActionLink: "primary-text-gradient hover:text-primary-500",
-        },
-      }}
-    >
-      <html lang="en">
-        <body className={`${inter.variable} ${grotesk.variable}`}>
-          <SignedOut>
-            <SignInButton />
-          </SignedOut>
-          <SignedIn>
-            <UserButton />
-          </SignedIn>
-          {children}
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en">
+      <body className={`${inter.variable} ${grotesk.variable}`}>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
   )
 }
