@@ -11,40 +11,40 @@ export const THEMES: TTheme[] = [
   { value: "system", label: "System", icon: "/assets/icons/computer.svg" },
 ]
 
-export const SIDEBAR_LINKS: SidebarLink[] = [
+export const LEFTSIDEBAR_LINKS: SidebarLink[] = [
   {
     imgURL: "/assets/icons/home.svg",
-    route: "/",
+    href: "/",
     label: "Home",
   },
   {
     imgURL: "/assets/icons/users.svg",
-    route: "/community",
+    href: "/community",
     label: "Community",
   },
   {
     imgURL: "/assets/icons/star.svg",
-    route: "/collection",
+    href: "/collection",
     label: "Collections",
   },
   {
     imgURL: "/assets/icons/suitcase.svg",
-    route: "/jobs",
+    href: "/jobs",
     label: "Find Jobs",
   },
   {
     imgURL: "/assets/icons/tag.svg",
-    route: "/tags",
+    href: "/tags",
     label: "Tags",
   },
   {
     imgURL: "/assets/icons/user.svg",
-    route: "/profile",
+    href: "/profile",
     label: "Profile",
   },
   {
     imgURL: "/assets/icons/question.svg",
-    route: "/ask-question",
+    href: "/ask-question",
     label: "Ask a question",
   },
 ]
