@@ -1,4 +1,4 @@
-import ButtonSwitchTheme from "@/components/ButtonSwitchTheme"
+import SwitchThemeButton from "@/components/SwitchThemeButton"
 import GlobalSearchBar from "@/components/GlobalSearchBar"
 import { SignedIn, UserButton } from "@clerk/nextjs"
 import Image from "next/image"
@@ -33,7 +33,7 @@ const Navbar = () => {
       </nav>
 
       <div className="flex-between gap-5">
-        <ButtonSwitchTheme />
+        <SwitchThemeButton />
 
         <SignedIn>
           <UserButton
