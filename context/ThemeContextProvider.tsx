@@ -12,7 +12,7 @@ export const ThemeContext = createContext<TThemeContext | null>(null)
 const ThemeContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [theme, setTheme] = useLocalStorage<TThemeContext["theme"]>({
     key: "devflow-theme",
-    initialValue: "light",
+    initialValue: "dark",
   })
 
   const handleThemeChange = () => {

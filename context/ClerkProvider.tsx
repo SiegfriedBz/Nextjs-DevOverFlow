@@ -1,9 +1,9 @@
 import {
   ClerkProvider,
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  UserButton,
+  // SignedIn,
+  // SignedOut,
+  // SignInButton,
+  // UserButton,
 } from "@clerk/nextjs"
 import React from "react"
 
@@ -16,13 +16,13 @@ const CustomClerkProvider = ({ children }: { children: React.ReactNode }) => (
       },
     }}
   >
-    <SignInButton />
+    {/* <SignInButton />
     <SignedOut>
       <SignInButton />
     </SignedOut>
     <SignedIn>
       <UserButton />
-    </SignedIn>
+    </SignedIn> */}
     {children}
   </ClerkProvider>
 )
