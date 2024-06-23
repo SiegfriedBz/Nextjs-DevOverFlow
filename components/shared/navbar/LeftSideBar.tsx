@@ -1,17 +1,12 @@
 "use client"
 
 import { LEFTSIDEBAR_LINKS } from "@/constants"
-import { SidebarLink } from "@/types"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 const LeftSideBar = () => {
   const pathname = usePathname()
-
-  console.log(LEFTSIDEBAR_LINKS)
-  const linkO = LEFTSIDEBAR_LINKS.at(0) as SidebarLink
-  console.log(linkO.imgURL)
 
   return (
     <section className="flex-1 pt-16">

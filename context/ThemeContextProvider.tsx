@@ -38,8 +38,6 @@ const ThemeContextProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [theme])
 
-  console.log("RENDER ThemeContextProvider theme", theme)
-
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
       {children}
