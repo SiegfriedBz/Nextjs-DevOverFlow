@@ -8,7 +8,7 @@ const useLocalStorage = <T>({
   initialValue: T
 }) => {
   const [isClient, setIsClient] = useState(false)
-  const [value, setValue] = useState(() => {
+  const [value, setValue] = useState<T>(() => {
     if (!isClient) return initialValue
 
     const jsonItem = window.localStorage.getItem(key)
@@ -30,7 +30,7 @@ const useLocalStorage = <T>({
     window.localStorage.setItem(key, JSON.stringify(value))
   }, [key, value, isClient])
 
-  return [value, setValue]
+  return [value, setValue] as const
 }
 
 export default useLocalStorage
