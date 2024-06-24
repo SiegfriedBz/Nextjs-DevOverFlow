@@ -1,6 +1,7 @@
-import LeftSideBar from "@/components/shared/navbar/LeftSideBar"
 import Navbar from "@/components/shared/navbar/Navbar"
-import RightSidebar from "@/components/shared/navbar/RightSidebar"
+import LeftSideBar from "@/components/shared/navbar/sidebar/LeftSideBar"
+import RightSidebar from "@/components/shared/navbar/sidebar/RightSidebar"
+
 import React from "react"
 
 const layout = ({ children }: { children: React.ReactNode }) => {
@@ -8,7 +9,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
     <main className="background-light850_dark100 relative">
       <Navbar />
       <div className="flex">
-        <div className="mt-6 max-sm:hidden">
+        <div className="mt-[56px] max-sm:hidden">
           <LeftSideBar />
         </div>
 
@@ -16,8 +17,9 @@ const layout = ({ children }: { children: React.ReactNode }) => {
           <div className="mx-auto w-full max-w-5xl">{children}</div>
         </section>
 
-        {/* TODO max-sm:hidden ? */}
-        <RightSidebar />
+        <div className="mt-[56px] max-xl:hidden">
+          <RightSidebar />
+        </div>
       </div>
     </main>
   )
