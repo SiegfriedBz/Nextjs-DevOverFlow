@@ -1,12 +1,12 @@
 import { BADGE_CRITERIA } from "@/constants"
 
-export interface SidebarLink {
+export interface ISidebarLink {
   imgURL: string
   href: string
   label: string
 }
 
-export interface Job {
+export interface IJob {
   id?: string
   employer_name?: string
   employer_logo?: string | undefined

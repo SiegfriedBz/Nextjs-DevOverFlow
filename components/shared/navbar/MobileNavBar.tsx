@@ -1,4 +1,5 @@
-import { Button } from "@/components/ui/button"
+"use client"
+
 import {
   Sheet,
   SheetContent,
@@ -6,17 +7,17 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import { cn } from "@/lib/utils"
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs"
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
 import Image from "next/image"
-import Link from "next/link"
-import LeftSideBar from "./LeftSideBar"
 import LogoLink from "./LogoLink"
+import { useState } from "react"
+import LeftSideBar from "./sidebar/LeftSideBar"
 
 const MobileNavBar = () => {
+  const [open, setOpen] = useState(false)
+
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Image
           src="/assets/icons/hamburger.svg"
@@ -38,30 +39,7 @@ const MobileNavBar = () => {
         <LogoLink />
 
         <div className="flex h-full flex-col">
-          <LeftSideBar />
-
-          <div>
-            <SignedOut>
-              <div className="flex flex-col gap-3">
-                {/* log in */}
-                <SignButton
-                  label="Log in"
-                  href="/sign-in"
-                  className="btn-secondary primary-text-gradient"
-                />
-                {/* sign up */}
-                <SignButton
-                  label="Sign up"
-                  href="/sign-up"
-                  className="light-border-2 btn-tertiary text-dark400_light900"
-                />
-              </div>
-            </SignedOut>
-
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
-          </div>
+          <LeftSideBar isMobileSideBar={true} setOpen={setOpen} />
         </div>
       </SheetContent>
     </Sheet>
@@ -69,27 +47,3 @@ const MobileNavBar = () => {
 }
 
 export default MobileNavBar
-
-const SignButton = ({
-  href,
-  label,
-  className,
-}: {
-  href: string
-  label: string
-  className: string
-}) => {
-  return (
-    <Button
-      asChild
-      className={cn(
-        "small-medium min-h-[41px] w-full rounded-lg px-4 py-3 shadow-none",
-        className
-      )}
-    >
-      <Link href={href}>
-        <span className="w-full text-center">{label}</span>
-      </Link>
-    </Button>
-  )
-}
