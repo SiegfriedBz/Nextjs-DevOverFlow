@@ -36,8 +36,8 @@ const SwitchThemeButton = () => {
                   : systemTheme.icon
             }
             alt={theme}
-            width={20}
-            height={20}
+            width={24}
+            height={24}
             className="active-theme"
           />
           <span className="sr-only">Toggle theme</span>
@@ -45,7 +45,7 @@ const SwitchThemeButton = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="relative flex -translate-x-2 flex-col gap-y-2 rounded-md border p-2 dark:border-dark-400 dark:bg-dark-300 dark:text-light-400"
+        className="relative flex -translate-x-2 flex-col gap-y-2 rounded-md border bg-light-900 p-2 dark:border-dark-400 dark:bg-dark-300 dark:text-light-400"
       >
         {THEMES.map((t) => {
           const { value, label, icon } = t
