@@ -1,4 +1,4 @@
-import type { SidebarLink } from "@/types/index"
+import type { ISidebarLink } from "@/types/index"
 
 export type TTheme = {
   value: "light" | "dark" | "system"
@@ -11,7 +11,7 @@ export const THEMES: TTheme[] = [
   { value: "system", label: "System", icon: "/assets/icons/computer.svg" },
 ]
 
-export const LEFTSIDEBAR_LINKS: SidebarLink[] = [
+export const LEFTSIDEBAR_LINKS: ISidebarLink[] = [
   {
     imgURL: "/assets/icons/home.svg",
     href: "/",
