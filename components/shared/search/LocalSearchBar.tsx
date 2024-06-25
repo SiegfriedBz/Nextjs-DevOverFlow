@@ -3,17 +3,16 @@
 import useQueryParams from "@/hooks/useQueryParams"
 import SearchBarInput from "./SearchBarInput"
 
-const GlobalSearchBar = () => {
+const LocalSearchBar = () => {
   const [search, setSearch] = useQueryParams({ queryParamName: "q" })
 
   return (
     <SearchBarInput
       search={search}
       setSearch={setSearch}
-      placeholder="Search globally"
-      isLocal={false}
+      placeholder="Search questions..."
     />
   )
 }
 
-export default GlobalSearchBar
+export default LocalSearchBar
