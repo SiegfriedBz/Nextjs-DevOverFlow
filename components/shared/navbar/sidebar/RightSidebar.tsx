@@ -26,7 +26,7 @@ const popularTags = [
 const RightSidebar = () => {
   return (
     <SideBar className="custom-scrollbar h-[calc(100vh-3rem)] w-[350px] overflow-y-auto">
-      <div className="">
+      <div>
         <h3 className="h3-bold text-dark200_light900">Top Questions</h3>
         <div className="mt-7 flex w-full flex-col gap-8">
           {hotQuestions?.map((q) => {

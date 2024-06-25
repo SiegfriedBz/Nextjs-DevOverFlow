@@ -37,7 +37,7 @@ const AuthButtons = ({ isMobileSideBar }: TProps) => {
         <div className="py-3">
           {/* log out */}
           <SignOutButton>
-            <Button className="text-dark300_light900 mx-auto flex items-center gap-4">
+            <Button className="small-medium light-border-2 btn-tertiary mx-auto flex min-h-[41px] w-full items-center gap-4 rounded-xl px-4 py-3 shadow-none">
               <Image
                 src="/assets/icons/sign-up.svg"
                 width={20}
@@ -46,7 +46,7 @@ const AuthButtons = ({ isMobileSideBar }: TProps) => {
                 className="invert-colors"
               />
               <p
-                className={`base-medium ${!isMobileSideBar && "max-lg:hidden"}`}
+                className={`text-dark400_light900 base-medium ${!isMobileSideBar && "max-lg:hidden"}`}
               >
                 Log out
               </p>

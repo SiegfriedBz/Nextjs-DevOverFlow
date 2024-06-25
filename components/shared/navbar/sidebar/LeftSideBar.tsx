@@ -22,18 +22,23 @@ const LeftSideBar = ({
 }: TProps) => {
   return (
     <SideBar
-      className={
-        isMobileSideBar ? "h-screen" : "h-[calc(100vh-3rem)] lg:w-[266px]"
-      }
+      className={`h-[calc(100vh-3rem)]
+        ${
+          isMobileSideBar
+            ? `custom-scrollbar
+                overflow-y-auto px-4 pt-8`
+            : "lg:w-[266px]"
+        }
+      `}
     >
       {/* left-side-bar links  */}
-      <ul className="flex h-full flex-col gap-4">
+      <ul className={`flex h-full flex-col gap-4`}>
         {LEFTSIDEBAR_LINKS.map((link) => {
           return (
             <li key={`mobileNavContent-${link.label}`}>
               <CustomNavLink
-                link={link}
                 isMobileSideBar={isMobileSideBar}
+                link={link}
                 setOpen={setOpen}
               />
             </li>
@@ -52,8 +57,8 @@ type TCustomNavLinkProps = TProps & {
   link: ISidebarLink
 }
 const CustomNavLink = ({
+  isMobileSideBar = false,
   link,
-  isMobileSideBar,
   setOpen,
 }: TCustomNavLinkProps) => {
   const { imgURL, href, label } = link
@@ -70,12 +75,14 @@ const CustomNavLink = ({
           : {}
       }
       href={href}
-      className={`flex w-full items-center justify-start gap-4 bg-transparent p-4
-                ${
-                  isActive
-                    ? "primary-gradient rounded-xl text-light-900"
-                    : "text-dark300_light900"
-                }`}
+      className={`flex w-full items-center justify-start gap-4
+        bg-transparent
+        ${isMobileSideBar ? "p-2" : "p-4"}
+        ${
+          isActive
+            ? "primary-gradient rounded-xl text-light-900"
+            : "text-dark300_light900"
+        }`}
     >
       <Image
         src={imgURL}
@@ -85,7 +92,7 @@ const CustomNavLink = ({
         className={isActive ? "" : "invert-colors"}
       />
       <p
-        className={`${!isMobileSideBar && "max-lg:hidden"} ${isActive ? "base-bold" : "base-medium"}`}
+        className={`whitespace-nowrap ${!isMobileSideBar && "max-lg:hidden"} ${isActive ? "base-bold" : "base-medium"}`}
       >
         {label}
       </p>
