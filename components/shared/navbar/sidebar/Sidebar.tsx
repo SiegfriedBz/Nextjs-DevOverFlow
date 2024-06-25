@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils"
 import React from "react"
 
 type TProps = {
@@ -8,11 +9,14 @@ type TProps = {
 const SideBar = ({ className = "", children }: TProps) => {
   return (
     <section
-      className={`${className} background-light900_dark200 
+      className={cn(
+        `background-light900_dark200 
         flex  
         flex-col px-8
         pb-4 pt-20 shadow-light-300 dark:shadow-none
-      `}
+      `,
+        className
+      )}
     >
       {children}
     </section>
