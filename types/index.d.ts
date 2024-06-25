@@ -20,29 +20,51 @@ export interface IJob {
   job_country?: string
 }
 
-export interface Country {
+export interface ICountry {
   name: {
     common: string
   }
 }
 
-export interface ParamsProps {
+export interface IParamsProps {
   params: { id: string }
 }
 
-export interface SearchParamsProps {
+export interface ISearchParamsProps {
   searchParams: { [key: string]: string | undefined }
 }
 
-export interface URLProps {
+export interface IURLProps {
   params: { id: string }
   searchParams: { [key: string]: string | undefined }
 }
 
-export interface BadgeCounts {
+export interface IBadgeCounts {
   GOLD: number
   SILVER: number
   BRONZE: number
 }
 
-export type BadgeCriteriaType = keyof typeof BADGE_CRITERIA
+export type TBadgeCriteria = keyof typeof BADGE_CRITERIA
+
+export type TTag = {
+  _id: string
+  name: string
+  totalQuestions?: number
+  showCount?: boolean
+}
+
+export type TQuestion = {
+  _id: string
+  title: string
+  tags: TTag[]
+  author: {
+    _id: string
+    name: string
+    picture: string
+  }
+  createdAt: Date
+  numOfVotes: number
+  numOfViews: number
+  answers: Array<object>
+}
