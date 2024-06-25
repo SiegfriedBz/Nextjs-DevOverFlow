@@ -8,7 +8,6 @@ type TProps = {
   isMobileSideBar?: boolean
 }
 const AuthButtons = ({ isMobileSideBar }: TProps) => {
-  console.log("AuthButtons isMobileSideBar", isMobileSideBar)
   return (
     <>
       <SignedOut>
