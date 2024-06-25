@@ -23,7 +23,7 @@ const QUESTIONS: TQuestion[] = [
     author: {
       _id: "a1",
       name: "Alice Johnson",
-      picture: "https://example.com/pictures/alice.jpg",
+      picture: "",
     },
     createdAt: new Date("2023-01-15T08:00:00Z"),
     numOfVotes: 10000000,
@@ -40,7 +40,7 @@ const QUESTIONS: TQuestion[] = [
     author: {
       _id: "a2",
       name: "Bob Smith",
-      picture: "https://example.com/pictures/bob.jpg",
+      picture: "",
     },
     createdAt: new Date("2023-02-20T09:30:00Z"),
     numOfVotes: 25,
