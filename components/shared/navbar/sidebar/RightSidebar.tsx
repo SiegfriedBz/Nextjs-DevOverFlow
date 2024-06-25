@@ -4,19 +4,28 @@ import Link from "next/link"
 import SideBar from "./Sidebar"
 
 const hotQuestions = [
-  { _id: 1, title: "Stuff" },
-  { _id: 2, title: "Stuff 2" },
-  { _id: 3, title: "Stuff 3" },
+  { _id: "1", title: "Stuff" },
+  { _id: "2", title: "Stuff 2" },
+  { _id: "3", title: "Stuff 3" },
 ]
 const popularTags = [
-  { _id: 1, name: "Stuff", totalQuestions: 2 },
-  { _id: 2, name: "Stuff 2", totalQuestions: 24 },
-  { _id: 3, name: "Stuff 3", totalQuestions: 28 },
+  { _id: "1", name: "Stuff", totalQuestions: 2 },
+  { _id: "2", name: "Stuff 2", totalQuestions: 24 },
+  { _id: "3", name: "Stuff 3", totalQuestions: 28 },
+  { _id: "12", name: "Stuff", totalQuestions: 2 },
+  { _id: "22", name: "Stuff 2", totalQuestions: 24 },
+  { _id: "31", name: "Stuff 3", totalQuestions: 28 },
+  { _id: "14", name: "Stuff", totalQuestions: 2 },
+  { _id: "25", name: "Stuff 2", totalQuestions: 24 },
+  { _id: "33", name: "Stuff 3", totalQuestions: 28 },
+  { _id: "1d4", name: "Stuff", totalQuestions: 2 },
+  { _id: "25s", name: "Stuff 2", totalQuestions: 24 },
+  { _id: "3d3", name: "Stuff 3", totalQuestions: 28 },
 ]
 
 const RightSidebar = () => {
   return (
-    <SideBar className="w-[350px]">
+    <SideBar className="custom-scrollbar h-[calc(100vh-3rem)] w-[350px] overflow-y-auto">
       <div className="">
         <h3 className="h3-bold text-dark200_light900">Top Questions</h3>
         <div className="mt-7 flex w-full flex-col gap-8">

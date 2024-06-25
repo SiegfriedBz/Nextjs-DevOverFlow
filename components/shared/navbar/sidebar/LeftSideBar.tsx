@@ -21,7 +21,11 @@ const LeftSideBar = ({
   setOpen = () => {},
 }: TProps) => {
   return (
-    <SideBar className={isMobileSideBar ? "" : "lg:w-[266px]"}>
+    <SideBar
+      className={
+        isMobileSideBar ? "h-screen" : "h-[calc(100vh-3rem)] lg:w-[266px]"
+      }
+    >
       {/* left-side-bar links  */}
       <ul className="flex h-full flex-col gap-4">
         {LEFTSIDEBAR_LINKS.map((link) => {
@@ -69,7 +73,7 @@ const CustomNavLink = ({
       className={`flex w-full items-center justify-start gap-4 bg-transparent p-4
                 ${
                   isActive
-                    ? "primary-gradient rounded-lg text-light-900"
+                    ? "primary-gradient rounded-xl text-light-900"
                     : "text-dark300_light900"
                 }`}
     >

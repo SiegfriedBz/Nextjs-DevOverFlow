@@ -9,8 +9,8 @@ const SideBar = ({ className = "", children }: TProps) => {
   return (
     <section
       className={`${className} background-light900_dark200 
-        custom-scrollbar flex
-        min-h-[90vh] flex-col overflow-y-auto px-8
+        flex  
+        flex-col px-8
         pb-4 pt-20 shadow-light-300 dark:shadow-none
       `}
     >
