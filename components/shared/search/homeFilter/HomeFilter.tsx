@@ -20,7 +20,7 @@ const HomeFilter = ({ filterName }: TFilterWrapperProps) => {
         filter={filter}
         setFilter={setFilter}
         options={HOME_FILTER_OPTIONS}
-        wrapperClassName="flex w-full gap-4 max-md:hidden md:my-4"
+        wrapperClassName="flex w-full max-md:hidden md:my-4"
         className="max-md:h-16 md:h-10"
       />
 
