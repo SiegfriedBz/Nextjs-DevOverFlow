@@ -7,7 +7,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { getDaysAgo } from "@/lib/utils"
+import { getDaysAgo } from "@/lib/dates.utils"
+
 import type { TQuestion } from "@/types"
 import Link from "next/link"
 

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/shadcn.utils"
 import { SignedIn, SignedOut, SignOutButton } from "@clerk/nextjs"
 import Image from "next/image"
 import Link from "next/link"
