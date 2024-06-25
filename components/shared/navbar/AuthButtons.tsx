@@ -8,7 +8,6 @@ type TProps = {
   isMobileSideBar?: boolean
 }
 const AuthButtons = ({ isMobileSideBar }: TProps) => {
-  console.log("AuthButtons isMobileSideBar", isMobileSideBar)
   return (
     <>
       <SignedOut>
@@ -19,7 +18,8 @@ const AuthButtons = ({ isMobileSideBar }: TProps) => {
             icon="/assets/icons/account.svg"
             label="Login"
             href="/sign-in"
-            className="btn-secondary primary-text-gradient"
+            className="btn-secondary"
+            textClassName="primary-text-gradient"
           />
           {/* sign up */}
           <SignButton
@@ -27,7 +27,8 @@ const AuthButtons = ({ isMobileSideBar }: TProps) => {
             icon="/assets/icons/sign-up.svg"
             label="Sign up"
             href="/sign-up"
-            className="light-border-2 btn-tertiary text-dark400_light900"
+            className="light-border-2 btn-tertiary"
+            textClassName="text-dark400_light900"
           />
         </div>
       </SignedOut>
@@ -64,6 +65,7 @@ type TSignButtonProps = {
   href: string
   label: string
   className: string
+  textClassName: string
   isMobileSideBar?: boolean
 }
 const SignButton = ({
@@ -71,13 +73,14 @@ const SignButton = ({
   href,
   label,
   className,
+  textClassName,
   isMobileSideBar = false,
 }: TSignButtonProps) => {
   return (
     <Button
       asChild
       className={cn(
-        "small-medium min-h-[41px] w-full rounded-lg px-4 py-3 shadow-none",
+        "small-medium min-h-[41px] w-full rounded-xl px-4 py-3 shadow-none",
         className
       )}
     >
@@ -92,6 +95,7 @@ const SignButton = ({
         <span
           className={`w-full text-center text-base 
             ${isMobileSideBar ? "" : "max-lg:hidden"}
+            ${textClassName}
           `}
         >
           {label}

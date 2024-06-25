@@ -1,13 +1,8 @@
+import { Badge } from "@/components/ui/badge"
+import type { TTag } from "@/types"
 import Link from "next/link"
-import React from "react"
-import { Badge } from "../ui/badge"
 
-type TProps = {
-  _id: number
-  name: string
-  totalQuestions: number
-  showCount?: boolean
-}
+type TProps = TTag
 const Tag = ({ _id, name, totalQuestions, showCount = false }: TProps) => {
   return (
     <Link href={`/tags/${_id}`} className="flex justify-between gap-2">
