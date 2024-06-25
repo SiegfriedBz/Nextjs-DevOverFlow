@@ -7,22 +7,22 @@ type TProps = {
 }
 const LogoLink = ({ className = "" }: TProps) => {
   return (
-    <Link href="/" className="flex items-center gap-1">
+    <Link href="/" className="flex items-center gap-1 sm:mr-4">
       <Image
         src="/assets/images/site-logo.svg"
-        width={23}
-        height={23}
+        width={24}
+        height={24}
         alt="DevFlow"
       />
 
-      <p
+      <h2
         className={cn(
-          "h2-bold text-dark100_light900 font-spaceGrotesk",
+          "h2-bold text-dark100_light900 font-spaceGrotesk whitespace-nowrap",
           className
         )}
       >
         Dev <span className="text-primary-500">OverFlow</span>
-      </p>
+      </h2>
     </Link>
   )
 }
