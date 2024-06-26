@@ -11,8 +11,6 @@ const TinyEditor = () => {
     setIsClient(true)
   }, [])
 
-  console.log("TinyEditor", editorRef.current)
-
   if (!isClient) return null
 
   return (
