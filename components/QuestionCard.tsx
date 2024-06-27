@@ -8,7 +8,6 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { getDaysAgo } from "@/lib/dates.utils"
-
 import type { TQuestion } from "@/types"
 import Link from "next/link"
 
@@ -64,12 +63,12 @@ const QuestionCard = ({
           max-2xl:flex-col max-2xl:items-start max-2xl:gap-4"
         >
           <Metric
-            imageSrc={author.picture || "/assets/icons/avatar.svg"}
+            imageSrc={author?.picture || "/assets/icons/avatar.svg"}
             alt="avatar"
             className="body-medium text-dark400_light800"
-            href={`/users/${author._id}`}
+            href={`/users/${author?._id}`}
             isAuthor={isAuthor}
-            value={author.name}
+            value={author?.name}
             title={` - asked ${
               daysAgo === 0
                 ? "Today"
@@ -87,7 +86,7 @@ const QuestionCard = ({
             <Metric
               imageSrc="/assets/icons/star.svg"
               alt="numOfAnswers"
-              value={answers.length}
+              value={answers?.length}
               title=" Answers"
             />
             <Metric

@@ -14,21 +14,29 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import {
-  createQuestionSchema,
-  type TcreateQuestionInput,
-} from "@/lib/zod.utils"
+  mutateQuestionSchema,
+  type TMutateQuestionInput,
+} from "@/lib/zod/questions.zod"
+import {
+  createQuestionAction,
+  updateQuestionAction,
+} from "@/server-actions/question.actions"
 import { zodResolver } from "@hookform/resolvers/zod"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import React, { useState } from "react"
 import { useForm } from "react-hook-form"
+import { toast } from "sonner"
 
 type TProps = {
   actionType: "create" | "edit"
+  questionId?: string
 }
-const QuestionForm = ({ actionType = "create" }: TProps) => {
+const QuestionForm = ({ actionType = "create", questionId }: TProps) => {
+  const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const form = useForm<TcreateQuestionInput>({
-    resolver: zodResolver(createQuestionSchema),
+  const form = useForm<TMutateQuestionInput>({
+    resolver: zodResolver(mutateQuestionSchema),
     defaultValues: {
       title: "",
       description: "",
@@ -54,7 +62,6 @@ const QuestionForm = ({ actionType = "create" }: TProps) => {
 
       const currentTagValues = field.value
       if (!currentTagValues.includes(tagValue)) {
-        console.log("tagValue", tagValue)
         form.setValue("tags", [...currentTagValues, tagValue])
         tagInput.value = ""
         form.clearErrors("tags")
@@ -69,23 +76,31 @@ const QuestionForm = ({ actionType = "create" }: TProps) => {
     form.setValue("tags", newTags)
   }
 
-  const createQuestionAction = async () => {}
-  const editQuestionAction = async () => {}
-
-  async function onSubmit(values: TcreateQuestionInput) {
+  async function onSubmit(values: TMutateQuestionInput) {
     setIsSubmitting(true)
 
     try {
       const response =
         actionType === "create"
-          ? await createQuestionAction()
-          : await editQuestionAction()
+          ? await createQuestionAction({ data: values })
+          : await updateQuestionAction({
+              questionId: questionId as string,
+              data: values,
+            })
 
       console.log("response", response)
 
-      //  navigate to home page
+      // notify user
+      toast.success(
+        `Question ${actionType === "create" ? "created" : "updated"} successfully!`
+      )
+      // navigate to home page
+      router.push("/")
     } catch (error) {
       console.log(error)
+      toast.error(
+        `Something went wrong when ${actionType === "create" ? "creating" : "updating"} question.`
+      )
     } finally {
       setIsSubmitting(false)
     }
@@ -131,7 +146,11 @@ const QuestionForm = ({ actionType = "create" }: TProps) => {
                 <span className="text-primary-500">*</span>
               </FormLabel>
               <FormControl className="background-light900_dark300 light-border-2 mt-3.5 ">
-                <TinyEditor />
+                <TinyEditor
+                  handleEditorChange={(content: string) =>
+                    field.onChange(content)
+                  }
+                />
               </FormControl>
               <FormDescription className="body-regular mt-2.5 text-light-500">
                 Introduce the problem and expand on what you put in the title.

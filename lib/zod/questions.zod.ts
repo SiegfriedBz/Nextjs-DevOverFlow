@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-const createQuestionSchema = z.object({
+const mutateQuestionSchema = z.object({
   title: z.string().min(5).max(130),
   description: z.string().min(20),
   tags: z
@@ -9,5 +9,5 @@ const createQuestionSchema = z.object({
     .max(3, { message: "Must have 3 tags max" }),
 })
 
-type TcreateQuestionInput = z.infer<typeof createQuestionSchema>
-export { createQuestionSchema, type TcreateQuestionInput }
+type TMutateQuestionInput = z.infer<typeof mutateQuestionSchema>
+export { mutateQuestionSchema, type TMutateQuestionInput }
