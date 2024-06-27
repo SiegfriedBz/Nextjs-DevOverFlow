@@ -24,10 +24,10 @@ const QuestionCardSkeleton = () => {
       "
     >
       <CardHeader>
-        <Skeleton className="mb-2 text-xs opacity-80 sm:hidden" />
+        <Skeleton className="background-light800_dark300 mb-2 h-12 w-2/3" />
 
         <CardTitle className="sm:h3-semibold base-semibold text-dark200_light900 line-clamp-1">
-          <Skeleton className="size-full" />
+          <Skeleton className="background-light800_dark300 size-full" />
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -42,7 +42,7 @@ const QuestionCardSkeleton = () => {
           className="flex w-full items-center justify-between text-sm 
           max-2xl:flex-col max-2xl:items-start max-2xl:gap-4"
         >
-          <MetricSkeleton className="body-medium text-dark400_light800" />
+          <MetricSkeleton className="body-medium background-light800_dark300 text-dark400_light800" />
 
           <div className="flex items-center gap-x-2">
             <MetricSkeleton />
