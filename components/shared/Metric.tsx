@@ -27,7 +27,7 @@ const Metric = ({
         width={16}
         height={16}
         alt={alt}
-        className="invert-colors"
+        className={`${href ? "rounded-full" : ""} invert-colors`}
       />
       <p className={`${isAuthor && href ? "max-sm:hidden" : ""}`}>
         <span>{typeof value === "number" ? formatNumber(value) : value}</span>
