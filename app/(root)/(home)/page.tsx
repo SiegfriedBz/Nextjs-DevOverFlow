@@ -1,9 +1,10 @@
 import QuestionCard from "@/components/QuestionCard"
 import QuestionCardSkeleton from "@/components/QuestionCardSkeleton"
 import NoResult from "@/components/shared/NoResult"
-import HomeFilter from "@/components/shared/search/homeFilter/HomeFilter"
+import CustomFilter from "@/components/shared/search/filter/CustomFilter"
 import LocalSearchBar from "@/components/shared/search/LocalSearchBar"
 import { Button } from "@/components/ui/button"
+import { HOME_FILTER_OPTIONS } from "@/constants/filters"
 import { getAllQuestions } from "@/services/question.services"
 import type { TQuestion, TSearchParamsProps } from "@/types"
 import Link from "next/link"
@@ -23,9 +24,9 @@ const Home = ({ searchParams }: TSearchParamsProps) => {
       </div>
 
       <div className="mt-4 flex justify-between gap-5 max-sm:flex-col sm:items-center md:flex-col">
-        <LocalSearchBar />
+        <LocalSearchBar queryParamName="q" placeholder="Search questions..." />
 
-        <HomeFilter filterName="filter" />
+        <CustomFilter filterName="filter" filterOptions={HOME_FILTER_OPTIONS} />
       </div>
 
       <div className="mt-4 flex flex-col justify-between gap-8 sm:items-center">
@@ -53,9 +54,15 @@ const QuestionListWrapper = async ({ searchParams }: TSearchParamsProps) => {
   await wait(2500)
 
   return data && data?.length > 0 ? (
-    data.map((question) => {
-      return <QuestionCard key={question._id} {...question} />
-    })
+    <ul className="w-full">
+      {data.map((question) => {
+        return (
+          <li key={question._id}>
+            <QuestionCard {...question} />
+          </li>
+        )
+      })}
+    </ul>
   ) : (
     <NoResult
       resultType="question"
