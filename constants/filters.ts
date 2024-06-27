@@ -4,3 +4,9 @@ export const HOME_FILTER_OPTIONS = [
   "Frequest",
   "Unanswered",
 ]
+
+export const COMMUNITY_FILTER_OPTIONS = [
+  "New Users",
+  "Old Users",
+  "Top Contributors",
+]
