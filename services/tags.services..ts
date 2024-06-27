@@ -2,8 +2,38 @@
 
 import connectToMongoDB from "@/lib/mongoose.utils"
 import type { IQuestionDocument } from "@/models/question.model"
+import Question from "@/models/question.model"
 import Tag, { type ITagDocument } from "@/models/tag.model"
+import User from "@/models/user.model"
+import type { TSearchParamsProps } from "@/types"
 import { getUser } from "./user.services"
+
+export async function getAllTags({ searchParams }: TSearchParamsProps) {
+  try {
+    await connectToMongoDB()
+
+    // TODO
+    // HANDLE searchParams
+    // const {
+    //   page = 1,
+    //   numOfResultsPerPage = 10,
+    //   filter = "",
+    //   searchQuery = "",
+    // } = searchParams
+
+    const tags = await Tag.find({})
+      .populate([{ path: "questions", model: Question }])
+      .populate([{ path: "followers", model: User }])
+      .sort({ createdAt: -1 })
+    // .lean()
+
+    return JSON.parse(JSON.stringify(tags))
+  } catch (error) {
+    const err = error as Error
+    console.log("getAllTags Error", err.message)
+    throw new Error(`Something went wrong when fetching tags - ${err.message}`)
+  }
+}
 
 export async function getUserTopTags({
   userId,
@@ -24,9 +54,27 @@ export async function getUserTopTags({
 
     // TODO
     return [
-      { _id: "1", name: "tag1" },
-      { _id: "2", name: "tag2" },
-      { _id: "3", name: "tag3" },
+      {
+        _id: "1",
+        name: "Stuff",
+        questions: ["kkv", "kjgl"],
+        description: "jblgvlvlv",
+        followers: ["kkv", "kjgl"],
+      },
+      {
+        _id: "2",
+        name: "Stuff 2",
+        questions: ["kkv", "kjgl"],
+        description: "jblgvlvlv",
+        followers: ["kkv", "kjgl"],
+      },
+      {
+        _id: "3",
+        name: "Stuff 3",
+        questions: ["kkv", "kjgl"],
+        description: "jblgvlvlv",
+        followers: ["kkv", "kjgl"],
+      },
     ]
   } catch (error) {
     const err = error as Error
