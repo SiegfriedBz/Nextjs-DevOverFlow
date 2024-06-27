@@ -1,9 +1,12 @@
 "use client"
 
 import { Editor } from "@tinymce/tinymce-react"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 
-const TinyEditor = () => {
+type TProps = {
+  handleEditorChange: (content: string) => void
+}
+const TinyEditor = ({ handleEditorChange }: TProps) => {
   const [isClient, setIsClient] = useState(false)
   const editorRef = useRef<typeof Editor | null>(null)
 
@@ -20,6 +23,8 @@ const TinyEditor = () => {
         // @ts-ignore
         editorRef.current = editor
       }}
+      // onBlur={}
+      onEditorChange={handleEditorChange}
       init={{
         height: 300,
         menubar: false,
