@@ -6,7 +6,6 @@ import UserCardSkeleton from "@/components/UserCardSkeleton"
 import { COMMUNITY_FILTER_OPTIONS } from "@/constants/filters"
 import { getAllUsers } from "@/services/user.services"
 import type { TSearchParamsProps, TUser } from "@/types"
-import { wait } from "@/utils/dev.utils"
 import { Suspense } from "react"
 
 const Community = ({ searchParams }: TSearchParamsProps) => {
@@ -44,8 +43,6 @@ const UserListWrapper = async ({ searchParams }: TSearchParamsProps) => {
   console.log(data)
   console.log("==== COMMUNITY searchParams", searchParams)
   console.log("==== COMMUNITY data", data)
-
-  await wait(2500)
 
   return data && data?.length > 0 ? (
     <ul className="flex w-full flex-wrap justify-start gap-8">
