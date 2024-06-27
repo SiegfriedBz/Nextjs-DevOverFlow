@@ -1,10 +1,12 @@
+"use server"
+
 import connectToMongoDB from "@/lib/mongoose.utils"
 import type { TMutateQuestionInput } from "@/lib/zod/questions.zod"
 import Answer from "@/models/answer.model"
 import Question, { IQuestionDocument } from "@/models/question.model"
 import Tag from "@/models/tag.model"
 import User from "@/models/user.model"
-import { TSearchParamsProps } from "@/types"
+import type { TSearchParamsProps } from "@/types"
 import { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
 
 export async function getAllQuestions({ searchParams }: TSearchParamsProps) {
@@ -13,9 +15,12 @@ export async function getAllQuestions({ searchParams }: TSearchParamsProps) {
 
     // TODO
     // HANDLE searchParams
-    // const queryParams = ""
-    // if (searchParams?.get("page")) {
-    // }
+    const {
+      page = 1,
+      numOfResultsPerPage = 10,
+      filter = "",
+      searchQuery = "",
+    } = searchParams
 
     const questions = await Question.find({})
       .populate([

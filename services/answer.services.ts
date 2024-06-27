@@ -1,3 +1,5 @@
+"use server"
+
 import connectToMongoDB from "@/lib/mongoose.utils"
 import Answer, { type IAnswerDocument } from "@/models/answer.model"
 import { FilterQuery } from "mongoose"

@@ -1,7 +1,38 @@
-import { TMutateUserData } from "@/app/api/v1/webhooks/clerk/route"
+"use server"
+
+import type { TMutateUserData } from "@/app/api/v1/webhooks/clerk/route"
 import connectToMongoDB from "@/lib/mongoose.utils"
+import Question from "@/models/question.model"
 import User, { type IUserDocument } from "@/models/user.model"
+import type { TSearchParamsProps } from "@/types"
 import { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
+
+export async function getAllUsers({ searchParams }: TSearchParamsProps) {
+  try {
+    await connectToMongoDB()
+
+    // TODO
+    // HANDLE searchParams
+    const {
+      page = 1,
+      numOfResultsPerPage = 10,
+      filter = "",
+      searchQuery = "",
+    } = searchParams
+
+    const users = await User.find({})
+      .populate([{ path: "savedQuestions", model: Question }])
+      .populate([{ path: "savedTags", model: Question }])
+      .sort({ createdAt: -1 })
+    // .lean()
+
+    return JSON.parse(JSON.stringify(users))
+  } catch (error) {
+    const err = error as Error
+    console.log("getAllUsers Error", err.message)
+    throw new Error(`Something went wrong when fetching users - ${err.message}`)
+  }
+}
 
 export async function getUser({
   filter,
