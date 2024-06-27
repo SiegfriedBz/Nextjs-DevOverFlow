@@ -17,8 +17,12 @@ export type TUser = {
 export type TTag = {
   _id: string
   name: string
-  totalQuestions?: number
-  showCount?: boolean
+  description: string
+  questions?: string[]
+  followers?: string[]
+  createdAt?: Date
+  // totalQuestions?: number
+  // showCount?: boolean
 }
 
 export type TQuestion = {
