@@ -1,27 +1,22 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { getUserTopTags } from "@/services/tags.services."
 import type { TUser } from "@/types"
-import { wait } from "@/utils/dev.utils"
 import Image from "next/image"
 import Link from "next/link"
 import { Suspense } from "react"
 import Tag from "./shared/Tag"
 import { Badge } from "./ui/badge"
-import { TagListWrapperSkeleton } from "./UserCardSkeleton"
+import { UserTagListWrapperSkeleton } from "./UserCardSkeleton"
 
 type TProps = TUser
 
 const UserCard = ({
   _id,
-  clerckId,
+
   name,
   userName,
-  email,
+
   picture,
-  reputation,
-  joinedDate,
-  location,
-  savedQuestions,
 }: TProps) => {
   // TODO
   // const isAuthor = true
@@ -57,7 +52,7 @@ const UserCard = ({
         </CardHeader>
       </Link>
       <CardContent>
-        <Suspense fallback={<TagListWrapperSkeleton />}>
+        <Suspense fallback={<UserTagListWrapperSkeleton />}>
           <TagListWrapper userId={_id} />
         </Suspense>
       </CardContent>
@@ -69,7 +64,6 @@ export default UserCard
 
 const TagListWrapper = async ({ userId }: { userId: string }) => {
   const favoredTags = await getUserTopTags({ userId, limit: 3 })
-  await wait(2500)
 
   return favoredTags?.length > 0 ? (
     <ul className="flex w-full justify-center gap-x-4">

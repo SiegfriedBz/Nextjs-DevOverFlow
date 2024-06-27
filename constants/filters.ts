@@ -10,3 +10,4 @@ export const COMMUNITY_FILTER_OPTIONS = [
   "Old Users",
   "Top Contributors",
 ]
+export const TAGS_FILTER_OPTIONS = ["Popular", "Recent", "Name", "Old"]

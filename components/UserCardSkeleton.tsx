@@ -26,7 +26,7 @@ const UserCardSkeleton = () => {
       </CardHeader>
 
       <CardContent>
-        <TagListWrapperSkeleton />
+        <UserTagListWrapperSkeleton />
       </CardContent>
     </Card>
   )
@@ -34,7 +34,7 @@ const UserCardSkeleton = () => {
 
 export default UserCardSkeleton
 
-export const TagListWrapperSkeleton = async () => {
+export const UserTagListWrapperSkeleton = async () => {
   return (
     <ul className="flex justify-center gap-x-4">
       {Array.from({ length: 3 }, (_, index) => {
