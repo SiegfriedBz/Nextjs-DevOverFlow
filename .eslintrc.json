@@ -1,8 +1,4 @@
-{settings: {
-        tailwindcss: {
-            config: path.join(__dirname, "./tailwind.config.ts"),
-        },
-    },
+{
   "extends": [
     "next/core-web-vitals",
     "standard",
