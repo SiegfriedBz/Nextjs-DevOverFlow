@@ -3,14 +3,18 @@
 import useQueryParams from "@/hooks/useQueryParams"
 import SearchBarInput from "./SearchBarInput"
 
-const LocalSearchBar = () => {
-  const [search, setSearch] = useQueryParams({ queryParamName: "q" })
+type TProps = {
+  queryParamName: string
+  placeholder: string
+}
+const LocalSearchBar = ({ queryParamName, placeholder }: TProps) => {
+  const [search, setSearch] = useQueryParams({ queryParamName })
 
   return (
     <SearchBarInput
       search={search}
       setSearch={setSearch}
-      placeholder="Search questions..."
+      placeholder={placeholder}
     />
   )
 }

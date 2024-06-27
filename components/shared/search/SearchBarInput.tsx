@@ -1,4 +1,5 @@
 import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/shadcn.utils"
 import Image from "next/image"
 import React from "react"
 
@@ -9,6 +10,7 @@ type TProps = {
   isLocal?: boolean
   iconName?: string
   iconPosition?: "left" | "right"
+  wrapperClassName?: string
   className?: string
 }
 const SearchBarInput = ({
@@ -18,10 +20,11 @@ const SearchBarInput = ({
   isLocal = true,
   iconName = "search",
   iconPosition = "left",
+  wrapperClassName = "",
   className = "",
 }: TProps) => {
   return (
-    <div className="relative w-full rounded-xl">
+    <div className={cn("relative w-full rounded-xl", wrapperClassName)}>
       <div
         className={`
             background-light800_darkgradient

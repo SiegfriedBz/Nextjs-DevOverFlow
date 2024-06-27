@@ -4,6 +4,14 @@ export type TUser = {
   _id: string
   name: string
   picture: string
+  clerckId: string
+  userName: string
+  email: string
+  userName: string
+  reputation: number
+  joinedDate: Date
+  location: object
+  savedQuestions: Array<object>
 }
 
 export type TTag = {
