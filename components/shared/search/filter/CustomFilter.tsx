@@ -1,14 +1,13 @@
 "use client"
 import useQueryParams from "@/hooks/useQueryParams"
-import React from "react"
-import FilterCustomSelect from "./FilterCustomSelect"
 import FilterBadgeSelect from "./FilterBadgeSelect"
-import { HOME_FILTER_OPTIONS } from "@/constants/filters"
+import FilterCustomSelect from "./FilterCustomSelect"
 
 type TFilterWrapperProps = {
   filterName: string
+  filterOptions: string[]
 }
-const HomeFilter = ({ filterName }: TFilterWrapperProps) => {
+const CustomFilter = ({ filterName, filterOptions }: TFilterWrapperProps) => {
   const [filter, setFilter] = useQueryParams({
     queryParamName: filterName,
     debounceDelay: 0,
@@ -19,15 +18,15 @@ const HomeFilter = ({ filterName }: TFilterWrapperProps) => {
       <FilterBadgeSelect
         filter={filter}
         setFilter={setFilter}
-        options={HOME_FILTER_OPTIONS}
-        wrapperClassName="flex w-full max-md:hidden md:my-4"
+        options={filterOptions}
+        wrapperClassName="flex w-full max-md:hidden md:my-4 -ms-8"
         className="max-md:h-16 md:h-10"
       />
 
       <FilterCustomSelect
         filter={filter}
         setFilter={setFilter}
-        options={HOME_FILTER_OPTIONS}
+        options={filterOptions}
         wrapperClassName="max-sm:w-full sm:w-1/2 sm:min-w-44 md:hidden"
         className="max-md:h-16 md:h-10"
       />
@@ -35,4 +34,4 @@ const HomeFilter = ({ filterName }: TFilterWrapperProps) => {
   )
 }
 
-export default HomeFilter
+export default CustomFilter
