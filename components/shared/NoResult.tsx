@@ -1,17 +1,20 @@
+import { cn } from "@/lib/shadcn.utils"
 import Image from "next/image"
 import Link from "next/link"
 
 type TProps = {
-  resultType: "question" | "tag"
+  resultType: "question" | "tag" | "user"
   paragraphContent: string
   linkLabel: string
   href: string
+  className?: string
 }
 const NoResult = ({
   resultType,
   paragraphContent,
   linkLabel,
   href,
+  className,
 }: TProps) => {
   return (
     <div className="flex w-full flex-col items-center justify-center pb-4">
@@ -32,7 +35,12 @@ const NoResult = ({
       <h2 className="h2-bold text-dark200_light900 mt-8">
         There is no {resultType} to show
       </h2>
-      <p className="body-regular text-dark500_light700 max-w-md text-center">
+      <p
+        className={cn(
+          "body-regular text-dark500_light700 max-w-md text-center",
+          className
+        )}
+      >
         {paragraphContent}
       </p>
 
