@@ -126,11 +126,12 @@ const formatUserData = (clerckData: UserJSON) => {
   const { id, email_addresses, first_name, last_name, username, image_url } =
     clerckData // clerckUser
   const userEmail = email_addresses?.at(0)?.email_address as string
+  const name = `${first_name}${last_name ? ` ${last_name}` : ""}`
 
   const userData: TMutateUserData = {
     clerckId: id,
-    name: `${first_name}${last_name ? ` ${last_name}` : ""}`,
-    userName: username as string,
+    name,
+    userName: username || name,
     email: userEmail,
     picture: image_url,
   }
