@@ -1,12 +1,37 @@
 import { BADGE_CRITERIA } from "@/constants"
 
+export type TUser = {
+  _id: string
+  name: string
+  picture: string
+}
+
+export type TTag = {
+  _id: string
+  name: string
+  totalQuestions?: number
+  showCount?: boolean
+}
+
+export type TQuestion = {
+  _id?: string
+  title: string
+  description: string
+  tags: TTag[]
+  numOfVotes: number
+  numOfViews: number
+  answers: Array<object>
+  createdAt: Date
+  author: TUser
+}
+
 export interface ISidebarLink {
   imgURL: string
   href: string
   label: string
 }
 
-export interface IJob {
+export type TJob = {
   id?: string
   employer_name?: string
   employer_logo?: string | undefined
@@ -20,51 +45,36 @@ export interface IJob {
   job_country?: string
 }
 
-export interface ICountry {
+export type TCountry = {
   name: {
     common: string
   }
 }
 
-export interface IParamsProps {
+export type TGetAllQuestionsParams = {
+  page?: number
+  resultsPerPage?: number
+  searchQuery?: string
+  filter?: string
+}
+
+export type TParamsProps = {
   params: { id: string }
 }
 
-export interface ISearchParamsProps {
+export type TSearchParamsProps = {
   searchParams: { [key: string]: string | undefined }
 }
 
-export interface IURLProps {
+export type TURLProps = {
   params: { id: string }
   searchParams: { [key: string]: string | undefined }
 }
 
-export interface IBadgeCounts {
+export type TBadgeCounts = {
   GOLD: number
   SILVER: number
   BRONZE: number
 }
 
 export type TBadgeCriteria = keyof typeof BADGE_CRITERIA
-
-export type TTag = {
-  _id: string
-  name: string
-  totalQuestions?: number
-  showCount?: boolean
-}
-
-export type TQuestion = {
-  _id: string
-  title: string
-  tags: TTag[]
-  author: {
-    _id: string
-    name: string
-    picture: string
-  }
-  createdAt: Date
-  numOfVotes: number
-  numOfViews: number
-  answers: Array<object>
-}
