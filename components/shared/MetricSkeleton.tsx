@@ -7,11 +7,10 @@ const MetricSkeleton = ({
 }) => {
   return (
     <div className={`${className} flex flex-wrap items-center gap-x-1`}>
-      <Skeleton className="invert-colors size-4 rounded-full" />
+      <Skeleton className="invert-colors background-light800_dark300 size-4 rounded-full" />
 
       <Skeleton>
-        <Skeleton className="w-4" />
-        <Skeleton className="w-8" />
+        <Skeleton className="background-light800_dark300 h-4 w-8" />
       </Skeleton>
     </div>
   )
