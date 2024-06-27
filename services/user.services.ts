@@ -22,7 +22,6 @@ export async function getAllUsers({ searchParams }: TSearchParamsProps) {
 
     const users = await User.find({})
       .populate([{ path: "savedQuestions", model: Question }])
-      .populate([{ path: "savedTags", model: Question }])
       .sort({ createdAt: -1 })
     // .lean()
 
