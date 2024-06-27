@@ -18,7 +18,6 @@ const FilterBadgeSelect = ({
   wrapperClassName,
   className,
 }: TProps) => {
-  console.log("FilterBadgeSelect filter", filter)
   const activeOption = filter
 
   return (

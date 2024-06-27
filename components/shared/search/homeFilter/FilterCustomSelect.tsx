@@ -24,8 +24,6 @@ const FilterCustomSelect = ({
   wrapperClassName,
   className,
 }: TProps) => {
-  console.log("FilterCustomSelect filter", filter)
-
   return (
     <div className={wrapperClassName}>
       <Select onValueChange={setFilter}>
