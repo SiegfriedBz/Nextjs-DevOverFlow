@@ -10,7 +10,7 @@ import { headers } from "next/headers"
 import { Webhook } from "svix"
 
 export type TMutateUserData = {
-  clerckId: string
+  clerkId: string
   name: string
   userName: string
   email: string
@@ -88,10 +88,10 @@ export async function POST(req: Request) {
 
   if (evt.type === "user.updated") {
     console.log("CLERK - user.updated")
-    const { clerckId, ...rest } = formatUserData(evt.data) as TMutateUserData
+    const { clerkId, ...rest } = formatUserData(evt.data) as TMutateUserData
 
     const updatedUser: Error | IUserDocument | null = await updateUserAction({
-      filter: { clerckId },
+      filter: { clerkId },
       data: rest,
     })
 
@@ -108,7 +108,7 @@ export async function POST(req: Request) {
     const { id } = evt.data
 
     const result = await deleteUserAction({
-      filter: { clerckId: id },
+      filter: { clerkId: id },
     })
 
     if (result instanceof Error) {
@@ -129,7 +129,7 @@ const formatUserData = (clerckData: UserJSON) => {
   const name = `${first_name}${last_name ? ` ${last_name}` : ""}`
 
   const userData: TMutateUserData = {
-    clerckId: id,
+    clerkId: id,
     name,
     userName: username || name,
     email: userEmail,
