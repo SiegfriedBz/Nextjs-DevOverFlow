@@ -8,7 +8,7 @@ import { getAllUsers } from "@/services/user.services"
 import type { TSearchParamsProps, TUser } from "@/types"
 import { Suspense } from "react"
 
-const Community = ({ searchParams }: TSearchParamsProps) => {
+const CommunityPage = ({ searchParams }: TSearchParamsProps) => {
   return (
     <div>
       <div className="flex w-full items-center max-sm:flex-col-reverse sm:justify-between">
@@ -36,7 +36,7 @@ const Community = ({ searchParams }: TSearchParamsProps) => {
   )
 }
 
-export default Community
+export default CommunityPage
 
 const UserListWrapper = async ({ searchParams }: TSearchParamsProps) => {
   const data: TUser[] | null = await getAllUsers({ searchParams })

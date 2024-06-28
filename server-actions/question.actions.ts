@@ -3,7 +3,7 @@
 import {
   mutateQuestionSchema,
   type TMutateQuestionInput,
-} from "@/lib/zod/questions.zod"
+} from "@/lib/zod/question.zod"
 import type { IQuestionDocument } from "@/models/question.model"
 import type { IUserDocument } from "@/models/user.model"
 import {
@@ -41,12 +41,12 @@ export async function createQuestionAction({
     const author = await getUser({ filter: { email: userEmail } })
 
     // create question without tags
-    const { title, description, tags } = parsedData.data
+    const { title, content, tags } = parsedData.data
     const newQuestion = await createQuestion({
       data: {
         author: author?._id as IQuestionDocument["author"],
         title,
-        description,
+        content,
       },
     })
 

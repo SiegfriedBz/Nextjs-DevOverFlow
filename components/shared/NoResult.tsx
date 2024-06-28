@@ -3,10 +3,10 @@ import Image from "next/image"
 import Link from "next/link"
 
 type TProps = {
-  resultType: "question" | "tag" | "user"
+  resultType: "question" | "tag" | "user" | "answer"
   paragraphContent: string
-  linkLabel: string
-  href: string
+  linkLabel?: string
+  href?: string
   className?: string
 }
 const NoResult = ({
@@ -44,9 +44,10 @@ const NoResult = ({
         {paragraphContent}
       </p>
 
-      <Link
-        href={href}
-        className="paragraph-medium 
+      {href && (
+        <Link
+          href={href}
+          className="paragraph-medium 
           mt-4
           min-h-10 cursor-pointer 
           rounded-xl
@@ -56,9 +57,10 @@ const NoResult = ({
           hover:bg-primary-500
           dark:text-light-900
         "
-      >
-        {linkLabel}
-      </Link>
+        >
+          {linkLabel}
+        </Link>
+      )}
     </div>
   )
 }

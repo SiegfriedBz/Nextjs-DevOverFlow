@@ -2,7 +2,7 @@ import { z } from "zod"
 
 const mutateQuestionSchema = z.object({
   title: z.string().min(5).max(130),
-  description: z.string().min(20),
+  content: z.string().min(20),
   tags: z
     .array(z.string().min(1).max(15))
     .min(1, { message: "Must have at least 1 tag" })
