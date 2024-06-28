@@ -1,12 +1,12 @@
 "use server"
 
 import connectToMongoDB from "@/lib/mongoose.utils"
-import type { TMutateQuestionInput } from "@/lib/zod/questions.zod"
+import type { TMutateQuestionInput } from "@/lib/zod/question.zod"
 import Answer from "@/models/answer.model"
-import Question, { IQuestionDocument } from "@/models/question.model"
+import Question, { type IQuestionDocument } from "@/models/question.model"
 import Tag from "@/models/tag.model"
-import User from "@/models/user.model"
-import type { TSearchParamsProps } from "@/types"
+import User, { IUserDocument } from "@/models/user.model"
+import type { TQuestion, TSearchParamsProps } from "@/types"
 import { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
 
 export async function getAllQuestions({ searchParams }: TSearchParamsProps) {
@@ -15,12 +15,12 @@ export async function getAllQuestions({ searchParams }: TSearchParamsProps) {
 
     // TODO
     // HANDLE searchParams
-    const {
-      page = 1,
-      numOfResultsPerPage = 10,
-      filter = "",
-      searchQuery = "",
-    } = searchParams
+    // const {
+    //   page = 1,
+    //   numOfResultsPerPage = 10,
+    //   filter = "",
+    //   searchQuery = "",
+    // } = searchParams
 
     const questions = await Question.find({})
       .populate([
@@ -39,6 +39,47 @@ export async function getAllQuestions({ searchParams }: TSearchParamsProps) {
     console.log("getAllQuestions Error", err.message)
     throw new Error(
       `Something went wrong when fetching questions - ${err.message}`
+    )
+  }
+}
+
+export async function getQuestion({
+  filter,
+}: {
+  filter: FilterQuery<IUserDocument>
+}): Promise<TQuestion> {
+  try {
+    const questionDocument: IQuestionDocument | null = await Question.findOne(
+      filter
+    ).populate([
+      { path: "author", model: User, select: "_id clerkId name picture" },
+      { path: "tags", model: Tag, select: "_id name" },
+      { path: "upVoters", model: User },
+      { path: "downVoters", model: User },
+      // We do not populate the answers.
+      // Instead, in the QuestionDetailsPage, we use getAllAnswers service to which we can pass searchParams.
+      // {
+      //   path: "answers",
+      //   model: Answer,
+      //   populate: {
+      //     path: "author",
+      //     model: User,
+      //   },
+      // },
+    ])
+
+    const question: TQuestion = JSON.parse(JSON.stringify(questionDocument))
+
+    if (!question?._id) {
+      throw new Error(`Question not found`)
+    }
+
+    return question
+  } catch (error) {
+    const err = error as Error
+    console.log("getQuestion Error", err.message)
+    throw new Error(
+      `Something went wrong when getting question - ${err.message}`
     )
   }
 }
