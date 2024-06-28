@@ -5,6 +5,7 @@ import Metric from "./shared/Metric"
 import { voteQuestionAction } from "@/server-actions/question.actions"
 import { voteAnswerAction } from "@/server-actions/answer.actions"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 type TVotingProps = {
   currentUserMongoId: string
@@ -27,7 +28,16 @@ const Voting = ({
   className = "",
   children,
 }: TVotingProps) => {
+  const router = useRouter()
+
   const handleUpVote = async () => {
+    if (!currentUserMongoId) {
+      router.push("/sign-in")
+      router.refresh()
+      toast.info(`Please sign-in to vote`)
+      return
+    }
+
     try {
       const response = isQuestionVoting
         ? await voteQuestionAction({
@@ -55,6 +65,13 @@ const Voting = ({
     }
   }
   const handleDownVote = async () => {
+    if (!currentUserMongoId) {
+      router.push("/sign-in")
+      router.refresh()
+      toast.info(`Please sign-in to vote`)
+      return
+    }
+
     try {
       const response = isQuestionVoting
         ? await voteQuestionAction({
