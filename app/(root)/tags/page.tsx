@@ -6,10 +6,9 @@ import TagCardSkeleton from "@/components/TagCardSkeleton"
 import { TAGS_FILTER_OPTIONS } from "@/constants/filters"
 import { getAllTags } from "@/services/tags.services."
 import type { TSearchParamsProps, TTag } from "@/types"
-import { wait } from "@/utils/dev.utils"
 import { Suspense } from "react"
 
-const Tags = ({ searchParams }: TSearchParamsProps) => {
+const TagsPage = ({ searchParams }: TSearchParamsProps) => {
   return (
     <div>
       <div className="flex w-full items-center max-sm:flex-col-reverse sm:justify-between">
@@ -34,15 +33,13 @@ const Tags = ({ searchParams }: TSearchParamsProps) => {
   )
 }
 
-export default Tags
+export default TagsPage
 
 const TagListWrapper = async ({ searchParams }: TSearchParamsProps) => {
   const data: TTag[] | null = await getAllTags({ searchParams })
-  console.log(data)
+
   console.log("==== TAGS searchParams", searchParams)
   console.log("==== TAGS data", data)
-
-  await wait(2500)
 
   return data && data?.length > 0 ? (
     <ul className="flex w-full flex-wrap justify-start gap-8">
