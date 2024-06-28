@@ -13,12 +13,12 @@ export async function getAllUsers({ searchParams }: TSearchParamsProps) {
 
     // TODO
     // HANDLE searchParams
-    const {
-      page = 1,
-      numOfResultsPerPage = 10,
-      filter = "",
-      searchQuery = "",
-    } = searchParams
+    // const {
+    //   page = 1,
+    //   numOfResultsPerPage = 10,
+    //   filter = "",
+    //   searchQuery = "",
+    // } = searchParams
 
     const users = await User.find({})
       .populate([{ path: "savedQuestions", model: Question }])
