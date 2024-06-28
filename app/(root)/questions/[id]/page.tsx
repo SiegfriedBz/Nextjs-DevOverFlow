@@ -33,6 +33,8 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
     redirect("/sign-in")
   }
 
+  console.log("QuestionDetailsPage -> current clerk user", user)
+
   const [question, mongoUser] = (await Promise.all([
     // We do not populate the question to fetch all answers.
     // Instead, we use getAllAnswers service to which we can pass searchParams.
@@ -44,6 +46,8 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
   const currentUserMongoId = mongoUser?._id as string
   const currentUserSavedQuestions =
     mongoUser?.savedQuestions as unknown as string[] // non-populated savedQuestions
+
+  console.log("QuestionDetailsPage -> mongoUser", mongoUser)
 
   const {
     // _id: questionId,
