@@ -5,7 +5,7 @@ import type { TMutateAnswerInput } from "@/lib/zod/answer.zod"
 import Answer, { type IAnswerDocument } from "@/models/answer.model"
 import User from "@/models/user.model"
 import type { TAnswer } from "@/types"
-import { FilterQuery } from "mongoose"
+import { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
 
 export async function getAllAnswers({
   filter = {}, // to get all answers for question._id
@@ -70,6 +70,41 @@ export async function createAnswer({
     console.log("createAnswer Error", err)
     throw new Error(
       `Something went wrong when creating answer - ${err.message}`
+    )
+  }
+}
+
+export async function findAndUpdateAnswer({
+  filter,
+  data,
+  options = { new: true },
+}: {
+  filter: FilterQuery<IAnswerDocument> | undefined
+  data: UpdateQuery<IAnswerDocument> | undefined
+  options?: QueryOptions<IAnswerDocument> | null | undefined
+}): Promise<IAnswerDocument | null> {
+  try {
+    await connectToMongoDB()
+
+    const updatedAnswer: IAnswerDocument | null = await Answer.findOneAndUpdate(
+      filter,
+      data,
+      options
+    )
+
+    console.log("findAndUpdateAnswer updatedAnswer", updatedAnswer)
+
+    // TODO
+    // if (!updatedAnswer?._id) {
+    //   throw new Error(`Answer not found`)
+    // }
+
+    return updatedAnswer
+  } catch (error) {
+    const err = error as Error
+    console.log("===== findAndUpdateAnswer Error", err)
+    throw new Error(
+      `Something went wrong when updating answer - ${err.message}`
     )
   }
 }
