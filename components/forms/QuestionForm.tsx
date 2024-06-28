@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input"
 import {
   mutateQuestionSchema,
   type TMutateQuestionInput,
-} from "@/lib/zod/questions.zod"
+} from "@/lib/zod/question.zod"
 import {
   createQuestionAction,
   updateQuestionAction,
@@ -39,7 +39,7 @@ const QuestionForm = ({ actionType = "create", questionId }: TProps) => {
     resolver: zodResolver(mutateQuestionSchema),
     defaultValues: {
       title: "",
-      description: "",
+      content: "",
       tags: [],
     },
   })
@@ -138,7 +138,7 @@ const QuestionForm = ({ actionType = "create", questionId }: TProps) => {
 
         <FormField
           control={form.control}
-          name="description"
+          name="content"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="paragraph-semibold text-dark400_light800">

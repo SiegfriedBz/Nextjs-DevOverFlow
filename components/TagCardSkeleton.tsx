@@ -18,6 +18,7 @@ const TagCardSkeleton = () => {
         px-8
         py-10
         shadow-none outline-none
+        max-sm:w-full
         sm:w-[260px]
       "
     >

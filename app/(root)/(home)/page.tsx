@@ -47,7 +47,6 @@ const wait = (delay: number) =>
 
 const QuestionListWrapper = async ({ searchParams }: TSearchParamsProps) => {
   const data: TQuestion[] | null = await getAllQuestions({ searchParams })
-  console.log(data)
   console.log("==== HOME searchParams", searchParams)
   console.log("==== HOME data", data)
 

@@ -1,3 +1,4 @@
+import { cn } from "@/lib/shadcn.utils"
 import { formatNumber } from "@/lib/utils"
 import Image from "next/image"
 import Link from "next/link"
@@ -10,18 +11,23 @@ const Metric = ({
   value,
   title,
   isAuthor = false,
-  className = "small-medium text-dark400_light800",
+  className = "",
 }: {
   href?: string
   imageSrc: string
   alt: string
   value: string | number
-  title: string
+  title?: string
   isAuthor?: boolean
   className?: string
 }) => {
   const content = (
-    <div className={`${className} flex flex-wrap items-center gap-x-1`}>
+    <div
+      className={cn(
+        `small-medium text-dark400_light800 flex flex-wrap items-center gap-x-1`,
+        className
+      )}
+    >
       <Image
         src={imageSrc}
         width={16}
@@ -31,7 +37,7 @@ const Metric = ({
       />
       <p className={`${isAuthor && href ? "max-sm:hidden" : ""}`}>
         <span>{typeof value === "number" ? formatNumber(value) : value}</span>
-        <span>{title}</span>
+        {title && <span>{title}</span>}
       </p>
     </div>
   )
