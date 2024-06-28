@@ -1,7 +1,6 @@
 "use client"
 
 import { updateUserAction } from "@/server-actions/user.actions"
-import { currentUser } from "@clerk/nextjs/server"
 import { Error } from "mongoose"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -21,16 +20,17 @@ const SaveQuestionButton = ({
 }: TProps) => {
   const router = useRouter()
 
-  const questionIsUserFavorite = currentUserSavedQuestions.some(
+  const questionIsUserFavorite = currentUserSavedQuestions?.some(
     (q) => q === questionId
   )
 
-  console.log("questionIsUserFavorite", questionIsUserFavorite)
-
   const handleToggleSaveQuestion = async () => {
     try {
-      if (!currentUser) {
+      if (!currentUserMongoId) {
         router.push("/sign-in")
+        router.refresh()
+        toast.info(`Please sign-in to vote`)
+        return
       }
 
       const query = questionIsUserFavorite
@@ -47,10 +47,15 @@ const SaveQuestionButton = ({
       })
 
       if (updatedUser instanceof Error) {
-        throw new Error("Could not add question to your favorites")
+        throw new Error(
+          `Could not ${questionIsUserFavorite ? "remove question from" : "add question to"} your favorites`
+        )
       }
-
-      toast.success("Question added to your favorites successfully")
+      if (questionIsUserFavorite) {
+        toast.info("Question removed from your favorites successfully")
+      } else {
+        toast.success("Question added to your favorites successfully")
+      }
     } catch (error) {
       const err = error as Error
       console.log("handleSaveQuestion error", err)

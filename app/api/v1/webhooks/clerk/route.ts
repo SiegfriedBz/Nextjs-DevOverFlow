@@ -71,7 +71,7 @@ export async function POST(req: Request) {
   console.log("Webhook body:", body)
 
   if (evt.type === "user.created") {
-    console.log("CLERK - user.created")
+    console.log("===== CLERK - user.created")
     const userData = formatUserData(evt.data) as TMutateUserData
 
     const newUser: Error | IUserDocument | null = await createUserAction({
@@ -79,7 +79,7 @@ export async function POST(req: Request) {
     })
 
     if (newUser instanceof Error || !newUser?._id) {
-      console.log("CLERK - user.created - ERROR", newUser)
+      console.log("===== CLERK - user.created - ERROR", newUser)
       return new Response("Error occured", {
         status: 400,
       })
@@ -87,7 +87,7 @@ export async function POST(req: Request) {
   }
 
   if (evt.type === "user.updated") {
-    console.log("CLERK - user.updated")
+    console.log("===== CLERK - user.updated")
     const { clerkId, ...rest } = formatUserData(evt.data) as TMutateUserData
 
     const updatedUser: Error | IUserDocument | null = await updateUserAction({
@@ -96,7 +96,7 @@ export async function POST(req: Request) {
     })
 
     if (updatedUser instanceof Error || !updatedUser?._id) {
-      console.log("CLERK - user.updated - ERROR", updatedUser)
+      console.log("===== CLERK - user.updated - ERROR", updatedUser)
       return new Response("Error occured", {
         status: 400,
       })
@@ -104,7 +104,7 @@ export async function POST(req: Request) {
   }
 
   if (evt.type === "user.deleted") {
-    console.log("CLERK - user.deleted")
+    console.log("===== CLERK - user.deleted")
     const { id } = evt.data
 
     const result = await deleteUserAction({
@@ -112,7 +112,7 @@ export async function POST(req: Request) {
     })
 
     if (result instanceof Error) {
-      console.log("CLERK - user.updated - ERROR", result)
+      console.log("===== CLERK - user.updated - ERROR", result)
       return new Response("Error occured", {
         status: 400,
       })
