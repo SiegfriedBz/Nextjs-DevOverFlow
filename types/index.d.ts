@@ -18,23 +18,35 @@ export type TTag = {
   _id: string
   name: string
   description: string
-  questions?: string[]
-  followers?: string[]
+  questions?: string[] // TODO TQuestion[] | string[]
+  followers?: TUser[] | string[]
   createdAt?: Date
   // totalQuestions?: number
   // showCount?: boolean
 }
 
-export type TQuestion = {
-  _id?: string
-  title: string
-  description: string
-  tags: TTag[]
-  numOfVotes: number
-  numOfViews: number
-  answers: Array<object>
+// TODO
+export type TAnswer = {
+  _id: string
+  author: TUser | string
+  content: string
   createdAt: Date
-  author: TUser
+  upVoters: TUser[] | string[]
+  downVoters: TUser[] | string[]
+  question: string[] // TODO TQuestion[] | string[]
+}
+
+export type TQuestion = {
+  _id: string
+  author: TUser | string
+  content: string
+  title: string
+  views: number
+  upVoters: TUser[] | string[]
+  downVoters: TUser[] | string[]
+  tags: TTag[] | string[]
+  answers: TAnswer[] | string[]
+  createdAt: Date
 }
 
 export interface ISidebarLink {
