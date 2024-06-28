@@ -58,9 +58,9 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
     createdAt,
   } = question
 
-  const numUpVotes = upVoters?.length ?? 0
-  const numDownVotes = downVoters?.length ?? 0
-  const numAnswers = allAnswersIds?.length ?? 0 // Total Answers for this question
+  const questionNumUpVotes = upVoters?.length ?? 0
+  const questionNumDownVotes = downVoters?.length ?? 0
+  const questionNumAnswers = allAnswersIds?.length ?? 0 // Total Answers for this question
 
   const daysAgo = getDaysAgo(createdAt)
 
@@ -68,9 +68,12 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
     <section>
       {/* Question Header */}
       <Header
+        currentUserMongoId={currentUserMongoId}
+        headerType="question"
+        questionId={questionId}
         author={author as TUser}
-        numUpVotes={numUpVotes}
-        numDownVotes={numDownVotes}
+        numUpVotes={questionNumUpVotes}
+        numDownVotes={questionNumDownVotes}
       >
         {/* Client-Component */}
         <SaveQuestionButton
@@ -88,7 +91,7 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
       {/* Metrics */}
       <QuestionMetrics
         daysAgo={daysAgo}
-        numAnswers={numAnswers}
+        numAnswers={questionNumAnswers}
         views={views}
       />
 
@@ -100,7 +103,11 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
 
       {/* Answers Counter + Filter // Answers */}
       <Suspense fallback={<div className="loader my-8" />}>
-        <AllAnswers questionId={questionId} searchParams={searchParams} />
+        <AllAnswers
+          currentUserMongoId={currentUserMongoId}
+          questionId={questionId}
+          searchParams={searchParams}
+        />
       </Suspense>
 
       {/* Answer form */}
@@ -112,14 +119,31 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
 export default QuestionDetailsPage
 
 type THeaderProps = {
+  currentUserMongoId: string
   author: TUser
   numUpVotes: number
   numDownVotes: number
-  answeredOn?: string
   children?: React.ReactNode
-}
+} & (
+  | {
+      headerType: "question"
+      questionId: string
+      answerId?: undefined
+      answeredOn?: undefined
+    }
+  | {
+      headerType: "answer"
+      questionId?: undefined
+      answerId: string
+      answeredOn: string
+    }
+)
 
 const Header = ({
+  currentUserMongoId,
+  headerType,
+  questionId,
+  answerId,
   author,
   numUpVotes,
   numDownVotes,
@@ -135,8 +159,12 @@ const Header = ({
         {/* Voting */}
         <Voting
           className="flex w-full items-center justify-end gap-4"
+          currentUserMongoId={currentUserMongoId}
           numUpVotes={numUpVotes}
           numDownVotes={numDownVotes}
+          isQuestionVoting={questionId != null}
+          questionId={questionId}
+          answerId={answerId}
         >
           {children}
         </Voting>
@@ -233,10 +261,15 @@ const QuestionTags = ({ tags }: TQuestionTagsProps) => {
 }
 
 type TAllAnswersProps = {
+  currentUserMongoId: string
   questionId: string
   searchParams: { [key: string]: string | undefined }
 }
-const AllAnswers = async ({ questionId, searchParams }: TAllAnswersProps) => {
+const AllAnswers = async ({
+  currentUserMongoId,
+  questionId,
+  searchParams,
+}: TAllAnswersProps) => {
   const selectedAnswers: TAnswer[] = await getAllAnswers({
     filter: { question: questionId },
     searchParams,
@@ -264,20 +297,23 @@ const AllAnswers = async ({ questionId, searchParams }: TAllAnswersProps) => {
               const {
                 author, // populated user
                 content,
-                upVoters: answerUpVoters, // non-populated user
-                downVoters: answerDownvoters, // non-populated user
+                upVoters, // non-populated user
+                downVoters, // non-populated user
                 createdAt,
               } = answer
-              const numUpVotes = answerUpVoters?.length ?? 0
-              const numDownVotes = answerDownvoters?.length ?? 0
+              const answerNumUpVotes = upVoters?.length ?? 0
+              const answerNumDownVotes = downVoters?.length ?? 0
 
               return (
                 <div key={`answer-${answer._id}`} className="">
                   {/* Answer Author + votes */}
                   <Header
+                    currentUserMongoId={currentUserMongoId}
+                    headerType="answer"
+                    answerId={answer._id}
                     author={author as TUser}
-                    numUpVotes={numUpVotes}
-                    numDownVotes={numDownVotes}
+                    numUpVotes={answerNumUpVotes}
+                    numDownVotes={answerNumDownVotes}
                     answeredOn={`answered ${formatDate(createdAt)}`}
                   />
                   {/* Answer Content */}
