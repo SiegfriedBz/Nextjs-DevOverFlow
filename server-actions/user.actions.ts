@@ -42,13 +42,15 @@ export async function updateUserAction({
   options?: QueryOptions<any> | null | undefined
 }) {
   try {
-    const updatedUser: IUserDocument | null = await findAndUpdateUser({
+    const updatedUserDoc: IUserDocument | null = await findAndUpdateUser({
       filter,
       data,
       options,
     })
 
-    revalidatePath(`/profile/${(updatedUser as IUserDocument)._id}`)
+    revalidatePath(`/profile/${(updatedUserDoc as IUserDocument)._id}`)
+
+    const updatedUser = JSON.parse(JSON.stringify(updatedUserDoc))
 
     return updatedUser
   } catch (error) {
