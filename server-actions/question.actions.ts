@@ -106,3 +106,32 @@ export async function updateQuestionAction({
     return error
   }
 }
+
+export async function voteQuestionAction({
+  questionId,
+  voterId,
+  isUpVoting,
+}: {
+  questionId: string
+  voterId: string
+  isUpVoting: boolean
+}) {
+  try {
+    const query = isUpVoting
+      ? { $push: { upVoters: voterId } }
+      : { $push: { downVoters: voterId } }
+
+    const updatedQuestion = await findAndUpdateQuestion({
+      filter: { _id: questionId },
+      data: query,
+    })
+
+    // revalidate
+    revalidatePath("/")
+
+    return JSON.parse(JSON.stringify(updatedQuestion))
+  } catch (error) {
+    console.log(error)
+    return error
+  }
+}
