@@ -26,28 +26,41 @@ type TProps = {
 const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
   const { id: questionId } = params
 
-  // Get current clerk user
-  const user = await currentUser()
-
-  if (!user) {
-    redirect("/sign-in")
-  }
-
-  console.log("QuestionDetailsPage -> current clerk user", user)
-
-  const [question, mongoUser] = (await Promise.all([
+  let question: TQuestion | null = null
+  try {
     // We do not populate the question to fetch all answers.
     // Instead, we use getAllAnswers service to which we can pass searchParams.
-    getQuestion({ filter: { _id: questionId } }),
-    // Get user from mongodb
-    getUser({ filter: { clerkId: user.id } }),
-  ])) as [question: TQuestion, mongoUser: IUserDocument]
+    question = await getQuestion({
+      filter: { _id: questionId },
+    })
+  } catch (error) {
+    console.log("QuestionDetailsPage -> error fetching question", error)
+  }
+
+  if (!question) redirect("/")
+
+  // Get current clerk user
+  const user = await currentUser()
+  console.log("QuestionDetailsPage -> current clerk user", user)
+  console.log("QuestionDetailsPage -> current clerk user?.id", user?.id)
+  let mongoUser: IUserDocument | null = null
+
+  try {
+    if (user) {
+      // Get user from mongodb
+      mongoUser = await getUser({
+        filter: { clerkId: user.id },
+      })
+    }
+  } catch (error) {
+    console.log("QuestionDetailsPage -> error fetching mongoUser", error)
+  }
+
+  console.log("QuestionDetailsPage -> mongoUser", mongoUser)
 
   const currentUserMongoId = mongoUser?._id as string
   const currentUserSavedQuestions =
     mongoUser?.savedQuestions as unknown as string[] // non-populated savedQuestions
-
-  console.log("QuestionDetailsPage -> mongoUser", mongoUser)
 
   const {
     // _id: questionId,
