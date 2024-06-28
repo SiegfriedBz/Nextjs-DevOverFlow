@@ -4,7 +4,7 @@ export type TUser = {
   _id: string
   name: string
   picture: string
-  clerckId: string
+  clerkId: string
   userName: string
   email: string
   userName: string
