@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Inter, Space_Grotesk as spaceGrotesk } from "next/font/google"
 import React from "react"
 import "./globals.css"
+import "./prism.css"
 
 const inter = Inter({
   subsets: ["latin"],
