@@ -8,23 +8,27 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { getDaysAgo } from "@/lib/dates.utils"
-import type { TQuestion } from "@/types"
+import type { TQuestion, TTag, TUser } from "@/types"
 import Link from "next/link"
 
 type TProps = TQuestion
 const QuestionCard = ({
   _id,
   title,
-  tags,
+  content,
+  views,
   author,
-  createdAt,
-  numOfVotes,
+  upVoters,
+  downVoters,
+  tags,
   answers,
-  numOfViews,
+  createdAt,
 }: TProps) => {
   const daysAgo = getDaysAgo(createdAt)
   // TODO
   const isAuthor = true
+
+  const numOfVotes = upVoters?.length ?? 0 + downVoters?.length ?? 0
 
   return (
     <Card
@@ -52,7 +56,7 @@ const QuestionCard = ({
       </CardHeader>
       <CardContent>
         <ul className="flex flex-wrap gap-2">
-          {tags?.map((tag) => {
+          {(tags as TTag[])?.map((tag) => {
             return <Tag key={`q-${title}-${tag._id}`} {...tag} />
           })}
         </ul>
@@ -63,12 +67,12 @@ const QuestionCard = ({
           max-2xl:flex-col max-2xl:items-start max-2xl:gap-4"
         >
           <Metric
-            imageSrc={author?.picture || "/assets/icons/avatar.svg"}
+            imageSrc={(author as TUser)?.picture || "/assets/icons/avatar.svg"}
             alt="avatar"
             className="body-medium text-dark400_light800"
-            href={`/users/${author?._id}`}
+            href={`/users/${(author as TUser)?._id}`}
             isAuthor={isAuthor}
-            value={author?.name}
+            value={(author as TUser)?.name}
             title={` - asked ${
               daysAgo === 0
                 ? "Today"
@@ -84,15 +88,15 @@ const QuestionCard = ({
               title=" Votes"
             />
             <Metric
-              imageSrc="/assets/icons/star.svg"
+              imageSrc="/assets/icons/message.svg"
               alt="numOfAnswers"
               value={answers?.length}
               title=" Answers"
             />
             <Metric
-              imageSrc="/assets/icons/star.svg"
+              imageSrc="/assets/icons/eye.svg"
               alt="numOfViews"
-              value={numOfViews}
+              value={views}
               title=" Views"
             />
           </div>
