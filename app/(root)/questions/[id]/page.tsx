@@ -1,19 +1,23 @@
 import AnswerForm from "@/components/forms/AnswerForm"
+import SaveQuestionButton from "@/components/SaveQuestionButton"
 import Metric from "@/components/shared/Metric"
 import NoResult from "@/components/shared/NoResult"
 import ParsedHtml from "@/components/shared/ParsedHtml"
 import CustomFilter from "@/components/shared/search/filter/CustomFilter"
 import Tag from "@/components/shared/Tag"
-import { Button } from "@/components/ui/button"
 import Voting from "@/components/Voting"
 import { ANSWERS_FILTER_OPTIONS } from "@/constants/filters"
 import { formatDate, getDaysAgo } from "@/lib/dates.utils"
+import { IUserDocument } from "@/models/user.model"
 import { getAllAnswers } from "@/services/answer.services"
 import { getQuestion } from "@/services/question.services"
+import { getUser } from "@/services/user.services"
 import type { TAnswer, TQuestion, TTag, TUser } from "@/types"
 import Image from "next/image"
 import Link from "next/link"
 import React, { Suspense } from "react"
+import { currentUser } from "@clerk/nextjs/server"
+import { redirect } from "next/navigation"
 
 type TProps = {
   params: { id: string }
@@ -22,9 +26,24 @@ type TProps = {
 const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
   const { id: questionId } = params
 
-  // We do not populate the question to fetch all answers.
-  // Instead, we use getAllAnswers service to which we can pass searchParams.
-  const question: TQuestion = await getQuestion({ filter: { _id: questionId } })
+  // Get current clerk user
+  const user = await currentUser()
+
+  if (!user) {
+    redirect("/sign-in")
+  }
+
+  const [question, mongoUser] = (await Promise.all([
+    // We do not populate the question to fetch all answers.
+    // Instead, we use getAllAnswers service to which we can pass searchParams.
+    getQuestion({ filter: { _id: questionId } }),
+    // Get user from mongodb
+    getUser({ filter: { clerkId: user.id } }),
+  ])) as [question: TQuestion, mongoUser: IUserDocument]
+
+  const currentUserMongoId = mongoUser?._id as string
+  const currentUserSavedQuestions =
+    mongoUser?.savedQuestions as unknown as string[] // non-populated savedQuestions
 
   const {
     // _id: questionId,
@@ -39,9 +58,9 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
     createdAt,
   } = question
 
-  const numUpVotes = upVoters?.length ?? 0
-  const numDownVotes = downVoters?.length ?? 0
-  const numAnswers = allAnswersIds?.length ?? 0 // Total Answers for this question
+  const questionNumUpVotes = upVoters?.length ?? 0
+  const questionNumDownVotes = downVoters?.length ?? 0
+  const questionNumAnswers = allAnswersIds?.length ?? 0 // Total Answers for this question
 
   const daysAgo = getDaysAgo(createdAt)
 
@@ -49,19 +68,19 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
     <section>
       {/* Question Header */}
       <Header
+        currentUserMongoId={currentUserMongoId}
+        headerType="question"
+        questionId={questionId}
         author={author as TUser}
-        numUpVotes={numUpVotes}
-        numDownVotes={numDownVotes}
+        numUpVotes={questionNumUpVotes}
+        numDownVotes={questionNumDownVotes}
       >
-        <Button className="p-0">
-          <Image
-            src="/assets/icons/star.svg"
-            alt="star"
-            width={24}
-            height={24}
-            className="invert-colors"
-          />
-        </Button>
+        {/* Client-Component */}
+        <SaveQuestionButton
+          questionId={questionId}
+          currentUserMongoId={currentUserMongoId}
+          currentUserSavedQuestions={currentUserSavedQuestions}
+        />
       </Header>
 
       {/* Question title */}
@@ -72,7 +91,7 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
       {/* Metrics */}
       <QuestionMetrics
         daysAgo={daysAgo}
-        numAnswers={numAnswers}
+        numAnswers={questionNumAnswers}
         views={views}
       />
 
@@ -84,7 +103,11 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
 
       {/* Answers Counter + Filter // Answers */}
       <Suspense fallback={<div className="loader my-8" />}>
-        <AllAnswers questionId={questionId} searchParams={searchParams} />
+        <AllAnswers
+          currentUserMongoId={currentUserMongoId}
+          questionId={questionId}
+          searchParams={searchParams}
+        />
       </Suspense>
 
       {/* Answer form */}
@@ -96,14 +119,31 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
 export default QuestionDetailsPage
 
 type THeaderProps = {
+  currentUserMongoId: string
   author: TUser
   numUpVotes: number
   numDownVotes: number
-  answeredOn?: string
   children?: React.ReactNode
-}
+} & (
+  | {
+      headerType: "question"
+      questionId: string
+      answerId?: undefined
+      answeredOn?: undefined
+    }
+  | {
+      headerType: "answer"
+      questionId?: undefined
+      answerId: string
+      answeredOn: string
+    }
+)
 
 const Header = ({
+  currentUserMongoId,
+  headerType,
+  questionId,
+  answerId,
   author,
   numUpVotes,
   numDownVotes,
@@ -119,8 +159,12 @@ const Header = ({
         {/* Voting */}
         <Voting
           className="flex w-full items-center justify-end gap-4"
+          currentUserMongoId={currentUserMongoId}
           numUpVotes={numUpVotes}
           numDownVotes={numDownVotes}
+          isQuestionVoting={questionId != null}
+          questionId={questionId}
+          answerId={answerId}
         >
           {children}
         </Voting>
@@ -217,10 +261,15 @@ const QuestionTags = ({ tags }: TQuestionTagsProps) => {
 }
 
 type TAllAnswersProps = {
+  currentUserMongoId: string
   questionId: string
   searchParams: { [key: string]: string | undefined }
 }
-const AllAnswers = async ({ questionId, searchParams }: TAllAnswersProps) => {
+const AllAnswers = async ({
+  currentUserMongoId,
+  questionId,
+  searchParams,
+}: TAllAnswersProps) => {
   const selectedAnswers: TAnswer[] = await getAllAnswers({
     filter: { question: questionId },
     searchParams,
@@ -248,20 +297,23 @@ const AllAnswers = async ({ questionId, searchParams }: TAllAnswersProps) => {
               const {
                 author, // populated user
                 content,
-                upVoters: answerUpVoters, // non-populated user
-                downVoters: answerDownvoters, // non-populated user
+                upVoters, // non-populated user
+                downVoters, // non-populated user
                 createdAt,
               } = answer
-              const numUpVotes = answerUpVoters?.length ?? 0
-              const numDownVotes = answerDownvoters?.length ?? 0
+              const answerNumUpVotes = upVoters?.length ?? 0
+              const answerNumDownVotes = downVoters?.length ?? 0
 
               return (
                 <div key={`answer-${answer._id}`} className="">
                   {/* Answer Author + votes */}
                   <Header
+                    currentUserMongoId={currentUserMongoId}
+                    headerType="answer"
+                    answerId={answer._id}
                     author={author as TUser}
-                    numUpVotes={numUpVotes}
-                    numDownVotes={numDownVotes}
+                    numUpVotes={answerNumUpVotes}
+                    numDownVotes={answerNumDownVotes}
                     answeredOn={`answered ${formatDate(createdAt)}`}
                   />
                   {/* Answer Content */}

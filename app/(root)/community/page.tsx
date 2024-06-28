@@ -40,7 +40,7 @@ export default CommunityPage
 
 const UserListWrapper = async ({ searchParams }: TSearchParamsProps) => {
   const data: TUser[] | null = await getAllUsers({ searchParams })
-  console.log(data)
+
   console.log("==== COMMUNITY searchParams", searchParams)
   console.log("==== COMMUNITY data", data)
 

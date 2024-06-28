@@ -28,7 +28,7 @@ const QuestionCard = ({
   // TODO
   const isAuthor = true
 
-  const numOfVotes = upVoters?.length ?? 0 + downVoters?.length ?? 0
+  const numOfVotes = upVoters?.length + downVoters?.length ?? 0
 
   return (
     <Card

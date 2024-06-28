@@ -3,7 +3,7 @@
 import { mutateAnswerSchema, TMutateAnswerInput } from "@/lib/zod/answer.zod"
 import { IQuestionDocument } from "@/models/question.model"
 import { IUserDocument } from "@/models/user.model"
-import { createAnswer } from "@/services/answer.services"
+import { createAnswer, findAndUpdateAnswer } from "@/services/answer.services"
 import { findAndUpdateQuestion } from "@/services/question.services"
 import { findAndUpdateUser, getUser } from "@/services/user.services"
 import { currentUser } from "@clerk/nextjs/server"
@@ -59,6 +59,35 @@ export async function createAnswerAction({
     revalidatePath(`/questions/${questionId}`)
 
     return JSON.parse(JSON.stringify(newAnswer))
+  } catch (error) {
+    console.log(error)
+    return error
+  }
+}
+
+export async function voteAnswerAction({
+  answerId,
+  voterId,
+  isUpVoting,
+}: {
+  answerId: string
+  voterId: string
+  isUpVoting: boolean
+}) {
+  try {
+    const query = isUpVoting
+      ? { $push: { upVoters: voterId } }
+      : { $push: { downVoters: voterId } }
+
+    const updatedAnswer = await findAndUpdateAnswer({
+      filter: { _id: answerId },
+      data: query,
+    })
+
+    // revalidate
+    revalidatePath("/")
+
+    return JSON.parse(JSON.stringify(updatedAnswer))
   } catch (error) {
     console.log(error)
     return error
