@@ -11,7 +11,7 @@ export type TUser = {
   reputation: number
   joinedDate: Date
   location: object
-  savedQuestions: Array<object>
+  savedQuestions: string[] // TODO TQuestion[] | string[]
 }
 
 export type TTag = {
