@@ -1,11 +1,12 @@
 "use client"
 
-import React from "react"
+import React, { useEffect } from "react"
 import Metric from "./shared/Metric"
 import { voteQuestionAction } from "@/server-actions/question.actions"
 import { voteAnswerAction } from "@/server-actions/answer.actions"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import { createViewForAction } from "@/server-actions/interaction.actions"
 
 type TVotingProps = {
   children?: React.ReactNode
@@ -36,6 +37,21 @@ const Voting = ({
 }: TVotingProps) => {
   const router = useRouter()
   const isQuestionVoting = questionId != null
+
+  // create (if not exists) a new view interaction record on component mount
+  useEffect(() => {
+    ;(async () => {
+      isQuestionVoting
+        ? await createViewForAction({
+            viewFor: "question",
+            questionId: questionId as string,
+          })
+        : await createViewForAction({
+            viewFor: "answer",
+            answerId: answerId as string,
+          })
+    })()
+  }, [isQuestionVoting, questionId, answerId])
 
   const handleVote = async ({ isUpVoting }: { isUpVoting: boolean }) => {
     if (!currentUserMongoId) {
