@@ -40,20 +40,13 @@ const Home = ({ searchParams }: TSearchParamsProps) => {
 
 export default Home
 
-const wait = (delay: number) =>
-  new Promise((resolve) => {
-    setTimeout(resolve, delay)
-  })
-
 const QuestionListWrapper = async ({ searchParams }: TSearchParamsProps) => {
   const data: TQuestion[] | null = await getAllQuestions({ searchParams })
   console.log("==== HOME searchParams", searchParams)
   console.log("==== HOME data", data)
 
-  await wait(2500)
-
   return data && data?.length > 0 ? (
-    <ul className="w-full">
+    <ul className="flex w-full flex-col gap-8 max-sm:gap-6 [&>*:first-child]:mt-2">
       {data.map((question) => {
         return (
           <li key={question._id}>
