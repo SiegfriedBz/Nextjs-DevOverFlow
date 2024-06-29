@@ -41,7 +41,6 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
 
   // Get current clerk user
   const user = await currentUser()
-  console.log("QuestionDetailsPage -> current clerk user", user)
 
   let mongoUserDoc: IUserDocument | null = null
   try {
@@ -57,7 +56,6 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
 
   // deep copy object (stringify mongo objectId & dates, remove functions) => "passable" to client-component
   const mongoUser = JSON.parse(JSON.stringify(mongoUserDoc))
-  console.log("QuestionDetailsPage -> mongoUser", mongoUser)
 
   const currentUserMongoId = mongoUser?._id as string // stringified to pass to client-component
   const currentUserSavedQuestions = mongoUser?.savedQuestions as string[] // non-populated savedQuestions

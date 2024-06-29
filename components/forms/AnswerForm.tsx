@@ -48,7 +48,7 @@ const AnswerForm = ({ questionId }: TProps) => {
       router.push("/")
     } catch (error) {
       console.log(error)
-      toast.error(`Something went wrong when submitting your answer.`)
+      toast.error(`Could not submit your answer.`)
     } finally {
       setIsSubmitting(false)
     }

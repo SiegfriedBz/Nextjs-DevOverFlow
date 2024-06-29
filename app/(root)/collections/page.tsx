@@ -55,8 +55,6 @@ const SavedQuestionListWrapper = async ({ searchParams }: TProps) => {
   const data: TQuestion[] | null = await getCurrentUserSavedQuestions({
     searchParams,
   })
-  console.log("==== CollectionsPage searchParams", searchParams)
-  console.log("==== CollectionsPage data", data)
 
   return data && data?.length > 0 ? (
     <ul className="flex w-full flex-col gap-8 max-sm:gap-6 [&>*:first-child]:mt-2">

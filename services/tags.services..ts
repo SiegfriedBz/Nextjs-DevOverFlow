@@ -37,7 +37,7 @@ export async function getAllTags({
   } catch (error) {
     const err = error as Error
     console.log("getAllTags Error", err.message)
-    throw new Error(`Something went wrong when fetching tags - ${err.message}`)
+    throw new Error(`Could not fetch tags - ${err.message}`)
   }
 }
 
@@ -85,9 +85,7 @@ export async function getUserTopTags({
   } catch (error) {
     const err = error as Error
     console.log("getUserTopTags Error", err.message)
-    throw new Error(
-      `Something went wrong when getting user's tags - ${err.message}`
-    )
+    throw new Error(`Could not fetch user's tags - ${err.message}`)
   }
 }
 
@@ -120,8 +118,6 @@ export async function upsertTagsOnCreateQuestion({
   } catch (error) {
     const err = error as Error
     console.log("upsertTagsOnCreateQuestion Error", err.message)
-    throw new Error(
-      `Something went wrong when creating/updating the tags - ${err.message}`
-    )
+    throw new Error(`Could not upsert tags - ${err.message}`)
   }
 }

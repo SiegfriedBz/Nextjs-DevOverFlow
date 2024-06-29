@@ -45,8 +45,6 @@ export default Home
 
 const QuestionListWrapper = async ({ searchParams }: TProps) => {
   const data: TQuestion[] | null = await getAllQuestions({ searchParams })
-  console.log("==== HOME searchParams", searchParams)
-  console.log("==== HOME data", data)
 
   return data && data?.length > 0 ? (
     <ul className="flex w-full flex-col gap-8 max-sm:gap-6 [&>*:first-child]:mt-2">
