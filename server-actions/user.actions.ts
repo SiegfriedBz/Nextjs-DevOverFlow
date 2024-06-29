@@ -10,8 +10,10 @@ import {
   findAndUpdateUser,
   getUser,
 } from "@/services/user.services"
+import { currentUser } from "@clerk/nextjs/server"
 import { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
 import { revalidatePath } from "next/cache"
+import { redirect } from "next/navigation"
 
 export async function createUserAction({
   userData,
@@ -88,6 +90,51 @@ export async function deleteUserAction({
     // revalidatePath(`/profile/${(updatedUser as IUserDocument)._id}`)
 
     return result
+  } catch (error) {
+    console.log(error)
+    const err = error as Error
+    return err
+  }
+}
+
+export async function toggleSaveQuestionAction({
+  questionId,
+}: {
+  questionId: string
+}) {
+  try {
+    // get user from from clerk DB
+    const clerckUser = await currentUser()
+
+    if (!clerckUser) {
+      redirect("/sign-in")
+    }
+
+    const clerckId = clerckUser?.id
+
+    // get user from our DB
+    const mongoUser: IUserDocument = await getUser({ filter: { clerckId } })
+    const user = JSON.parse(JSON.stringify(mongoUser))
+    // check if question is already saved
+    const questionIsSaved = (user.savedQuestions as string[]).some(
+      (q) => q === questionId
+    )
+
+    // update user
+    const query = questionIsSaved
+      ? { $pull: { savedQuestions: questionId } }
+      : { $push: { savedQuestions: questionId } }
+
+    const updatedUserDoc = await findAndUpdateUser({
+      filter: { _id: user._id },
+      data: query,
+    })
+
+    revalidatePath(`/questions/${questionId}`)
+
+    const updatedUser = JSON.parse(JSON.stringify(updatedUserDoc))
+
+    return updatedUser
   } catch (error) {
     console.log(error)
     const err = error as Error

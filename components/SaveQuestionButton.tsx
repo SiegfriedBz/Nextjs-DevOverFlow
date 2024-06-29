@@ -1,6 +1,6 @@
 "use client"
 
-import { updateUserAction } from "@/server-actions/user.actions"
+import { toggleSaveQuestionAction } from "@/server-actions/user.actions"
 import { Error } from "mongoose"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -25,37 +25,21 @@ const SaveQuestionButton = ({
       if (!currentUserMongoId) {
         router.push("/sign-in")
         router.refresh()
-        toast.info(`Please sign-in to vote`)
+        toast.info(`Please sign in to vote`)
         return
       }
 
-      const query = userHasSavedQuestion
-        ? {
-            $pull: { savedQuestions: questionId },
-          }
-        : {
-            $push: { savedQuestions: questionId },
-          }
-
-      const updatedUser = await updateUserAction({
-        filter: { _id: currentUserMongoId },
-        data: query,
-      })
+      const updatedUser = await toggleSaveQuestionAction({ questionId })
 
       if (updatedUser instanceof Error) {
-        throw new Error(
-          `Could not ${userHasSavedQuestion ? "remove question from" : "add question to"} your favorites`
-        )
+        throw new Error(`Could not update question in your favorites`)
       }
-      if (userHasSavedQuestion) {
-        toast.info("Question removed from your favorites successfully")
-      } else {
-        toast.success("Question added to your favorites successfully")
-      }
+
+      toast.success("Question updated in your favorites successfully")
     } catch (error) {
       const err = error as Error
       console.log("handleSaveQuestion error", err)
-      toast.warning("Could not add question to your favorites")
+      toast.warning("Could not update the question in your favorites")
     }
   }
 

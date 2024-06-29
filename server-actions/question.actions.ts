@@ -28,7 +28,7 @@ export async function createQuestionAction({
       throw new Error("Invalid input data")
     }
 
-    // get user from cleck DB
+    // get user from from clerk DB
     const clerckUser = await currentUser()
 
     if (!clerckUser) {
@@ -127,7 +127,7 @@ export async function voteQuestionAction({
     })
 
     // revalidate
-    revalidatePath("/")
+    revalidatePath(`/questions/${questionId}`)
 
     return JSON.parse(JSON.stringify(updatedQuestion))
   } catch (error) {
