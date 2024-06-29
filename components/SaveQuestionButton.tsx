@@ -10,19 +10,15 @@ import { Button } from "./ui/button"
 type TProps = {
   questionId: string
   currentUserMongoId: string
-  currentUserSavedQuestions: string[]
+  userHasSavedQuestion: boolean
 }
 
 const SaveQuestionButton = ({
   questionId,
   currentUserMongoId,
-  currentUserSavedQuestions,
+  userHasSavedQuestion,
 }: TProps) => {
   const router = useRouter()
-
-  const questionIsUserFavorite = currentUserSavedQuestions?.some(
-    (q) => q === questionId
-  )
 
   const handleToggleSaveQuestion = async () => {
     try {
@@ -33,7 +29,7 @@ const SaveQuestionButton = ({
         return
       }
 
-      const query = questionIsUserFavorite
+      const query = userHasSavedQuestion
         ? {
             $pull: { savedQuestions: questionId },
           }
@@ -48,10 +44,10 @@ const SaveQuestionButton = ({
 
       if (updatedUser instanceof Error) {
         throw new Error(
-          `Could not ${questionIsUserFavorite ? "remove question from" : "add question to"} your favorites`
+          `Could not ${userHasSavedQuestion ? "remove question from" : "add question to"} your favorites`
         )
       }
-      if (questionIsUserFavorite) {
+      if (userHasSavedQuestion) {
         toast.info("Question removed from your favorites successfully")
       } else {
         toast.success("Question added to your favorites successfully")
@@ -70,7 +66,7 @@ const SaveQuestionButton = ({
         alt="star"
         width={24}
         height={24}
-        className={`invert-colors ${questionIsUserFavorite ? "bg-red-500" : "bg-blue-500"}`}
+        className={`invert-colors ${userHasSavedQuestion ? "bg-red-500" : "bg-blue-500"}`}
       />
     </Button>
   )

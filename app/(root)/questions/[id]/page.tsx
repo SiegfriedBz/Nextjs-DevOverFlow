@@ -42,13 +42,12 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
   // Get current clerk user
   const user = await currentUser()
   console.log("QuestionDetailsPage -> current clerk user", user)
-  console.log("QuestionDetailsPage -> current clerk user?.id", user?.id)
-  let mongoUser: IUserDocument | null = null
 
+  let mongoUserDoc: IUserDocument | null = null
   try {
     if (user) {
       // Get user from mongodb
-      mongoUser = await getUser({
+      mongoUserDoc = await getUser({
         filter: { clerkId: user.id },
       })
     }
@@ -56,11 +55,15 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
     console.log("QuestionDetailsPage -> error fetching mongoUser", error)
   }
 
+  // deep copy object (stringify mongo objectId & dates, remove functions) => "passable" to client-component
+  const mongoUser = JSON.parse(JSON.stringify(mongoUserDoc))
   console.log("QuestionDetailsPage -> mongoUser", mongoUser)
 
-  const currentUserMongoId = mongoUser?._id as string
-  const currentUserSavedQuestions =
-    mongoUser?.savedQuestions as unknown as string[] // non-populated savedQuestions
+  const currentUserMongoId = mongoUser?._id as string // stringified to pass to client-component
+  const currentUserSavedQuestions = mongoUser?.savedQuestions as string[] // non-populated savedQuestions
+  const userHasSavedQuestion = currentUserSavedQuestions?.some(
+    (q) => q === questionId
+  )
 
   const {
     // _id: questionId,
@@ -78,7 +81,6 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
   const questionNumUpVotes = upVoters?.length ?? 0
   const questionNumDownVotes = downVoters?.length ?? 0
   const questionNumAnswers = allAnswersIds?.length ?? 0 // Total Answers for this question
-
   const daysAgo = getDaysAgo(createdAt)
 
   return (
@@ -96,7 +98,7 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
         <SaveQuestionButton
           questionId={questionId}
           currentUserMongoId={currentUserMongoId}
-          currentUserSavedQuestions={currentUserSavedQuestions}
+          userHasSavedQuestion={userHasSavedQuestion}
         />
       </Header>
 
