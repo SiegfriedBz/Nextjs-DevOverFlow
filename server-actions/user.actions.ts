@@ -110,10 +110,10 @@ export async function toggleSaveQuestionAction({
       redirect("/sign-in")
     }
 
-    const clerckId = clerckUser?.id
+    const clerkId = clerckUser?.id
 
     // get user from our DB
-    const mongoUser: IUserDocument = await getUser({ filter: { clerckId } })
+    const mongoUser: IUserDocument = await getUser({ filter: { clerkId } })
     const user = JSON.parse(JSON.stringify(mongoUser))
     // check if question is already saved
     const questionIsSaved = (user.savedQuestions as string[]).some(
