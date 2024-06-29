@@ -62,11 +62,10 @@ const SaveQuestionButton = ({
   return (
     <Button onClick={handleToggleSaveQuestion} type="button" className="p-0">
       <Image
-        src="/assets/icons/star.svg"
+        src={`/assets/icons/${userHasSavedQuestion ? "star-filled" : "star-red"}.svg`}
         alt="star"
         width={24}
         height={24}
-        className={`invert-colors ${userHasSavedQuestion ? "bg-red-500" : "bg-blue-500"}`}
       />
     </Button>
   )
