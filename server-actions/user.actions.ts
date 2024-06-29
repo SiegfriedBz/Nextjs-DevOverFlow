@@ -130,7 +130,7 @@ export async function toggleSaveQuestionAction({
       data: query,
     })
 
-    revalidatePath(`/questions/${questionId}`)
+    revalidatePath("/")
 
     const updatedUser = JSON.parse(JSON.stringify(updatedUserDoc))
 
