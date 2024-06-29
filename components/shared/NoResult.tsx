@@ -3,7 +3,7 @@ import Image from "next/image"
 import Link from "next/link"
 
 type TProps = {
-  resultType: "question" | "tag" | "user" | "answer"
+  resultType: "question" | "saved question" | "tag" | "user" | "answer"
   paragraphContent: string
   linkLabel?: string
   href?: string
