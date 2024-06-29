@@ -5,7 +5,7 @@ import type { IQuestionDocument } from "@/models/question.model"
 import Question from "@/models/question.model"
 import Tag, { type ITagDocument } from "@/models/tag.model"
 import User from "@/models/user.model"
-import type { TTag } from "@/types"
+import type { TQuestion, TTag } from "@/types"
 import type { FilterQuery, QueryOptions } from "mongoose"
 import { getUser } from "./user.services"
 
@@ -46,22 +46,10 @@ export async function getTag({
   filter,
 }: {
   filter: FilterQuery<ITagDocument>
-}): Promise<TTag | null> {
+}): Promise<TTag> {
   try {
-    await connectToMongoDB()
-
-    const tagDocument: ITagDocument | null = await Tag.findOne(filter).populate(
-      [
-        {
-          path: "followers",
-          model: User,
-          select: "_id clerkId name picture",
-        },
-        { path: "questions", model: Question },
-      ]
-    )
-
-    const tag: TTag = JSON.parse(JSON.stringify(tagDocument))
+    const tagdoc: ITagDocument | null = await Tag.findOne(filter)
+    const tag: TTag = JSON.parse(JSON.stringify(tagdoc))
 
     if (!tag?._id) {
       throw new Error(`Tag not found`)
@@ -70,8 +58,64 @@ export async function getTag({
     return tag
   } catch (error) {
     const err = error as Error
-    console.log("getQuestion getTag", err.message)
+    console.log("getQuestion Error", err.message)
     throw new Error(`Could not fetch tag - ${err.message}`)
+  }
+}
+
+export async function getQuestionsByTag({
+  filter,
+  searchParams,
+}: {
+  filter: FilterQuery<ITagDocument>
+  searchParams?: { [key: string]: string | undefined }
+}): Promise<TQuestion[]> {
+  try {
+    await connectToMongoDB()
+
+    // TODO TOFIX
+    // HANDLE searchParams
+    // const {
+    //   page = 1,
+    //   numOfResultsPerPage = 10,
+    //   filter = "",
+    //   searchQuery = "",
+    // } = searchParams
+
+    const tagDocument: ITagDocument | null = await Tag.findOne(filter, {
+      questions: 1,
+    }).populate({
+      path: "questions",
+      model: Question,
+      // TODO TOFIX
+      // match: searchQuery ? {title: { $regex:searchQuery,$options:"i" }}
+      populate: [
+        {
+          path: "tags",
+          model: Tag,
+          select: "_id name",
+        },
+        {
+          path: "author",
+          model: User,
+          select: "_id clerkId name picture",
+        },
+      ],
+    })
+
+    if (!tagDocument) {
+      throw new Error("Tag not found")
+    }
+
+    const questionsDoc = tagDocument.questions
+
+    const questions = JSON.parse(JSON.stringify(questionsDoc))
+
+    return questions
+  } catch (error) {
+    const err = error as Error
+    console.log("getQuestionsByTag", err.message)
+    throw new Error(`Could not get questions by tag - ${err.message}`)
   }
 }
 
