@@ -246,13 +246,13 @@ const QuestionMetrics = ({
         imageSrc="/assets/icons/message.svg"
         alt="numOfAnswers"
         value={numAnswers}
-        title=" Answers"
+        title={` Answer${numAnswers > 0 ? "s" : ""}`}
       />
       <Metric
         imageSrc="/assets/icons/eye.svg"
         alt="numOfViews"
         value={views}
-        title=" Views"
+        title={` View${views > 0 ? "s" : ""}`}
       />
     </div>
   )
@@ -293,21 +293,24 @@ const AllAnswers = async ({
   return (
     <>
       {/* Answers Counter + Filter */}
-      <div className="my-8">
-        <span className="text-primary-500">
-          {selectedAnswers.length} Answers
-        </span>
-        <div className="sm:px-4">
-          <CustomFilter
-            filterName="filter"
-            filterOptions={ANSWERS_FILTER_OPTIONS}
-          />
-        </div>
+      <div className="mb-4 mt-8 flex justify-between max-sm:flex-col max-sm:gap-4 md:flex-col md:items-center">
+        <Metric
+          imageSrc="/assets/icons/message.svg"
+          alt="numOfAnswers"
+          value={selectedAnswers.length}
+          title={` Answer${selectedAnswers.length > 0 ? "s" : ""}`}
+          className="inline-flex justify-start text-primary-500 max-sm:ps-2 sm:self-center md:self-start"
+        />
+
+        <CustomFilter
+          filterName="filter"
+          filterOptions={ANSWERS_FILTER_OPTIONS}
+        />
       </div>
       <>
         {/* Answers */}
         {selectedAnswers?.length > 0 ? (
-          <ul className="my-8 flex flex-col gap-8">
+          <ul className="flex w-full flex-col gap-8 max-sm:gap-6 [&>*:first-child]:mt-2">
             {(selectedAnswers as TAnswer[])?.map((answer) => {
               const {
                 author, // populated user
