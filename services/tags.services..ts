@@ -5,7 +5,8 @@ import type { IQuestionDocument } from "@/models/question.model"
 import Question from "@/models/question.model"
 import Tag, { type ITagDocument } from "@/models/tag.model"
 import User from "@/models/user.model"
-import type { QueryOptions } from "mongoose"
+import type { TTag } from "@/types"
+import type { FilterQuery, QueryOptions } from "mongoose"
 import { getUser } from "./user.services"
 
 export async function getAllTags({
@@ -38,6 +39,39 @@ export async function getAllTags({
     const err = error as Error
     console.log("getAllTags Error", err.message)
     throw new Error(`Could not fetch tags - ${err.message}`)
+  }
+}
+
+export async function getTag({
+  filter,
+}: {
+  filter: FilterQuery<ITagDocument>
+}): Promise<TTag | null> {
+  try {
+    await connectToMongoDB()
+
+    const tagDocument: ITagDocument | null = await Tag.findOne(filter).populate(
+      [
+        {
+          path: "followers",
+          model: User,
+          select: "_id clerkId name picture",
+        },
+        { path: "questions", model: Question },
+      ]
+    )
+
+    const tag: TTag = JSON.parse(JSON.stringify(tagDocument))
+
+    if (!tag?._id) {
+      throw new Error(`Tag not found`)
+    }
+
+    return tag
+  } catch (error) {
+    const err = error as Error
+    console.log("getQuestion getTag", err.message)
+    throw new Error(`Could not fetch tag - ${err.message}`)
   }
 }
 
@@ -106,7 +140,7 @@ export async function upsertTagsOnCreateQuestion({
         { name: { $regex: new RegExp(`^${tagName}$`, "i") } },
         {
           $setOnInsert: { name: tagName },
-          $push: { question: (newQuestion as IQuestionDocument)._id },
+          $push: { questions: (newQuestion as IQuestionDocument)._id },
         },
         { upsert: true, new: true }
       )
