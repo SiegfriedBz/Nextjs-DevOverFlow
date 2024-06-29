@@ -54,8 +54,9 @@ export async function getQuestion({
     ).populate([
       { path: "author", model: User, select: "_id clerkId name picture" },
       { path: "tags", model: Tag, select: "_id name" },
-      { path: "upVoters", model: User },
-      { path: "downVoters", model: User },
+      // We do not populate the upVoters, downVoters.
+      // { path: "upVoters", model: User },
+      // { path: "downVoters", model: User },
       // We do not populate the answers.
       // Instead, in the QuestionDetailsPage, we use getAllAnswers service to which we can pass searchParams.
       // {
