@@ -98,9 +98,7 @@ const QuestionForm = ({ actionType = "create", questionId }: TProps) => {
       router.push("/")
     } catch (error) {
       console.log(error)
-      toast.error(
-        `Something went wrong when ${actionType === "create" ? "creating" : "updating"} question.`
-      )
+      toast.error(`Could not ${actionType} question.`)
     } finally {
       setIsSubmitting(false)
     }
