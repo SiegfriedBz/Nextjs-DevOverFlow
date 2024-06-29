@@ -13,11 +13,11 @@ import { getAllAnswers } from "@/services/answer.services"
 import { getQuestion } from "@/services/question.services"
 import { getUser } from "@/services/user.services"
 import type { TAnswer, TQuestion, TTag, TUser } from "@/types"
+import { currentUser } from "@clerk/nextjs/server"
 import Image from "next/image"
 import Link from "next/link"
-import React, { Suspense } from "react"
-import { currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
+import React, { Suspense } from "react"
 
 type TProps = {
   params: { id: string }
@@ -71,15 +71,21 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
     content,
     views,
     author,
-    upVoters,
-    downVoters,
-    answers: allAnswersIds, // non-populated answers
+    upVoters, // non-populated string[]
+    downVoters, // non-populated string[]
+    answers: allAnswersIds, // non-populated answers string[]
     tags,
     createdAt,
   } = question
 
   const questionNumUpVotes = upVoters?.length ?? 0
   const questionNumDownVotes = downVoters?.length ?? 0
+  const userHasUpVotedQuestion = upVoters.some(
+    (voterId) => voterId === currentUserMongoId
+  )
+  const userHasDownVotedQuestion = downVoters.some(
+    (voterId) => voterId === currentUserMongoId
+  )
   const questionNumAnswers = allAnswersIds?.length ?? 0 // Total Answers for this question
   const daysAgo = getDaysAgo(createdAt)
 
@@ -92,6 +98,8 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
         author={author as TUser}
         numUpVotes={questionNumUpVotes}
         numDownVotes={questionNumDownVotes}
+        userHasUpVoted={userHasUpVotedQuestion}
+        userHasDownVoted={userHasDownVotedQuestion}
       >
         {/* Client-Component */}
         <SaveQuestionButton
@@ -137,18 +145,22 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
 export default QuestionDetailsPage
 
 type THeaderProps = {
+  children?: React.ReactNode
   currentUserMongoId: string
   author: TUser
   numUpVotes: number
   numDownVotes: number
-  children?: React.ReactNode
+  userHasUpVoted: boolean
+  userHasDownVoted: boolean
 } & (
   | {
+      // question case
       questionId: string
       answerId?: undefined
       answeredOn?: undefined
     }
   | {
+      // answer case
       questionId?: undefined
       answerId: string
       answeredOn: string
@@ -157,13 +169,17 @@ type THeaderProps = {
 
 const Header = ({
   currentUserMongoId,
-  questionId,
-  answerId,
   author,
   numUpVotes,
   numDownVotes,
-  answeredOn,
   children,
+  userHasUpVoted,
+  userHasDownVoted,
+  // question case
+  questionId,
+  // answer case
+  answerId,
+  answeredOn,
 }: THeaderProps) => {
   return (
     <>
@@ -177,8 +193,11 @@ const Header = ({
           currentUserMongoId={currentUserMongoId}
           numUpVotes={numUpVotes}
           numDownVotes={numDownVotes}
-          isQuestionVoting={questionId != null}
+          userHasUpVoted={userHasUpVoted}
+          userHasDownVoted={userHasDownVoted}
+          // question case
           questionId={questionId}
+          // answer case
           answerId={answerId}
         >
           {children}
@@ -246,13 +265,13 @@ const QuestionMetrics = ({
         imageSrc="/assets/icons/message.svg"
         alt="numOfAnswers"
         value={numAnswers}
-        title={` Answer${numAnswers > 0 ? "s" : ""}`}
+        title={` Answer${numAnswers > 1 ? "s" : ""}`}
       />
       <Metric
         imageSrc="/assets/icons/eye.svg"
         alt="numOfViews"
         value={views}
-        title={` View${views > 0 ? "s" : ""}`}
+        title={` View${views > 1 ? "s" : ""}`}
       />
     </div>
   )
@@ -290,6 +309,8 @@ const AllAnswers = async ({
     searchParams,
   })
 
+  const numAnswers = selectedAnswers.length
+
   return (
     <>
       {/* Answers Counter + Filter */}
@@ -297,8 +318,8 @@ const AllAnswers = async ({
         <Metric
           imageSrc="/assets/icons/message.svg"
           alt="numOfAnswers"
-          value={selectedAnswers.length}
-          title={` Answer${selectedAnswers.length > 0 ? "s" : ""}`}
+          value={numAnswers}
+          title={` Answer${numAnswers > 1 ? "s" : ""}`}
           className="inline-flex justify-start text-primary-500 max-sm:ps-2 sm:self-center md:self-start"
         />
 
@@ -313,14 +334,21 @@ const AllAnswers = async ({
           <ul className="flex w-full flex-col gap-8 max-sm:gap-6 [&>*:first-child]:mt-2">
             {(selectedAnswers as TAnswer[])?.map((answer) => {
               const {
-                author, // populated user
+                author, // populated user string[]
                 content,
-                upVoters, // non-populated user
-                downVoters, // non-populated user
+                upVoters, // non-populated user string[]
+                downVoters, // non-populated user string[]
                 createdAt,
               } = answer
+
               const answerNumUpVotes = upVoters?.length ?? 0
               const answerNumDownVotes = downVoters?.length ?? 0
+              const userHasUpVotedAnswer = upVoters.some(
+                (voterId) => voterId === currentUserMongoId
+              )
+              const userHasDownVotedAnswer = downVoters.some(
+                (voterId) => voterId === currentUserMongoId
+              )
 
               return (
                 <div key={`answer-${answer._id}`} className="">
@@ -332,6 +360,8 @@ const AllAnswers = async ({
                     numUpVotes={answerNumUpVotes}
                     numDownVotes={answerNumDownVotes}
                     answeredOn={`answered ${formatDate(createdAt)}`}
+                    userHasUpVoted={userHasUpVotedAnswer}
+                    userHasDownVoted={userHasDownVotedAnswer}
                   />
                   {/* Answer Content */}
                   <ParsedHtml data={content} />
