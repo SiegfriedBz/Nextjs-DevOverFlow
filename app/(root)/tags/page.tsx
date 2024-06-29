@@ -45,7 +45,7 @@ const TagListWrapper = async ({ searchParams }: TSearchParamsProps) => {
     <ul className="flex w-full flex-wrap justify-start gap-8">
       {data.map((tag) => {
         return (
-          <li key={tag._id} className="size-full">
+          <li key={tag._id} className="h-full">
             <TagCard {...tag} />
           </li>
         )
