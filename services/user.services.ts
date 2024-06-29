@@ -147,8 +147,6 @@ export async function getCurrentUserSavedQuestions({
     //   searchQuery = "",
     // } = searchParams
 
-    console.log("getCurrentUserSavedQuestions -> searchParams", searchParams)
-
     // get user from from clerk DB
     const clerckUser = await currentUser()
 
