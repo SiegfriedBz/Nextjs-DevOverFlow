@@ -29,6 +29,7 @@ const QuestionCard = ({
   const isAuthor = true
 
   const numOfVotes = upVoters?.length + downVoters?.length ?? 0
+  const numOfAnswers = answers?.length ?? 0
 
   return (
     <Card
@@ -85,19 +86,19 @@ const QuestionCard = ({
               imageSrc="/assets/icons/like.svg"
               alt="numOfVotes"
               value={numOfVotes}
-              title=" Votes"
+              title={` Vote${numOfVotes > 0 ? "s" : ""}`}
             />
             <Metric
               imageSrc="/assets/icons/message.svg"
               alt="numOfAnswers"
-              value={answers?.length}
-              title=" Answers"
+              value={numOfAnswers}
+              title={` Answer${numOfAnswers > 0 ? "s" : ""}`}
             />
             <Metric
               imageSrc="/assets/icons/eye.svg"
               alt="numOfViews"
               value={views}
-              title=" Views"
+              title={` View${views > 0 ? "s" : ""}`}
             />
           </div>
         </div>
