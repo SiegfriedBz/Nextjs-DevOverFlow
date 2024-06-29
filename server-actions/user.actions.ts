@@ -120,6 +120,11 @@ export async function toggleSaveQuestionAction({
       (q) => q === questionId
     )
 
+    console.log("=============")
+    console.log("toggleSaveQuestionAction -> clerckUser", clerckUser)
+    console.log("toggleSaveQuestionAction -> user", user)
+    console.log("toggleSaveQuestionAction -> questionIsSaved", questionIsSaved)
+
     // update user
     const query = questionIsSaved
       ? { $pull: { savedQuestions: questionId } }
@@ -130,9 +135,11 @@ export async function toggleSaveQuestionAction({
       data: query,
     })
 
-    revalidatePath("/")
-
     const updatedUser = JSON.parse(JSON.stringify(updatedUserDoc))
+    console.log("toggleSaveQuestionAction -> updatedUser", updatedUser)
+    console.log("=============")
+
+    revalidatePath("/")
 
     return updatedUser
   } catch (error) {
