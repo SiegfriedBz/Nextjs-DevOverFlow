@@ -45,9 +45,7 @@ export async function getAllQuestions({
   } catch (error) {
     const err = error as Error
     console.log("getAllQuestions Error", err.message)
-    throw new Error(
-      `Something went wrong when fetching questions - ${err.message}`
-    )
+    throw new Error(`Could not fetch questions - ${err.message}`)
   }
 }
 
@@ -87,9 +85,7 @@ export async function getQuestion({
   } catch (error) {
     const err = error as Error
     console.log("getQuestion Error", err.message)
-    throw new Error(
-      `Something went wrong when getting question - ${err.message}`
-    )
+    throw new Error(`Could not fetch question - ${err.message}`)
   }
 }
 
@@ -111,9 +107,7 @@ export async function createQuestion({
   } catch (error) {
     const err = error as Error
     console.log("createQuestion Error", err)
-    throw new Error(
-      `Something went wrong when creating question - ${err.message}`
-    )
+    throw new Error(`Could not create question - ${err.message}`)
   }
 }
 
@@ -140,9 +134,7 @@ export async function findAndUpdateQuestion({
   } catch (error) {
     const err = error as Error
     console.log("===== findAndUpdateQuestion Error", err)
-    throw new Error(
-      `Something went wrong when updating question - ${err.message}`
-    )
+    throw new Error(`Could not update question - ${err.message}`)
   }
 }
 
@@ -166,9 +158,7 @@ export async function findAndDeleteQuestion({
   } catch (error) {
     const err = error as Error
     console.log("===== findAndDeleteQuestion Error", err)
-    throw new Error(
-      `Something went wrong when deleting question - ${err.message}`
-    )
+    throw new Error(`Could not delete question - ${err.message}`)
   }
 }
 
@@ -190,8 +180,6 @@ export async function findAndDeleteManyQuestions({
   } catch (error) {
     const err = error as Error
     console.log("===== findAndDeleteManyQuestions Error", err)
-    throw new Error(
-      `Something went wrong when deleting questions - ${err.message}`
-    )
+    throw new Error(`Could not delete questions - ${err.message}`)
   }
 }

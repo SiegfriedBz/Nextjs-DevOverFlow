@@ -44,9 +44,7 @@ export async function getAllAnswers({
   } catch (error) {
     const err = error as Error
     console.log("getAllAnswers Error", err.message)
-    throw new Error(
-      `Something went wrong when fetching answers - ${err.message}`
-    )
+    throw new Error(`Could not fetch answers - ${err.message}`)
   }
 }
 
@@ -70,9 +68,7 @@ export async function createAnswer({
   } catch (error) {
     const err = error as Error
     console.log("createAnswer Error", err)
-    throw new Error(
-      `Something went wrong when creating answer - ${err.message}`
-    )
+    throw new Error(`Could not create answer - ${err.message}`)
   }
 }
 
@@ -105,9 +101,7 @@ export async function findAndUpdateAnswer({
   } catch (error) {
     const err = error as Error
     console.log("===== findAndUpdateAnswer Error", err)
-    throw new Error(
-      `Something went wrong when updating answer - ${err.message}`
-    )
+    throw new Error(`Could not update answer - ${err.message}`)
   }
 }
 
@@ -129,8 +123,6 @@ export async function findAndDeleteManyAnswers({
   } catch (error) {
     const err = error as Error
     console.log("===== findAndDeleteManyAnswers Error", err)
-    throw new Error(
-      `Something went wrong when deleting answers - ${err.message}`
-    )
+    throw new Error(`Could not delete answers - ${err.message}`)
   }
 }

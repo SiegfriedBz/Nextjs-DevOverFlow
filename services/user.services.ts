@@ -39,7 +39,7 @@ export async function getAllUsers({
   } catch (error) {
     const err = error as Error
     console.log("getAllUsers Error", err.message)
-    throw new Error(`Something went wrong when fetching users - ${err.message}`)
+    throw new Error(`Could not fetch users - ${err.message}`)
   }
 }
 
@@ -60,7 +60,7 @@ export async function getUser({
   } catch (error) {
     const err = error as Error
     console.log("getUser Error", err.message)
-    throw new Error(`Something went wrong when getting user - ${err.message}`)
+    throw new Error(`Could not fetch user - ${err.message}`)
   }
 }
 
@@ -76,7 +76,7 @@ export async function createUser(
   } catch (error) {
     const err = error as Error
     console.log("createUser Error", err.message)
-    throw new Error(`Something went wrong when creating user - ${err.message}`)
+    throw new Error(`Could not create user - ${err.message}`)
   }
 }
 
@@ -101,7 +101,7 @@ export async function findAndUpdateUser({
   } catch (error) {
     const err = error as Error
     console.log("findAndUpdateUser Error", err.message)
-    throw new Error(`Something went wrong when updating user - ${err.message}`)
+    throw new Error(`Could not update user - ${err.message}`)
   }
 }
 
@@ -124,7 +124,7 @@ export async function findAndDeleteUser({
   } catch (error) {
     const err = error as Error
     console.log("findAndDeleteUser Error", err.message)
-    throw new Error(`Something went wrong when deleting user - ${err.message}`)
+    throw new Error(`Could not delete user - ${err.message}`)
   }
 }
 
@@ -191,8 +191,6 @@ export async function getCurrentUserSavedQuestions({
   } catch (error) {
     const err = error as Error
     console.log("getCurrentUserSavedQuestions Error", err.message)
-    throw new Error(
-      `Something went wrong when getting saved Questions - ${err.message}`
-    )
+    throw new Error(`Could not fetch saved questions - ${err.message}`)
   }
 }
