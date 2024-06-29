@@ -24,7 +24,7 @@ export const LEFTSIDEBAR_LINKS: ISidebarLink[] = [
   },
   {
     imgURL: "/assets/icons/star.svg",
-    href: "/collection",
+    href: "/collections",
     label: "Collections",
   },
   {
