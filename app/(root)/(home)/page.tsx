@@ -6,11 +6,14 @@ import LocalSearchBar from "@/components/shared/search/LocalSearchBar"
 import { Button } from "@/components/ui/button"
 import { HOME_FILTER_OPTIONS } from "@/constants/filters"
 import { getAllQuestions } from "@/services/question.services"
-import type { TQuestion, TSearchParamsProps } from "@/types"
+import type { TQuestion } from "@/types"
 import Link from "next/link"
 import { Suspense } from "react"
 
-const Home = ({ searchParams }: TSearchParamsProps) => {
+type TProps = {
+  searchParams: { [key: string]: string | undefined }
+}
+const Home = ({ searchParams }: TProps) => {
   return (
     <div>
       <div className="flex w-full items-center max-sm:flex-col-reverse sm:justify-between">
@@ -40,7 +43,7 @@ const Home = ({ searchParams }: TSearchParamsProps) => {
 
 export default Home
 
-const QuestionListWrapper = async ({ searchParams }: TSearchParamsProps) => {
+const QuestionListWrapper = async ({ searchParams }: TProps) => {
   const data: TQuestion[] | null = await getAllQuestions({ searchParams })
   console.log("==== HOME searchParams", searchParams)
   console.log("==== HOME data", data)
@@ -66,7 +69,7 @@ const QuestionListWrapper = async ({ searchParams }: TSearchParamsProps) => {
   )
 }
 
-const QuestionListWrapperSkeleton = () => {
+export const QuestionListWrapperSkeleton = () => {
   return Array.from({ length: 8 }, (_, index) => {
     return <QuestionCardSkeleton key={index} />
   })
