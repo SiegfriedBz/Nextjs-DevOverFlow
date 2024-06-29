@@ -88,7 +88,6 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
       {/* Question Header */}
       <Header
         currentUserMongoId={currentUserMongoId}
-        headerType="question"
         questionId={questionId}
         author={author as TUser}
         numUpVotes={questionNumUpVotes}
@@ -145,13 +144,11 @@ type THeaderProps = {
   children?: React.ReactNode
 } & (
   | {
-      headerType: "question"
       questionId: string
       answerId?: undefined
       answeredOn?: undefined
     }
   | {
-      headerType: "answer"
       questionId?: undefined
       answerId: string
       answeredOn: string
@@ -160,7 +157,6 @@ type THeaderProps = {
 
 const Header = ({
   currentUserMongoId,
-  headerType,
   questionId,
   answerId,
   author,
@@ -175,7 +171,7 @@ const Header = ({
       <div className="flex w-full flex-col-reverse justify-between gap-2 sm:flex-row sm:items-center">
         <Author author={author as TUser} answeredOn={answeredOn} />
 
-        {/* Voting */}
+        {/* Client-Component */}
         <Voting
           className="flex w-full items-center justify-end gap-4"
           currentUserMongoId={currentUserMongoId}
@@ -328,7 +324,6 @@ const AllAnswers = async ({
                   {/* Answer Author + votes */}
                   <Header
                     currentUserMongoId={currentUserMongoId}
-                    headerType="answer"
                     answerId={answer._id}
                     author={author as TUser}
                     numUpVotes={answerNumUpVotes}
