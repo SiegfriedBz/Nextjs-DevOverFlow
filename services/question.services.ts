@@ -5,11 +5,19 @@ import type { TMutateQuestionInput } from "@/lib/zod/question.zod"
 import Answer from "@/models/answer.model"
 import Question, { type IQuestionDocument } from "@/models/question.model"
 import Tag from "@/models/tag.model"
-import User, { IUserDocument } from "@/models/user.model"
-import type { TQuestion, TSearchParamsProps } from "@/types"
-import { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
+import User, { type IUserDocument } from "@/models/user.model"
+import type { TQuestion } from "@/types"
+import type { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
 
-export async function getAllQuestions({ searchParams }: TSearchParamsProps) {
+export async function getAllQuestions({
+  filter,
+  searchParams,
+  options = {},
+}: {
+  filter?: FilterQuery<IUserDocument>
+  searchParams?: { [key: string]: string | undefined }
+  options?: QueryOptions<any> | null | undefined
+}) {
   try {
     await connectToMongoDB()
 

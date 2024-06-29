@@ -5,10 +5,16 @@ import type { IQuestionDocument } from "@/models/question.model"
 import Question from "@/models/question.model"
 import Tag, { type ITagDocument } from "@/models/tag.model"
 import User from "@/models/user.model"
-import type { TSearchParamsProps } from "@/types"
+import type { QueryOptions } from "mongoose"
 import { getUser } from "./user.services"
 
-export async function getAllTags({ searchParams }: TSearchParamsProps) {
+export async function getAllTags({
+  searchParams,
+  options = {},
+}: {
+  searchParams?: { [key: string]: string | undefined }
+  options?: QueryOptions<any> | null | undefined
+}) {
   try {
     await connectToMongoDB()
 

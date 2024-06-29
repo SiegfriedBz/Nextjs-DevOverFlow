@@ -19,3 +19,11 @@ export const ANSWERS_FILTER_OPTIONS = [
   "Most Recent",
   "Oldest",
 ]
+
+// TODO
+export const SAVED_QUESTIONS_FILTER_OPTIONS = [
+  "Highest UpVotes",
+  "Lowest UpVotes",
+  "Most Recent",
+  "Oldest",
+]
