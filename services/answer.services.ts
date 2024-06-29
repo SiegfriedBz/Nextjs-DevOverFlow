@@ -10,9 +10,11 @@ import { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
 export async function getAllAnswers({
   filter = {}, // to get all answers for question._id
   searchParams,
+  options = {},
 }: {
   filter?: FilterQuery<IAnswerDocument> | undefined
   searchParams: { [key: string]: string | undefined }
+  options?: QueryOptions<any> | null | undefined
 }) {
   try {
     await connectToMongoDB()
