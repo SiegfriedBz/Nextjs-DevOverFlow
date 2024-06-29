@@ -3,11 +3,20 @@
 import type { TMutateUserData } from "@/app/api/v1/webhooks/clerk/route"
 import connectToMongoDB from "@/lib/mongoose.utils"
 import Question from "@/models/question.model"
+import Tag from "@/models/tag.model"
 import User, { type IUserDocument } from "@/models/user.model"
-import type { TSearchParamsProps } from "@/types"
-import { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
+import type { TQuestion } from "@/types"
+import { currentUser } from "@clerk/nextjs/server"
+import type { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
+import { redirect } from "next/navigation"
 
-export async function getAllUsers({ searchParams }: TSearchParamsProps) {
+export async function getAllUsers({
+  searchParams,
+  options = {},
+}: {
+  searchParams?: { [key: string]: string | undefined }
+  options?: QueryOptions<any> | null | undefined
+}) {
   try {
     await connectToMongoDB()
 
@@ -23,6 +32,7 @@ export async function getAllUsers({ searchParams }: TSearchParamsProps) {
     const users = await User.find({})
       .populate([{ path: "savedQuestions", model: Question }])
       .sort({ createdAt: -1 })
+
     // .lean()
 
     return JSON.parse(JSON.stringify(users))
@@ -115,5 +125,74 @@ export async function findAndDeleteUser({
     const err = error as Error
     console.log("findAndDeleteUser Error", err.message)
     throw new Error(`Something went wrong when deleting user - ${err.message}`)
+  }
+}
+
+export async function getCurrentUserSavedQuestions({
+  searchParams,
+  options = {},
+}: {
+  searchParams?: { [key: string]: string | undefined }
+  options?: QueryOptions<any> | null | undefined
+}): Promise<TQuestion[]> {
+  try {
+    await connectToMongoDB()
+
+    // TODO
+    // HANDLE searchParams
+    // const {
+    //   page = 1,
+    //   numOfResultsPerPage = 10,
+    //   filter = "",
+    //   searchQuery = "",
+    // } = searchParams
+
+    console.log("getCurrentUserSavedQuestions -> searchParams", searchParams)
+
+    // get user from from clerk DB
+    const clerckUser = await currentUser()
+
+    if (!clerckUser) {
+      redirect("/sign-in")
+    }
+
+    const clerkId = clerckUser?.id
+
+    // get user's saved questions from our DB
+    const data = await User.findOne({ clerkId }, { savedQuestions: 1 }, options)
+      .populate([
+        {
+          path: "savedQuestions",
+          // TODO
+          // match: searchParams as FilterQuery<IQuestionDocument> | undefined,
+          model: Question,
+          populate: [
+            {
+              path: "author",
+              model: User,
+              select: "_id clerkId name picture",
+            },
+            {
+              path: "tags",
+              model: Tag,
+              select: "_id name",
+            },
+          ],
+        },
+      ])
+      .sort({ createdAt: -1 })
+
+    const savedQuestionsDoc: IUserDocument[] = data?.savedQuestions
+    const savedQuestions: TQuestion[] = JSON.parse(
+      JSON.stringify(savedQuestionsDoc)
+    )
+
+    return savedQuestions
+  } catch (error) {
+    const err = error as Error
+    console.log("getCurrentUserSavedQuestions Error", err.message)
+    throw new Error(
+      `Something went wrong when getting saved Questions - ${err.message}`
+    )
   }
 }
