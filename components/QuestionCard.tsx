@@ -86,19 +86,19 @@ const QuestionCard = ({
               imageSrc="/assets/icons/like.svg"
               alt="numOfVotes"
               value={numOfVotes}
-              title={` Vote${numOfVotes > 0 ? "s" : ""}`}
+              title={` Vote${numOfVotes > 1 ? "s" : ""}`}
             />
             <Metric
               imageSrc="/assets/icons/message.svg"
               alt="numOfAnswers"
               value={numOfAnswers}
-              title={` Answer${numOfAnswers > 0 ? "s" : ""}`}
+              title={` Answer${numOfAnswers > 1 ? "s" : ""}`}
             />
             <Metric
               imageSrc="/assets/icons/eye.svg"
               alt="numOfViews"
               value={views}
-              title={` View${views > 0 ? "s" : ""}`}
+              title={` View${views > 1 ? "s" : ""}`}
             />
           </div>
         </div>
