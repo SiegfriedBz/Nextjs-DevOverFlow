@@ -30,6 +30,7 @@ export type TAnswer = {
   _id: string
   author: TUser | string
   content: string
+  views: number
   createdAt: Date
   upVoters: TUser[] | string[]
   downVoters: TUser[] | string[]
@@ -39,8 +40,8 @@ export type TAnswer = {
 export type TQuestion = {
   _id: string
   author: TUser | string
-  content: string
   title: string
+  content: string
   views: number
   upVoters: TUser[] | string[]
   downVoters: TUser[] | string[]
