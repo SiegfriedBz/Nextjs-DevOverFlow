@@ -32,8 +32,8 @@ export async function getAllAnswers({
     const answers = await Answer.find({ ...(filter || {}) })
       .populate([
         { path: "author", model: User },
-        { path: "upVoters", model: User },
-        { path: "downVoters", model: User },
+        // { path: "upVoters", model: User },
+        // { path: "downVoters", model: User },
       ])
       .sort({ createdAt: -1 })
     // .lean()

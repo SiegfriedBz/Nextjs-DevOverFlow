@@ -118,8 +118,8 @@ export async function voteQuestionAction({
 }) {
   try {
     const query = isUpVoting
-      ? { $push: { upVoters: voterId } }
-      : { $push: { downVoters: voterId } }
+      ? { $push: { upVoters: voterId }, $pull: { downVoters: voterId } }
+      : { $pull: { upVoters: voterId }, $push: { downVoters: voterId } }
 
     const updatedQuestion = await findAndUpdateQuestion({
       filter: { _id: questionId },

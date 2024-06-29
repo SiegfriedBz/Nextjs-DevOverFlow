@@ -8,29 +8,36 @@ import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 
 type TVotingProps = {
+  children?: React.ReactNode
+  className?: string
   currentUserMongoId: string
   numUpVotes: number
   numDownVotes: number
-  isQuestionVoting: boolean
+  userHasUpVoted: boolean
+  userHasDownVoted: boolean
+  // question case
   questionId?: string
+  // answer case
   answerId?: string
-  className?: string
-  children?: React.ReactNode
 }
 
 const Voting = ({
+  children,
+  className = "",
   currentUserMongoId,
   numUpVotes,
   numDownVotes,
-  isQuestionVoting,
+  userHasUpVoted,
+  userHasDownVoted,
+  // question case
   questionId,
+  // answer case
   answerId,
-  className = "",
-  children,
 }: TVotingProps) => {
   const router = useRouter()
+  const isQuestionVoting = questionId != null
 
-  const handleUpVote = async () => {
+  const handleVote = async ({ isUpVoting }: { isUpVoting: boolean }) => {
     if (!currentUserMongoId) {
       router.push("/sign-in")
       router.refresh()
@@ -43,79 +50,47 @@ const Voting = ({
         ? await voteQuestionAction({
             questionId: questionId as string,
             voterId: currentUserMongoId,
-            isUpVoting: true,
+            isUpVoting,
           })
         : await voteAnswerAction({
             answerId: answerId as string,
             voterId: currentUserMongoId,
-            isUpVoting: true,
+            isUpVoting,
           })
 
       if (response instanceof Error) {
         throw new Error(response.message)
       }
       toast.success(
-        `Upvoted the ${isQuestionVoting ? "question" : "answer"} successfully!`
+        `${isUpVoting ? "Up" : "Down"} voted ${isQuestionVoting ? "question" : "answer"} successfully!`
       )
     } catch (error) {
-      console.log("handleUpVote ERROR", error)
+      console.log(`handle${isUpVoting ? "Up" : "Down"}-Vote ERROR`, error)
       toast.warning(
-        `Could not upvote the ${isQuestionVoting ? "question" : "answer"}`
-      )
-    }
-  }
-  const handleDownVote = async () => {
-    if (!currentUserMongoId) {
-      router.push("/sign-in")
-      router.refresh()
-      toast.info(`Please sign-in to vote`)
-      return
-    }
-
-    try {
-      const response = isQuestionVoting
-        ? await voteQuestionAction({
-            questionId: questionId as string,
-            voterId: currentUserMongoId,
-            isUpVoting: false,
-          })
-        : await voteAnswerAction({
-            answerId: answerId as string,
-            voterId: currentUserMongoId,
-            isUpVoting: false,
-          })
-
-      if (response instanceof Error) {
-        throw new Error(response.message)
-      }
-      toast.success(
-        `Downvoted the ${isQuestionVoting ? "question" : "answer"} successfully!`
-      )
-    } catch (error) {
-      console.log("handleUpVote ERROR", error)
-      toast.warning(
-        `Could not downvote the ${isQuestionVoting ? "question" : "answer"}`
+        `Could not ${isUpVoting ? "up" : "down"}vote ${isQuestionVoting ? "question" : "answer"}`
       )
     }
   }
 
   return (
     <div className={className}>
-      <button onClick={handleUpVote}>
+      <button onClick={() => handleVote({ isUpVoting: true })}>
         <Metric
-          imageSrc="/assets/icons/upvote.svg"
+          imageSrc={`/assets/icons/${userHasUpVoted ? "upvoted" : "upvote"}.svg`}
           alt="up-votes"
           value={numUpVotes}
           className="cursor-pointer"
+          paragraphClassName="background-light700_dark400 p-1 min-w-[18px]"
         />
       </button>
 
-      <button onClick={handleDownVote}>
+      <button onClick={() => handleVote({ isUpVoting: false })}>
         <Metric
-          imageSrc="/assets/icons/downvote.svg"
+          imageSrc={`/assets/icons/${userHasDownVoted ? "downvoted" : "downvote"}.svg`}
           alt="down-votes"
           value={numDownVotes}
           className="cursor-pointer"
+          paragraphClassName="background-light700_dark400 p-1 min-w-[18px]"
         />
       </button>
       {children}

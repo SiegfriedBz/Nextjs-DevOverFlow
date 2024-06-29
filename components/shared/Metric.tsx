@@ -4,6 +4,16 @@ import Image from "next/image"
 import Link from "next/link"
 import React from "react"
 
+type TProps = {
+  href?: string
+  imageSrc: string
+  alt: string
+  value: string | number
+  title?: string
+  isAuthor?: boolean
+  className?: string
+  paragraphClassName?: string
+}
 const Metric = ({
   href,
   imageSrc,
@@ -12,15 +22,8 @@ const Metric = ({
   title,
   isAuthor = false,
   className = "",
-}: {
-  href?: string
-  imageSrc: string
-  alt: string
-  value: string | number
-  title?: string
-  isAuthor?: boolean
-  className?: string
-}) => {
+  paragraphClassName = "",
+}: TProps) => {
   const content = (
     <div
       className={cn(
@@ -35,7 +38,12 @@ const Metric = ({
         alt={alt}
         className={`${href ? "rounded-full" : ""} invert-colors`}
       />
-      <p className={`${isAuthor && href ? "max-sm:hidden" : ""}`}>
+      <p
+        className={cn(
+          `font-light ${isAuthor && href ? "max-sm:hidden" : ""}`,
+          paragraphClassName
+        )}
+      >
         <span>{typeof value === "number" ? formatNumber(value) : value}</span>
         {title && <span>{title}</span>}
       </p>
