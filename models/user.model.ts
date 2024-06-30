@@ -24,17 +24,7 @@ const userSchema = new Schema<IUserDocument>({
   password: String,
   bio: String,
   portfolio: String,
-  location: {
-    type: {
-      type: String,
-      enum: ["Point"],
-      // required: true,
-    },
-    coordinates: {
-      type: [Number],
-      // required: true,
-    },
-  },
+  location: String,
   reputation: { type: Number, default: 0 },
   joinedDate: { type: Date, default: Date.now },
   savedQuestions: [{ type: Schema.Types.ObjectId, ref: "Question" }],
