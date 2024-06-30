@@ -10,7 +10,7 @@ export type TUser = {
   userName: string
   reputation: number
   joinedDate: Date
-  location: object
+  location: string
   savedQuestions: string[] // TODO TQuestion[] | string[]
 }
 
