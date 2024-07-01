@@ -8,26 +8,62 @@ import Tag from "@/models/tag.model"
 import User from "@/models/user.model"
 import type { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
 
+export async function getHotQuestions({
+  limit,
+}: {
+  limit: number
+}): Promise<{ _id: string; title: string }[]> {
+  try {
+    await connectToMongoDB()
+
+    const result = await Question.aggregate([
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          upVotersCount: { $size: "$upVoters" },
+        },
+      },
+      {
+        $sort: { views: -1, upVotersCount: -1 },
+      },
+      {
+        $limit: limit,
+      },
+    ])
+
+    return JSON.parse(JSON.stringify(result))
+  } catch (error) {
+    const err = error as Error
+    console.log("getHotQuestions Error", err.message)
+    throw new Error(`Could not fetch hot questions - ${err.message}`)
+  }
+}
+
+type TParams = {
+  page?: number
+  numOfResultsPerPage?: number
+  searchQuery?: string
+}
 export async function getAllQuestions({
   filter,
-  searchParams,
+  params,
   options = {},
 }: {
   filter?: FilterQuery<IQuestionDocument>
-  searchParams?: { [key: string]: string | undefined }
+  params?: TParams
   options?: QueryOptions<any> | null | undefined
 }) {
   try {
     await connectToMongoDB()
 
     // TODO
-    // HANDLE searchParams
+    // HANDLE params
     // const {
     //   page = 1,
     //   numOfResultsPerPage = 10,
-    //   filter = "",
     //   searchQuery = "",
-    // } = searchParams
+    // } = params
 
     const result = await Question.find({})
       .populate([
@@ -181,6 +217,9 @@ export async function deleteQuestion({
 }): Promise<IQuestionDocument | null> {
   try {
     await connectToMongoDB()
+
+    //  TODO
+    // delete tags associated with question
 
     // delete question
     const result = await Question.findOneAndDelete(filter, options)

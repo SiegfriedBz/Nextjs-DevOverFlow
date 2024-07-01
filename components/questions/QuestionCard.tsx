@@ -1,3 +1,4 @@
+import EditDeleteActionButton from "@/components/EditDeleteActionButton"
 import Metric from "@/components/Metric"
 import Tag from "@/components/Tag"
 import {
@@ -11,7 +12,6 @@ import { getDaysAgo } from "@/lib/dates.utils"
 import type { IUserDocument } from "@/models/user.model"
 import type { TQuestion, TTag, TUser } from "@/types"
 import Link from "next/link"
-import EditDeleteActionButton from "../EditDeleteActionButton"
 
 type TProps = TQuestion & { currentUserClerkId?: string }
 const QuestionCard = ({
@@ -27,7 +27,7 @@ const QuestionCard = ({
   createdAt,
 }: TProps) => {
   const isQuestionAuthor =
-    currentUserClerkId === (author as IUserDocument).clerkId
+    currentUserClerkId === (author as unknown as TUser).clerkId
   const numOfVotes = upVoters?.length + downVoters?.length ?? 0
   const numOfAnswers = answers?.length ?? 0
   const daysAgo = getDaysAgo(createdAt)
@@ -82,8 +82,7 @@ const QuestionCard = ({
         >
           <Metric
             imageSrc={
-              (author as unknown as TUser)?.picture ||
-              "/assets/icons/avatar.svg"
+              (author as IUserDocument)?.picture || "/assets/icons/avatar.svg"
             }
             alt="avatar"
             className="body-medium text-dark400_light800"

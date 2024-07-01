@@ -9,6 +9,39 @@ import type { TQuestion, TTag } from "@/types"
 import type { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
 import { getUser } from "./user.services"
 
+export async function getHotTags({
+  limit,
+}: {
+  limit: number
+}): Promise<{ _id: string; name: string }[]> {
+  try {
+    await connectToMongoDB()
+
+    const result = await Tag.aggregate([
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          questionsCount: { $size: "$questions" },
+          followersCount: { $size: "$followers" },
+        },
+      },
+      {
+        $sort: { questionsCount: -1, followersCount: -1 },
+      },
+      {
+        $limit: limit,
+      },
+    ])
+
+    return JSON.parse(JSON.stringify(result))
+  } catch (error) {
+    const err = error as Error
+    console.log("getHotTags Error", err.message)
+    throw new Error(`Could not fetch hot tags - ${err.message}`)
+  }
+}
+
 export async function getAllTags({
   searchParams,
   options = {},

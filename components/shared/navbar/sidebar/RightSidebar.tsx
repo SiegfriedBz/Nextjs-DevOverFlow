@@ -2,105 +2,20 @@ import Tag from "@/components/Tag"
 import Image from "next/image"
 import Link from "next/link"
 import SideBar from "./Sidebar"
+import { getHotQuestions } from "@/services/question.services"
+import { getHotTags } from "@/services/tags.services."
 
-const hotQuestions = [
-  { _id: "1", title: "Stuff" },
-  { _id: "2", title: "Stuff 2" },
-  { _id: "3", title: "Stuff 3" },
-]
-const popularTags = [
-  {
-    _id: "1",
-    name: "Stuff",
-    questions: ["kkv", "kjgl"],
-    description: "jblgvlvlv",
-    followers: ["kkv", "kjgl"],
-  },
-  {
-    _id: "2",
-    name: "Stuff 2",
-    questions: ["kkv", "kjgl"],
-    description: "jblgvlvlv",
-    followers: ["kkv", "kjgl"],
-  },
-  {
-    _id: "3",
-    name: "Stuff 3",
-    questions: ["kkv", "kjgl"],
-    description: "jblgvlvlv",
-    followers: ["kkv", "kjgl"],
-  },
-  {
-    _id: "12",
-    name: "Stuff",
-    questions: ["kkv", "kjgl"],
-    description: "jblgvlvlv",
-    followers: ["kkv", "kjgl"],
-  },
-  {
-    _id: "22",
-    name: "Stuff 2",
-    questions: ["kkv", "kjgl"],
-    description: "jblgvlvlv",
-    followers: ["kkv", "kjgl"],
-  },
-  {
-    _id: "31",
-    name: "Stuff 3",
-    questions: ["kkv", "kjgl"],
-    description: "jblgvlvlv",
-    followers: ["kkv", "kjgl"],
-  },
-  {
-    _id: "14",
-    name: "Stuff",
-    questions: ["kkv", "kjgl"],
-    description: "jblgvlvlv",
-    followers: ["kkv", "kjgl"],
-  },
-  {
-    _id: "25",
-    name: "Stuff 2",
-    questions: ["kkv", "kjgl"],
-    description: "jblgvlvlv",
-    followers: ["kkv", "kjgl"],
-  },
-  {
-    _id: "33",
-    name: "Stuff 3",
-    questions: ["kkv", "kjgl"],
-    description: "jblgvlvlv",
-    followers: ["kkv", "kjgl"],
-  },
-  {
-    _id: "1d4",
-    name: "Stuff",
-    questions: ["kkv", "kjgl"],
-    description: "jblgvlvlv",
-    followers: ["kkv", "kjgl"],
-  },
-  {
-    _id: "25s",
-    name: "Stuff 2",
-    questions: ["kkv", "kjgl"],
-    description: "jblgvlvlv",
-    followers: ["kkv", "kjgl"],
-  },
-  {
-    _id: "3d3",
-    name: "Stuff 3",
-    questions: ["kkv", "kjgl"],
-    description: "jblgvlvlv",
-    followers: ["kkv", "kjgl"],
-  },
-]
+const RightSidebar = async () => {
+  const [hotQuestions, hotTags] = await Promise.all([
+    getHotQuestions({ limit: 5 }),
+    getHotTags({ limit: 5 }),
+  ])
 
-const RightSidebar = () => {
   return (
-    <SideBar className="custom-scrollbar h-[calc(100vh-3rem)] w-[350px] overflow-y-auto">
+    <SideBar className="custom-scrollbar h-[calc(100vh-3rem)] w-[350px] overflow-y-auto overflow-x-hidden">
       <div>
         <h3 className="h3-bold text-dark200_light900">Top Questions</h3>
-        <div className="mt-7 flex w-full flex-col gap-8">
+        <div className="mt-7 flex flex-col gap-8">
           {hotQuestions?.map((q) => {
             const { _id, title } = q
 
@@ -110,7 +25,9 @@ const RightSidebar = () => {
                 href={`/questions/${_id}`}
                 className="flex cursor-pointer items-center justify-between"
               >
-                <p className="body-medium text-dark500_light700">{title}</p>
+                <p className="body-medium text-dark500_light700 truncate">
+                  {title}
+                </p>
                 <Image
                   src="/assets/icons/chevron-right.svg"
                   width={20}
@@ -127,7 +44,7 @@ const RightSidebar = () => {
       <div className="mt-16">
         <h3 className="h3-bold text-dark200_light900">Popular Tags</h3>
         <div className="mt-7 flex w-full flex-col gap-4">
-          {popularTags?.map((tag) => {
+          {hotTags?.map((tag) => {
             return <Tag key={tag._id} {...tag} showCount={true} />
           })}
         </div>
