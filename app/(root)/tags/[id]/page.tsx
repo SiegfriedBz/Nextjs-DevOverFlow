@@ -29,7 +29,7 @@ const TagDetailsPage = ({ params, searchParams }: TProps) => {
         />
 
         <CustomFilter
-          filterName="filter"
+          filterName="sort"
           // TODO
           filterOptions={SAVED_QUESTIONS_FILTER_OPTIONS}
         />
@@ -80,15 +80,15 @@ const QuestionListWrapper = async ({ params, searchParams }: TProps) => {
 
   const tagId = params?.id
 
-  const localFilterQuery = searchParams?.q
-  const globalFilterQuery = searchParams?.global
+  const localSearchQuery = searchParams?.q
+  const globalSearchQuery = searchParams?.globalQ
 
   // fetch questions pointing to this tag
   const data = await getQuestionsByTag({
     filter: {
       _id: tagId,
     },
-    params: { localFilterQuery, globalFilterQuery },
+    params: { localSearchQuery, globalSearchQuery },
   })
 
   return data && data?.length > 0 ? (

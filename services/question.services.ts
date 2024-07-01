@@ -7,7 +7,12 @@ import Question, { type IQuestionDocument } from "@/models/question.model"
 import Tag from "@/models/tag.model"
 import User from "@/models/user.model"
 import type { TQueryParams } from "@/types"
-import type { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
+import type {
+  FilterQuery,
+  PipelineStage,
+  QueryOptions,
+  UpdateQuery,
+} from "mongoose"
 
 export async function getHotQuestions({
   limit,
@@ -48,32 +53,97 @@ export async function getAllQuestions({ params }: { params: TQueryParams }) {
     const {
       page = 1,
       numOfResultsPerPage = 10,
-      localFilterQuery = "",
-      // globalFilterQuery = "",
+      localSortQuery,
+      localSearchQuery = "",
+      // globalSearchQuery = "",
     } = params
 
-    const limit = page * numOfResultsPerPage
-    const skip = (page - 1) * numOfResultsPerPage
-    const query: FilterQuery<IQuestionDocument> = localFilterQuery
+    // searchQuery
+    const searchQueryStage: FilterQuery<IQuestionDocument> = localSearchQuery
       ? {
           $or: [
-            { title: { $regex: localFilterQuery, $options: "i" } },
-            { content: { $regex: localFilterQuery, $options: "i" } },
+            { title: { $regex: localSearchQuery, $options: "i" } },
+            { content: { $regex: localSearchQuery, $options: "i" } },
           ],
         }
       : {}
 
-    const result = await Question.find(query)
-      .populate([
-        { path: "author", model: User },
-        { path: "tags", model: Tag },
-        { path: "upVoters", model: User },
-        { path: "downVoters", model: User },
-        { path: "answers", model: Answer },
-      ])
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 })
+    // Define the aggregation pipeline stages dynamically
+    const pipelineStages: PipelineStage[] = [
+      { $match: searchQueryStage },
+      {
+        $addFields: {
+          numAnswers: { $size: "$answers" }, // Compute number of answers
+          numOfUpVotes: { $size: "$upVoters" }, // Compute number of upVoters
+        },
+      },
+    ]
+
+    // Sort stage
+    let sortQueryStage: Record<string, 1 | -1> | undefined
+    switch (localSortQuery) {
+      case "newest":
+        sortQueryStage = { createdAt: -1 }
+        break
+      case "recommended":
+        sortQueryStage = { numOfUpVotes: -1 }
+        break
+      case "frequent":
+        sortQueryStage = { views: -1 }
+        break
+      // case "unanswered":
+      // For "unanswered", we don't need to sort by numAnswers explicitly, just filter
+      default:
+        sortQueryStage = { createdAt: -1 } // Default to sorting by createdAt in descending order (newest first)
+    }
+
+    // Conditionally add $match stage for unanswered questions based on localSortQuery
+    if (localSortQuery === "unanswered") {
+      pipelineStages.push({ $match: { numAnswers: { $eq: 0 } } })
+    }
+
+    // Conditionally add $sort stage based on sortQueryStage
+    if (sortQueryStage) {
+      pipelineStages.push({ $sort: sortQueryStage })
+    }
+
+    // Add $project stage to include necessary fields
+    const projectStage = {
+      _id: 1,
+      title: 1,
+      content: 1,
+      views: 1,
+      createdAt: 1,
+      author: 1,
+      tags: 1,
+      upVoters: 1,
+      downVoters: 1,
+      answers: 1,
+    }
+    pipelineStages.push({
+      $project: projectStage,
+    })
+
+    // Pagination
+    const limit = page * numOfResultsPerPage
+    const skip = (page - 1) * numOfResultsPerPage
+    pipelineStages.push({ $skip: skip })
+    pipelineStages.push({ $limit: limit })
+
+    // Perform the aggregation query with all defined pipeline stages
+    const questionsAggregation = await Question.aggregate(pipelineStages).exec()
+
+    // Fields to populate
+    const populateFields = [
+      { path: "author", model: User },
+      { path: "tags", model: Tag },
+      { path: "upVoters", model: User },
+      { path: "downVoters", model: User },
+      { path: "answers", model: Answer },
+    ]
+
+    // Populate
+    const result = await Question.populate(questionsAggregation, populateFields)
 
     const questions = JSON.parse(JSON.stringify(result))
 

@@ -21,7 +21,7 @@ const TagsPage = ({ searchParams }: TSearchParamsProps) => {
           placeholder="Search by tag name..."
         />
 
-        <CustomFilter filterName="filter" filterOptions={TAGS_FILTER_OPTIONS} />
+        <CustomFilter filterName="sort" filterOptions={TAGS_FILTER_OPTIONS} />
       </div>
 
       <div className="mt-4 flex flex-col justify-between gap-8 sm:items-center">
@@ -36,11 +36,11 @@ const TagsPage = ({ searchParams }: TSearchParamsProps) => {
 export default TagsPage
 
 const TagListWrapper = async ({ searchParams }: TSearchParamsProps) => {
-  const localFilterQuery = searchParams?.q
-  const globalFilterQuery = searchParams?.global
+  const localSearchQuery = searchParams?.q
+  const globalSearchQuery = searchParams?.globalQ
 
   const data: TTag[] | null = await getAllTags({
-    params: { localFilterQuery, globalFilterQuery },
+    params: { localSearchQuery, globalSearchQuery },
   })
 
   return data && data?.length > 0 ? (

@@ -19,19 +19,19 @@ export async function getAllUsers({ params }: { params: TQueryParams }) {
     const {
       page = 1,
       numOfResultsPerPage = 10,
-      localFilterQuery = "",
-      // globalFilterQuery = "",
+      localSearchQuery = "",
+      // globalSearchQuery = "",
     } = params
 
     const limit = page * numOfResultsPerPage
     const skip = (page - 1) * numOfResultsPerPage
-    const query: FilterQuery<IUserDocument> = localFilterQuery
+    const query: FilterQuery<IUserDocument> = localSearchQuery
       ? {
           $or: [
-            { name: { $regex: localFilterQuery, $options: "i" } },
-            { userName: { $regex: localFilterQuery, $options: "i" } },
-            { location: { $regex: localFilterQuery, $options: "i" } },
-            { bio: { $regex: localFilterQuery, $options: "i" } },
+            { name: { $regex: localSearchQuery, $options: "i" } },
+            { userName: { $regex: localSearchQuery, $options: "i" } },
+            { location: { $regex: localSearchQuery, $options: "i" } },
+            { bio: { $regex: localSearchQuery, $options: "i" } },
           ],
         }
       : {}
@@ -215,17 +215,17 @@ export async function getCurrentUserSavedQuestions({
     const {
       page = 1,
       numOfResultsPerPage = 10,
-      localFilterQuery = "",
-      // globalFilterQuery = "",
+      localSearchQuery = "",
+      // globalSearchQuery = "",
     } = params
 
     const limit = page * numOfResultsPerPage
     const skip = (page - 1) * numOfResultsPerPage
-    const query: FilterQuery<IQuestionDocument> = localFilterQuery
+    const query: FilterQuery<IQuestionDocument> = localSearchQuery
       ? {
           $or: [
-            { title: { $regex: localFilterQuery, $options: "i" } },
-            { content: { $regex: localFilterQuery, $options: "i" } },
+            { title: { $regex: localSearchQuery, $options: "i" } },
+            { content: { $regex: localSearchQuery, $options: "i" } },
           ],
         }
       : {}
