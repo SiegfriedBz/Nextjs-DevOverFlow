@@ -2,12 +2,12 @@
 
 import type { TMutateUserData } from "@/app/api/v1/webhooks/clerk/route"
 import { IUserDocument } from "@/models/user.model"
-import { findAndDeleteManyAnswers } from "@/services/answer.services"
-import { findAndDeleteManyQuestions } from "@/services/question.services"
+import { deleteManyAnswers } from "@/services/answer.services"
+import { deleteManyQuestions } from "@/services/question.services"
 import {
   createUser,
-  findAndDeleteUser,
-  findAndUpdateUser,
+  deleteUser,
+  updateUser,
   getUser,
 } from "@/services/user.services"
 import { currentUser } from "@clerk/nextjs/server"
@@ -24,13 +24,12 @@ export async function createUserAction({
     // create user in our DB from ClerkUser
     const newUser: IUserDocument | null = await createUser(userData)
 
-    revalidatePath(`/profile/${(newUser as IUserDocument)._id}`)
+    revalidatePath(`/profile/${(newUser as IUserDocument).clerkId}`)
 
     return newUser
   } catch (error) {
-    console.log(error)
-    const err = error as Error
-    return err
+    console.log("===== createUserAction Error", error)
+    return error
   }
 }
 
@@ -44,21 +43,20 @@ export async function updateUserAction({
   options?: QueryOptions<any> | null | undefined
 }) {
   try {
-    const updatedUserDoc: IUserDocument | null = await findAndUpdateUser({
+    const updatedUserDoc: IUserDocument | null = await updateUser({
       filter,
       data,
       options,
     })
 
-    revalidatePath(`/profile/${(updatedUserDoc as IUserDocument)._id}`)
+    revalidatePath(`/profile/${(updatedUserDoc as IUserDocument).clerkId}`)
 
     const updatedUser = JSON.parse(JSON.stringify(updatedUserDoc))
 
     return updatedUser
   } catch (error) {
-    console.log(error)
-    const err = error as Error
-    return err
+    console.log("===== updateUserAction Error", error)
+    return error
   }
 }
 
@@ -77,23 +75,22 @@ export async function deleteUserAction({
     }
 
     // delete user in mongodb
-    const result = await findAndDeleteUser({
+    const result = await deleteUser({
       filter,
       options,
     })
 
     // TODO
     // delete user questions, answers...
-    await findAndDeleteManyQuestions({ filter: { author: user._id } })
-    await findAndDeleteManyAnswers({ filter: { author: user._id } })
+    await deleteManyQuestions({ filter: { author: user._id } })
+    await deleteManyAnswers({ filter: { author: user._id } })
 
-    // revalidatePath(`/profile/${(updatedUser as IUserDocument)._id}`)
+    // revalidatePath(`/profile/${(updatedUser as IUserDocument).clerkId}`)
 
     return result
   } catch (error) {
-    console.log(error)
-    const err = error as Error
-    return err
+    console.log("===== deleteUserAction Error", error)
+    return error
   }
 }
 
@@ -120,31 +117,23 @@ export async function toggleSaveQuestionAction({
       (q) => q === questionId
     )
 
-    console.log("=============")
-    console.log("toggleSaveQuestionAction -> clerckUser", clerckUser)
-    console.log("toggleSaveQuestionAction -> user", user)
-    console.log("toggleSaveQuestionAction -> questionIsSaved", questionIsSaved)
-
     // update user
     const query = questionIsSaved
       ? { $pull: { savedQuestions: questionId } }
       : { $push: { savedQuestions: questionId } }
 
-    const updatedUserDoc = await findAndUpdateUser({
+    const updatedUserDoc = await updateUser({
       filter: { _id: user._id },
       data: query,
     })
 
     const updatedUser = JSON.parse(JSON.stringify(updatedUserDoc))
-    console.log("toggleSaveQuestionAction -> updatedUser", updatedUser)
-    console.log("=============")
 
     revalidatePath("/")
 
     return updatedUser
   } catch (error) {
-    console.log(error)
-    const err = error as Error
-    return err
+    console.log("===== toggleSaveQuestionAction Error", error)
+    return error
   }
 }

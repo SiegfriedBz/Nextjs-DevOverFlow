@@ -3,12 +3,12 @@
 import type { IAnswerDocument } from "@/models/answer.model"
 import type { IInteractionDocument } from "@/models/interaction.model"
 import type { IQuestionDocument } from "@/models/question.model"
-import { findAndUpdateAnswer } from "@/services/answer.services"
+import { updateAnswer } from "@/services/answer.services"
 import {
   createInteraction,
   getInteraction,
 } from "@/services/interaction.services"
-import { findAndUpdateQuestion } from "@/services/question.services"
+import { updateQuestion } from "@/services/question.services"
 import { getUser } from "@/services/user.services"
 import { currentUser } from "@clerk/nextjs/server"
 
@@ -22,12 +22,12 @@ export async function createViewForAction({
   | { viewFor: "answer"; questionId?: undefined; answerId: string }) {
   try {
     // Get clerk user
-    const user = await currentUser()
-    if (!user)
+    const clerkUser = await currentUser()
+    if (!clerkUser)
       return console.log("user required to create new interaction record")
 
     // Get mongoUser
-    const mongoUser = await getUser({ filter: { clerkId: user.id } })
+    const mongoUser = await getUser({ filter: { clerkId: clerkUser.id } })
     if (!mongoUser)
       return console.log("user required to create new interaction record")
 
@@ -49,7 +49,7 @@ export async function createViewForAction({
       if (interactionExists) return console.log("interaction already exists")
 
       // update question total views
-      updatedQuestion = await findAndUpdateQuestion({
+      updatedQuestion = await updateQuestion({
         filter: { _id: questionId },
         data: { $inc: { views: 1 } },
       })
@@ -83,7 +83,7 @@ export async function createViewForAction({
       if (interactionExists) return console.log("interaction already exists")
 
       // update answer total views
-      updatedAnswer = await findAndUpdateAnswer({
+      updatedAnswer = await updateAnswer({
         filter: { _id: answerId },
         data: { $inc: { views: 1 } },
       })
@@ -104,8 +104,7 @@ export async function createViewForAction({
 
     return JSON.parse(JSON.stringify(interaction))
   } catch (error) {
-    const err = error as Error
-    console.log("===== createView Error", err)
-    throw new Error(`Could not create a View - ${err.message}`)
+    console.log("===== createViewForAction Error", error)
+    return error
   }
 }
