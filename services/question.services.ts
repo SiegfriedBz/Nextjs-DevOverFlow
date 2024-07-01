@@ -5,8 +5,7 @@ import type { TMutateQuestionInput } from "@/lib/zod/question.zod"
 import Answer from "@/models/answer.model"
 import Question, { type IQuestionDocument } from "@/models/question.model"
 import Tag from "@/models/tag.model"
-import User, { type IUserDocument } from "@/models/user.model"
-import type { TQuestion } from "@/types"
+import User from "@/models/user.model"
 import type { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
 
 export async function getAllQuestions({
@@ -14,7 +13,7 @@ export async function getAllQuestions({
   searchParams,
   options = {},
 }: {
-  filter?: FilterQuery<IUserDocument>
+  filter?: FilterQuery<IQuestionDocument>
   searchParams?: { [key: string]: string | undefined }
   options?: QueryOptions<any> | null | undefined
 }) {
@@ -30,7 +29,7 @@ export async function getAllQuestions({
     //   searchQuery = "",
     // } = searchParams
 
-    const questions = await Question.find({})
+    const result = await Question.find({})
       .populate([
         { path: "author", model: User },
         { path: "tags", model: Tag },
@@ -41,7 +40,9 @@ export async function getAllQuestions({
       .sort({ createdAt: -1 })
     // .lean()
 
-    return JSON.parse(JSON.stringify(questions))
+    const questions = JSON.parse(JSON.stringify(result))
+
+    return questions
   } catch (error) {
     const err = error as Error
     console.log("getAllQuestions Error", err.message)
@@ -52,34 +53,60 @@ export async function getAllQuestions({
 export async function getQuestion({
   filter,
 }: {
-  filter: FilterQuery<IUserDocument>
-}): Promise<TQuestion> {
+  filter: FilterQuery<IQuestionDocument>
+}): Promise<IQuestionDocument> {
   try {
-    const questionDocument: IQuestionDocument | null = await Question.findOne(
+    const result: IQuestionDocument | null = await Question.findOne(
       filter
     ).populate([
       { path: "author", model: User, select: "_id clerkId name picture" },
       { path: "tags", model: Tag, select: "_id name" },
-      // We do not populate the upVoters, downVoters.
-      // { path: "upVoters", model: User },
-      // { path: "downVoters", model: User },
-      // We do not populate the answers.
-      // Instead, in the QuestionDetailsPage, we use getAllAnswers service to which we can pass searchParams.
-      // {
-      //   path: "answers",
-      //   model: Answer,
-      //   populate: {
-      //     path: "author",
-      //     model: User,
-      //   },
-      // },
     ])
 
-    const question: TQuestion = JSON.parse(JSON.stringify(questionDocument))
-
-    if (!question?._id) {
+    if (!result) {
       throw new Error(`Question not found`)
     }
+
+    return result
+  } catch (error) {
+    const err = error as Error
+    console.log("getQuestion Error", err.message)
+    throw new Error(`Could not fetch question - ${err.message}`)
+  }
+}
+
+export type TGetQuestionDataForEditReturn = {
+  _id: string
+  author: { clerkId: string }
+  title: string
+  content: string
+  tags: { _id: string; name: string }[]
+}
+
+export async function getQuestionDataForEdit({
+  filter,
+}: {
+  filter: FilterQuery<IQuestionDocument>
+}): Promise<TGetQuestionDataForEditReturn> {
+  try {
+    const result: IQuestionDocument | null = await Question.findOne(filter, {
+      _id: 1,
+      author: 1,
+      title: 1,
+      content: 1,
+      tags: 1,
+    }).populate([
+      { path: "author", model: User, select: "clerkId" },
+      { path: "tags", model: Tag, select: "_id name" },
+    ])
+
+    if (!result) {
+      throw new Error(`Question not found`)
+    }
+
+    const question: TGetQuestionDataForEditReturn = JSON.parse(
+      JSON.stringify(result)
+    )
 
     return question
   } catch (error) {
@@ -99,11 +126,11 @@ export async function createQuestion({
   try {
     await connectToMongoDB()
 
-    const newQuestion: IQuestionDocument = await Question.create({
+    const result: IQuestionDocument = await Question.create({
       ...data,
     })
 
-    return newQuestion
+    return result
   } catch (error) {
     const err = error as Error
     console.log("createQuestion Error", err)
@@ -111,7 +138,7 @@ export async function createQuestion({
   }
 }
 
-export async function findAndUpdateQuestion({
+export async function updateQuestion({
   filter,
   data,
   options = { new: true },
@@ -123,22 +150,29 @@ export async function findAndUpdateQuestion({
   try {
     await connectToMongoDB()
 
-    const updatedQuestion: IQuestionDocument | null =
-      await Question.findOneAndUpdate(filter, data, options)
+    console.log("updateQuestion -> data", data)
 
-    if (!updatedQuestion?._id) {
+    const result: IQuestionDocument | null = await Question.findOneAndUpdate(
+      filter,
+      data,
+      options
+    )
+
+    if (!result) {
       throw new Error(`Question not found`)
     }
 
-    return updatedQuestion
+    console.log("updateQuestion -> result", result)
+
+    return result
   } catch (error) {
     const err = error as Error
-    console.log("===== findAndUpdateQuestion Error", err)
+    console.log("===== updateQuestion Error", err)
     throw new Error(`Could not update question - ${err.message}`)
   }
 }
 
-export async function findAndDeleteQuestion({
+export async function deleteQuestion({
   filter,
   options = {},
 }: {
@@ -148,21 +182,41 @@ export async function findAndDeleteQuestion({
   try {
     await connectToMongoDB()
 
+    // delete question
     const result = await Question.findOneAndDelete(filter, options)
-
-    if (!result.value) {
+    if (!result) {
       throw new Error(`Question not found`)
     }
 
     return result
   } catch (error) {
     const err = error as Error
-    console.log("===== findAndDeleteQuestion Error", err)
+    console.log("===== deleteQuestion Error", err)
     throw new Error(`Could not delete question - ${err.message}`)
   }
 }
 
-export async function findAndDeleteManyQuestions({
+export async function updateManyQuestions({
+  filter,
+  data,
+}: {
+  filter: FilterQuery<IQuestionDocument> | undefined
+  data: UpdateQuery<IQuestionDocument> | undefined
+}) {
+  try {
+    await connectToMongoDB()
+
+    const result = await Question.updateMany(filter, data)
+
+    return result
+  } catch (error) {
+    const err = error as Error
+    console.log("===== updateManyQuestions Error", err)
+    throw new Error(`Could not update questions - ${err.message}`)
+  }
+}
+
+export async function deleteManyQuestions({
   filter,
 }: {
   filter: FilterQuery<IQuestionDocument> | undefined
@@ -172,14 +226,10 @@ export async function findAndDeleteManyQuestions({
 
     const result = await Question.deleteMany(filter)
 
-    // if (!result.deletedCount) {
-    //   throw new Error(`No questions found for the given filter`)
-    // }
-
     return result
   } catch (error) {
     const err = error as Error
-    console.log("===== findAndDeleteManyQuestions Error", err)
+    console.log("===== deleteManyQuestions Error", err)
     throw new Error(`Could not delete questions - ${err.message}`)
   }
 }

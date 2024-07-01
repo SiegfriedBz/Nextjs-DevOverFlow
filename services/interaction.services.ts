@@ -44,3 +44,21 @@ export async function createInteraction({
     throw new Error(`Could not create interaction - ${err.message}`)
   }
 }
+
+export async function deleteManyInteractions({
+  filter,
+}: {
+  filter: FilterQuery<IInteractionDocument> | undefined
+}) {
+  try {
+    await connectToMongoDB()
+
+    const result = await Interaction.deleteMany(filter)
+
+    return result
+  } catch (error) {
+    const err = error as Error
+    console.log("===== deleteManyInteractions Error", err)
+    throw new Error(`Could not delete interactions - ${err.message}`)
+  }
+}

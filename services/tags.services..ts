@@ -6,7 +6,7 @@ import Question from "@/models/question.model"
 import Tag, { type ITagDocument } from "@/models/tag.model"
 import User from "@/models/user.model"
 import type { TQuestion, TTag } from "@/types"
-import type { FilterQuery, QueryOptions } from "mongoose"
+import type { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
 import { getUser } from "./user.services"
 
 export async function getAllTags({
@@ -28,13 +28,15 @@ export async function getAllTags({
     //   searchQuery = "",
     // } = searchParams
 
-    const tags = await Tag.find({})
+    const result = await Tag.find({})
       .populate([{ path: "questions", model: Question }])
       .populate([{ path: "followers", model: User }])
       .sort({ createdAt: -1 })
     // .lean()
 
-    return JSON.parse(JSON.stringify(tags))
+    const tags = JSON.parse(JSON.stringify(result))
+
+    return tags
   } catch (error) {
     const err = error as Error
     console.log("getAllTags Error", err.message)
@@ -48,18 +50,38 @@ export async function getTag({
   filter: FilterQuery<ITagDocument>
 }): Promise<TTag> {
   try {
-    const tagdoc: ITagDocument | null = await Tag.findOne(filter)
-    const tag: TTag = JSON.parse(JSON.stringify(tagdoc))
+    const result: ITagDocument | null = await Tag.findOne(filter)
 
-    if (!tag?._id) {
+    if (!result) {
       throw new Error(`Tag not found`)
     }
+
+    const tag: TTag = JSON.parse(JSON.stringify(result))
 
     return tag
   } catch (error) {
     const err = error as Error
     console.log("getQuestion Error", err.message)
     throw new Error(`Could not fetch tag - ${err.message}`)
+  }
+}
+
+export async function updateManyTags({
+  filter,
+  data,
+}: {
+  filter: FilterQuery<ITagDocument>
+  data: UpdateQuery<ITagDocument> | undefined
+}) {
+  try {
+    await connectToMongoDB()
+    const result = await Tag.updateMany(filter, data)
+
+    return result
+  } catch (error) {
+    const err = error as Error
+    console.log("updateManyTags", err.message)
+    throw new Error(`Could not update tags - ${err.message}`)
   }
 }
 
@@ -82,7 +104,7 @@ export async function getQuestionsByTag({
     //   searchQuery = "",
     // } = searchParams
 
-    const tagDocument: ITagDocument | null = await Tag.findOne(filter, {
+    const result: ITagDocument | null = await Tag.findOne(filter, {
       questions: 1,
     }).populate({
       path: "questions",
@@ -103,11 +125,11 @@ export async function getQuestionsByTag({
       ],
     })
 
-    if (!tagDocument) {
+    if (!result) {
       throw new Error("Tag not found")
     }
 
-    const questionsDoc = tagDocument.questions
+    const questionsDoc = result.questions
 
     const questions = JSON.parse(JSON.stringify(questionsDoc))
 
@@ -130,9 +152,9 @@ export async function getUserTopTags({
     await connectToMongoDB()
 
     // get user
-    const user = await getUser({ filter: { _id: userId } })
+    const result = await getUser({ filter: { _id: userId } })
 
-    if (!user) {
+    if (!result) {
       throw new Error("User not found")
     }
 
@@ -167,35 +189,38 @@ export async function getUserTopTags({
   }
 }
 
-export async function upsertTagsOnCreateQuestion({
-  newQuestion,
+export async function upsertTagsOnMutateQuestion({
+  question,
   tags,
 }: {
-  newQuestion: IQuestionDocument
-  tags: string[]
+  question: IQuestionDocument
+  tags: string[] // tagNames
 }) {
   try {
     await connectToMongoDB()
 
-    let tagsIds: ITagDocument["_id"][] = []
+    const uniqueTags = new Set([...tags])
 
-    for (const tagName of tags) {
-      const upsertedTag = await Tag.findOneAndUpdate(
+    let tagsIds: ITagDocument["_id"][] = []
+    for (const tagName of uniqueTags) {
+      const result = await Tag.findOneAndUpdate(
         { name: { $regex: new RegExp(`^${tagName}$`, "i") } },
         {
           $setOnInsert: { name: tagName },
-          $push: { questions: (newQuestion as IQuestionDocument)._id },
+          $push: {
+            questions: (question as IQuestionDocument)._id,
+          },
         },
         { upsert: true, new: true }
       )
 
-      tagsIds = [...tagsIds, upsertedTag._id]
+      tagsIds = [...tagsIds, result._id]
     }
 
     return tagsIds
   } catch (error) {
     const err = error as Error
-    console.log("upsertTagsOnCreateQuestion Error", err.message)
+    console.log("upsertTagsOnMutateQuestion Error", err.message)
     throw new Error(`Could not upsert tags - ${err.message}`)
   }
 }
