@@ -22,7 +22,7 @@ const CommunityPage = ({ searchParams }: TSearchParamsProps) => {
         />
 
         <CustomFilter
-          filterName="filter"
+          filterName="sort"
           filterOptions={COMMUNITY_FILTER_OPTIONS}
         />
       </div>
@@ -40,7 +40,7 @@ export default CommunityPage
 
 const UserListWrapper = async ({ searchParams }: TSearchParamsProps) => {
   const localSearchQuery = searchParams?.q
-  const globalSearchQuery = searchParams?.global
+  const globalSearchQuery = searchParams?.globalQ
 
   const data: TUser[] | null = await getAllUsers({
     params: { localSearchQuery, globalSearchQuery },

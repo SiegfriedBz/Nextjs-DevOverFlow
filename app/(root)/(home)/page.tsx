@@ -29,7 +29,7 @@ const Home = ({ searchParams }: TProps) => {
       <div className="mt-4 flex justify-between gap-5 max-sm:flex-col sm:items-center md:flex-col">
         <LocalSearchBar queryParamName="q" placeholder="Search questions..." />
 
-        <CustomFilter filterName="filter" filterOptions={HOME_FILTER_OPTIONS} />
+        <CustomFilter filterName="sort" filterOptions={HOME_FILTER_OPTIONS} />
       </div>
 
       <div className="mt-4 flex flex-col justify-between gap-8 sm:items-center">
@@ -46,13 +46,14 @@ export default Home
 const QuestionListWrapper = async ({ searchParams }: TProps) => {
   console.log("Home -> searchParams", searchParams)
 
+  const localSortQuery = searchParams?.sort
   const localSearchQuery = searchParams?.q
-  const globalSearchQuery = searchParams?.global
+  const globalSearchQuery = searchParams?.globalQ
 
   console.log("localSearchQuery", localSearchQuery)
 
   const data: TQuestion[] | null = await getAllQuestions({
-    params: { localSearchQuery, globalSearchQuery },
+    params: { localSortQuery, localSearchQuery, globalSearchQuery },
   })
 
   return (

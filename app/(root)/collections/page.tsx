@@ -27,7 +27,7 @@ const CollectionsPage = ({ searchParams }: TProps) => {
         />
 
         <CustomFilter
-          filterName="filter"
+          filterName="sort"
           filterOptions={SAVED_QUESTIONS_FILTER_OPTIONS}
         />
       </div>
@@ -53,7 +53,7 @@ const SavedQuestionListWrapper = async ({ searchParams }: TProps) => {
   }
 
   const localSearchQuery = searchParams?.q
-  const globalSearchQuery = searchParams?.global
+  const globalSearchQuery = searchParams?.globalQ
 
   const data: TQuestion[] | null = await getCurrentUserSavedQuestions({
     params: { localSearchQuery, globalSearchQuery },

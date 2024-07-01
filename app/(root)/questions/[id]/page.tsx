@@ -145,7 +145,7 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
         />
 
         <CustomFilter
-          filterName="filter"
+          filterName="sort"
           filterOptions={ANSWERS_FILTER_OPTIONS}
         />
       </div>
