@@ -46,13 +46,13 @@ export default Home
 const QuestionListWrapper = async ({ searchParams }: TProps) => {
   console.log("Home -> searchParams", searchParams)
 
-  const localFilterQuery = searchParams?.q
-  const globalFilterQuery = searchParams?.global
+  const localSearchQuery = searchParams?.q
+  const globalSearchQuery = searchParams?.global
 
-  console.log("localFilterQuery", localFilterQuery)
+  console.log("localSearchQuery", localSearchQuery)
 
   const data: TQuestion[] | null = await getAllQuestions({
-    params: { localFilterQuery, globalFilterQuery },
+    params: { localSearchQuery, globalSearchQuery },
   })
 
   return (

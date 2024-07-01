@@ -48,17 +48,17 @@ export async function getAllQuestions({ params }: { params: TQueryParams }) {
     const {
       page = 1,
       numOfResultsPerPage = 10,
-      localFilterQuery = "",
-      // globalFilterQuery = "",
+      localSearchQuery = "",
+      // globalSearchQuery = "",
     } = params
 
     const limit = page * numOfResultsPerPage
     const skip = (page - 1) * numOfResultsPerPage
-    const query: FilterQuery<IQuestionDocument> = localFilterQuery
+    const query: FilterQuery<IQuestionDocument> = localSearchQuery
       ? {
           $or: [
-            { title: { $regex: localFilterQuery, $options: "i" } },
-            { content: { $regex: localFilterQuery, $options: "i" } },
+            { title: { $regex: localSearchQuery, $options: "i" } },
+            { content: { $regex: localSearchQuery, $options: "i" } },
           ],
         }
       : {}
