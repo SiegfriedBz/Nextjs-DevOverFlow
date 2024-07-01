@@ -1,4 +1,8 @@
 import { BADGE_CRITERIA } from "@/constants"
+import type { IAnswerDocument } from "@/models/answer.model"
+import type { IQuestionDocument } from "@/models/question.model"
+import type { ITagDocument } from "@/models/tag.model"
+import type { IUserDocument } from "@/models/user.model"
 
 export type TUser = {
   _id: string
@@ -11,15 +15,17 @@ export type TUser = {
   reputation: number
   joinedDate: Date
   location: string
-  savedQuestions: string[] // TODO TQuestion[] | string[]
+  bio: string
+  portfolio: string
+  savedQuestions: IQuestionDocument[] | string[]
 }
 
 export type TTag = {
   _id: string
   name: string
-  description: string
-  questions?: string[] // TODO TQuestion[] | string[]
-  followers?: TUser[] | string[]
+  description?: string
+  questions?: IQuestionDocument[] | string[]
+  followers?: IUserDocument[] | string[]
   createdAt?: Date
   // totalQuestions?: number
   // showCount?: boolean
@@ -28,25 +34,25 @@ export type TTag = {
 // TODO
 export type TAnswer = {
   _id: string
-  author: TUser | string
+  author: IUserDocument | string
   content: string
   views: number
   createdAt: Date
-  upVoters: TUser[] | string[]
-  downVoters: TUser[] | string[]
-  question: string[] // TODO TQuestion[] | string[]
+  upVoters: IUserDocument[] | string[]
+  downVoters: IUserDocument[] | string[]
+  question: IQuestionDocument | string
 }
 
 export type TQuestion = {
   _id: string
-  author: TUser | string
+  author: IUserDocument | string
   title: string
   content: string
   views: number
-  upVoters: TUser[] | string[]
-  downVoters: TUser[] | string[]
-  tags: TTag[] | string[]
-  answers: TAnswer[] | string[]
+  upVoters: IUserDocument[] | string[]
+  downVoters: IUserDocument[] | string[]
+  tags: ITagDocument[] | string[]
+  answers: IAnswerDocument[] | string[]
   createdAt: Date
 }
 
