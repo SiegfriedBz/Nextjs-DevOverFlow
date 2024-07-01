@@ -4,7 +4,7 @@ import useQueryParams from "@/hooks/useQueryParams"
 import SearchBarInput from "./SearchBarInput"
 
 const GlobalSearchBar = () => {
-  const [search, setSearch] = useQueryParams({ queryParamName: "q" })
+  const [search, setSearch] = useQueryParams({ queryParamName: "global" })
 
   return (
     <SearchBarInput
