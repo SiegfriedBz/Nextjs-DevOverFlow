@@ -74,9 +74,9 @@ export async function POST(req: Request) {
     console.log("===== CLERK - user.created")
     const userData = formatUserData(evt.data) as TMutateUserData
 
-    const newUser: Error | IUserDocument | null = await createUserAction({
+    const newUser = (await createUserAction({
       userData,
-    })
+    })) as unknown as Error | IUserDocument | null
 
     if (newUser instanceof Error || !newUser?._id) {
       console.log("===== CLERK - user.created - ERROR", newUser)
