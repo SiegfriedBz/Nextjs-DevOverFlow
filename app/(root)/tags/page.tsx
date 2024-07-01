@@ -36,10 +36,12 @@ const TagsPage = ({ searchParams }: TSearchParamsProps) => {
 export default TagsPage
 
 const TagListWrapper = async ({ searchParams }: TSearchParamsProps) => {
-  const data: TTag[] | null = await getAllTags({ searchParams })
+  const localFilterQuery = searchParams?.q
+  const globalFilterQuery = searchParams?.global
 
-  console.log("==== TAGS searchParams", searchParams)
-  console.log("==== TAGS data", data)
+  const data: TTag[] | null = await getAllTags({
+    params: { localFilterQuery, globalFilterQuery },
+  })
 
   return data && data?.length > 0 ? (
     <ul className="flex w-full flex-wrap justify-start gap-8">

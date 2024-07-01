@@ -6,6 +6,7 @@ import Answer from "@/models/answer.model"
 import Question, { type IQuestionDocument } from "@/models/question.model"
 import Tag from "@/models/tag.model"
 import User from "@/models/user.model"
+import type { TQueryParams } from "@/types"
 import type { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
 
 export async function getHotQuestions({
@@ -40,32 +41,29 @@ export async function getHotQuestions({
   }
 }
 
-// type TParams = {
-//   page?: number
-//   numOfResultsPerPage?: number
-//   searchQuery?: string
-// }
-export async function getAllQuestions({
-  filter,
-  searchParams,
-  options = {},
-}: {
-  filter?: FilterQuery<IQuestionDocument>
-  searchParams?: { [key: string]: string | undefined }
-  options?: QueryOptions<any> | null | undefined
-}) {
+export async function getAllQuestions({ params }: { params: TQueryParams }) {
   try {
     await connectToMongoDB()
 
-    // TODO
-    // HANDLE params
-    // const {
-    //   page = 1,
-    //   numOfResultsPerPage = 10,
-    //   searchQuery = "",
-    // } = params
+    const {
+      page = 1,
+      numOfResultsPerPage = 10,
+      localFilterQuery = "",
+      // globalFilterQuery = "",
+    } = params
 
-    const result = await Question.find({})
+    const limit = page * numOfResultsPerPage
+    const skip = (page - 1) * numOfResultsPerPage
+    const query: FilterQuery<IQuestionDocument> = localFilterQuery
+      ? {
+          $or: [
+            { title: { $regex: localFilterQuery, $options: "i" } },
+            { content: { $regex: localFilterQuery, $options: "i" } },
+          ],
+        }
+      : {}
+
+    const result = await Question.find(query)
       .populate([
         { path: "author", model: User },
         { path: "tags", model: Tag },
@@ -73,8 +71,9 @@ export async function getAllQuestions({
         { path: "downVoters", model: User },
         { path: "answers", model: Answer },
       ])
+      .skip(skip)
+      .limit(limit)
       .sort({ createdAt: -1 })
-    // .lean()
 
     const questions = JSON.parse(JSON.stringify(result))
 

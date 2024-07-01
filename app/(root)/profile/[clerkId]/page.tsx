@@ -25,9 +25,8 @@ import { Suspense } from "react"
 
 type TProps = {
   params: { clerkId: string }
-  searchParams?: { [key: string]: string | undefined }
 }
-const ProfilePage = async ({ params, searchParams }: TProps) => {
+const ProfilePage = async ({ params }: TProps) => {
   const clerkId = params.clerkId
 
   const { user, userTotalQuestions, userTotalAnswers } = await getFullUserInfo({
@@ -125,7 +124,6 @@ const ProfilePage = async ({ params, searchParams }: TProps) => {
                 currentUserClerkId={currentUserClerkId}
                 userName={user.name}
                 userId={user._id as string}
-                searchParams={searchParams}
               />
             </Suspense>
           </TabsContent>
@@ -135,7 +133,6 @@ const ProfilePage = async ({ params, searchParams }: TProps) => {
                 currentUserClerkId={currentUserClerkId}
                 userName={user.name}
                 userId={user._id as string}
-                searchParams={searchParams}
               />
             </Suspense>
           </TabsContent>
@@ -154,7 +151,6 @@ type TTabsProps = {
   currentUserClerkId?: string
   userId: string
   userName: string
-  searchParams?: { [key: string]: string | undefined }
 }
 
 // fetch all user's questions
@@ -162,11 +158,9 @@ const QuestionListWrapper = async ({
   currentUserClerkId,
   userId,
   userName,
-  searchParams,
 }: TTabsProps) => {
   const data = await getUserQuestions({
     userId,
-    searchParams,
   })
 
   return (
@@ -186,11 +180,9 @@ const AnswerListWrapper = async ({
   currentUserClerkId,
   userId,
   userName,
-  searchParams,
 }: TTabsProps) => {
   const data: IAnswerDocument[] = await getUserAnswers({
     userId,
-    searchParams,
   })
 
   return (

@@ -4,6 +4,13 @@ import type { IQuestionDocument } from "@/models/question.model"
 import type { ITagDocument } from "@/models/tag.model"
 import type { IUserDocument } from "@/models/user.model"
 
+export type TQueryParams = {
+  page?: number
+  numOfResultsPerPage?: number
+  localFilterQuery?: string
+  globalFilterQuery?: string
+}
+
 export type TUser = {
   _id: string
   name: string

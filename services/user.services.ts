@@ -2,40 +2,45 @@
 
 import type { TMutateUserData } from "@/app/api/v1/webhooks/clerk/route"
 import connectToMongoDB from "@/lib/mongoose.utils"
-import { TMutateUserInput } from "@/lib/zod/user.zod"
-import Answer, { IAnswerDocument } from "@/models/answer.model"
-import Question, { IQuestionDocument } from "@/models/question.model"
+import type { TMutateUserInput } from "@/lib/zod/user.zod"
+import Answer, { type IAnswerDocument } from "@/models/answer.model"
+import Question, { type IQuestionDocument } from "@/models/question.model"
 import Tag from "@/models/tag.model"
 import User, { type IUserDocument } from "@/models/user.model"
-import type { TQuestion } from "@/types"
+import type { TQueryParams, TQuestion } from "@/types"
 import { currentUser } from "@clerk/nextjs/server"
 import type { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
 import { redirect } from "next/navigation"
 
-export async function getAllUsers({
-  searchParams,
-  options = {},
-}: {
-  searchParams?: { [key: string]: string | undefined }
-  options?: QueryOptions<any> | null | undefined
-}) {
+export async function getAllUsers({ params }: { params: TQueryParams }) {
   try {
     await connectToMongoDB()
 
-    // TODO
-    // HANDLE searchParams
-    // const {
-    //   page = 1,
-    //   numOfResultsPerPage = 10,
-    //   filter = "",
-    //   searchQuery = "",
-    // } = searchParams
+    const {
+      page = 1,
+      numOfResultsPerPage = 10,
+      localFilterQuery = "",
+      // globalFilterQuery = "",
+    } = params
 
-    const users = await User.find({})
+    const limit = page * numOfResultsPerPage
+    const skip = (page - 1) * numOfResultsPerPage
+    const query: FilterQuery<IUserDocument> = localFilterQuery
+      ? {
+          $or: [
+            { name: { $regex: localFilterQuery, $options: "i" } },
+            { userName: { $regex: localFilterQuery, $options: "i" } },
+            { location: { $regex: localFilterQuery, $options: "i" } },
+            { bio: { $regex: localFilterQuery, $options: "i" } },
+          ],
+        }
+      : {}
+
+    const users = await User.find(query)
       .populate([{ path: "savedQuestions", model: Question }])
+      .skip(skip)
+      .limit(limit)
       .sort({ createdAt: -1 })
-
-    // .lean()
 
     return JSON.parse(JSON.stringify(users))
   } catch (error) {
@@ -191,40 +196,46 @@ export async function getFullUserInfo({
 }
 
 export async function getCurrentUserSavedQuestions({
-  searchParams,
-  options = {},
+  params,
 }: {
-  searchParams?: { [key: string]: string | undefined }
-  options?: QueryOptions<any> | null | undefined
+  params: TQueryParams
 }): Promise<TQuestion[]> {
   try {
-    await connectToMongoDB()
-
-    // TODO
-    // HANDLE searchParams
-    // const {
-    //   page = 1,
-    //   numOfResultsPerPage = 10,
-    //   filter = "",
-    //   searchQuery = "",
-    // } = searchParams
-
     // get user from from clerk DB
     const clerckUser = await currentUser()
-
     if (!clerckUser) {
       redirect("/sign-in")
     }
 
     const clerkId = clerckUser?.id
 
-    // get user's saved questions from our DB
-    const data = await User.findOne({ clerkId }, { savedQuestions: 1 }, options)
+    //  connect to mongo db
+    await connectToMongoDB()
+
+    const {
+      page = 1,
+      numOfResultsPerPage = 10,
+      localFilterQuery = "",
+      // globalFilterQuery = "",
+    } = params
+
+    const limit = page * numOfResultsPerPage
+    const skip = (page - 1) * numOfResultsPerPage
+    const query: FilterQuery<IQuestionDocument> = localFilterQuery
+      ? {
+          $or: [
+            { title: { $regex: localFilterQuery, $options: "i" } },
+            { content: { $regex: localFilterQuery, $options: "i" } },
+          ],
+        }
+      : {}
+
+    // get user's saved questions
+    const data = await User.findOne({ clerkId }, { savedQuestions: 1 })
       .populate([
         {
           path: "savedQuestions",
-          // TODO
-          // match: searchParams as FilterQuery<IQuestionDocument> | undefined,
+          match: query as FilterQuery<IQuestionDocument>,
           model: Question,
           populate: [
             {
@@ -240,6 +251,8 @@ export async function getCurrentUserSavedQuestions({
           ],
         },
       ])
+      .skip(skip)
+      .limit(limit)
       .sort({ createdAt: -1 })
 
     const savedQuestionsDoc: IUserDocument[] = data?.savedQuestions
@@ -257,10 +270,8 @@ export async function getCurrentUserSavedQuestions({
 
 export async function getUserQuestions({
   userId,
-  searchParams,
 }: {
   userId: string
-  searchParams?: { [key: string]: string | undefined }
 }): Promise<TQuestion[]> {
   try {
     await connectToMongoDB()
@@ -294,22 +305,11 @@ export async function getUserQuestions({
 
 export async function getUserAnswers({
   userId,
-  searchParams,
 }: {
   userId: string
-  searchParams?: { [key: string]: string | undefined }
 }): Promise<IAnswerDocument[]> {
   try {
     await connectToMongoDB()
-
-    // TODO
-    // HANDLE searchParams
-    // const {
-    //   page = 1,
-    //   numOfResultsPerPage = 10,
-    //   filter = "",
-    //   searchQuery = "",
-    // } = searchParams
 
     const answersDoc: IAnswerDocument[] = await Answer.find(
       {

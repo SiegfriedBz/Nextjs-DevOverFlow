@@ -5,9 +5,9 @@ import type { IQuestionDocument } from "@/models/question.model"
 import Question from "@/models/question.model"
 import Tag, { type ITagDocument } from "@/models/tag.model"
 import User from "@/models/user.model"
-import type { TQuestion, TTag } from "@/types"
-import type { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
-import { getUser } from "./user.services"
+import { getUser } from "@/services/user.services"
+import type { TQueryParams, TQuestion, TTag } from "@/types"
+import type { FilterQuery, UpdateQuery } from "mongoose"
 
 export async function getHotTags({
   limit,
@@ -42,30 +42,34 @@ export async function getHotTags({
   }
 }
 
-export async function getAllTags({
-  searchParams,
-  options = {},
-}: {
-  searchParams?: { [key: string]: string | undefined }
-  options?: QueryOptions<any> | null | undefined
-}) {
+export async function getAllTags({ params }: { params: TQueryParams }) {
   try {
     await connectToMongoDB()
 
-    // TODO
-    // HANDLE searchParams
-    // const {
-    //   page = 1,
-    //   numOfResultsPerPage = 10,
-    //   filter = "",
-    //   searchQuery = "",
-    // } = searchParams
+    const {
+      page = 1,
+      numOfResultsPerPage = 10,
+      localFilterQuery = "",
+      // globalFilterQuery = "",
+    } = params
 
-    const result = await Tag.find({})
+    const limit = page * numOfResultsPerPage
+    const skip = (page - 1) * numOfResultsPerPage
+    const query: FilterQuery<ITagDocument> = localFilterQuery
+      ? {
+          $or: [
+            { name: { $regex: localFilterQuery, $options: "i" } },
+            { description: { $regex: localFilterQuery, $options: "i" } },
+          ],
+        }
+      : {}
+
+    const result = await Tag.find(query)
       .populate([{ path: "questions", model: Question }])
       .populate([{ path: "followers", model: User }])
+      .skip(skip)
+      .limit(limit)
       .sort({ createdAt: -1 })
-    // .lean()
 
     const tags = JSON.parse(JSON.stringify(result))
 
@@ -120,43 +124,55 @@ export async function updateManyTags({
 
 export async function getQuestionsByTag({
   filter,
-  searchParams,
+  params,
 }: {
   filter: FilterQuery<ITagDocument>
-  searchParams?: { [key: string]: string | undefined }
+  params: TQueryParams
 }): Promise<TQuestion[]> {
   try {
     await connectToMongoDB()
 
-    // TODO TOFIX
-    // HANDLE searchParams
-    // const {
-    //   page = 1,
-    //   numOfResultsPerPage = 10,
-    //   filter = "",
-    //   searchQuery = "",
-    // } = searchParams
+    const {
+      page = 1,
+      numOfResultsPerPage = 10,
+      localFilterQuery = "",
+      // globalFilterQuery = "",
+    } = params
+
+    const limit = page * numOfResultsPerPage
+    const skip = (page - 1) * numOfResultsPerPage
+    const query: FilterQuery<IQuestionDocument> = localFilterQuery
+      ? {
+          $or: [
+            { title: { $regex: localFilterQuery, $options: "i" } },
+            { content: { $regex: localFilterQuery, $options: "i" } },
+          ],
+        }
+      : {}
 
     const result: ITagDocument | null = await Tag.findOne(filter, {
       questions: 1,
-    }).populate({
-      path: "questions",
-      model: Question,
-      // TODO TOFIX
-      // match: searchQuery ? {title: { $regex:searchQuery,$options:"i" }}
-      populate: [
-        {
-          path: "tags",
-          model: Tag,
-          select: "_id name",
-        },
-        {
-          path: "author",
-          model: User,
-          select: "_id clerkId name picture",
-        },
-      ],
     })
+      .populate({
+        path: "questions",
+        model: Question,
+        match: query as FilterQuery<IQuestionDocument>,
+        populate: [
+          {
+            path: "tags",
+            model: Tag,
+            select: "_id name",
+          },
+          {
+            path: "author",
+            model: User,
+            select: "_id clerkId name picture",
+          },
+        ],
+      })
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
 
     if (!result) {
       throw new Error("Tag not found")

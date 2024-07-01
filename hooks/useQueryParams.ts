@@ -10,10 +10,16 @@ type TProps = {
 }
 
 const useQueryParams = ({ queryParamName, debounceDelay = 1000 }: TProps) => {
-  const [search, setSearch] = useState("")
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const router = useRouter()
+
+  const [search, setSearch] = useState(() => {
+    // init input field value on component mount (fetch value from URL)
+    const queryParams = new URLSearchParams(searchParams)
+    const initSearch = queryParams.get(queryParamName)
+    return initSearch || ""
+  })
   const [value] = useDebounce(search, debounceDelay)
 
   const getQueryString = useCallback(
@@ -30,10 +36,12 @@ const useQueryParams = ({ queryParamName, debounceDelay = 1000 }: TProps) => {
     [searchParams]
   )
 
+  // update URL state (searchParams) onChange input
   useEffect(() => {
     const queryString = getQueryString({ name: queryParamName, value })
 
     router.push(`${pathname}?${queryString}`)
+    router.refresh()
   }, [queryParamName, value, pathname, getQueryString, router])
 
   return [search, setSearch] as const

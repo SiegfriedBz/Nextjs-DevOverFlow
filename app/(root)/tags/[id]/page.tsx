@@ -80,11 +80,15 @@ const QuestionListWrapper = async ({ params, searchParams }: TProps) => {
 
   const tagId = params?.id
 
+  const localFilterQuery = searchParams?.q
+  const globalFilterQuery = searchParams?.global
+
   // fetch questions pointing to this tag
   const data = await getQuestionsByTag({
     filter: {
       _id: tagId,
     },
+    params: { localFilterQuery, globalFilterQuery },
   })
 
   return data && data?.length > 0 ? (

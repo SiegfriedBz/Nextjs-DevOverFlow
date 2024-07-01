@@ -39,10 +39,12 @@ const CommunityPage = ({ searchParams }: TSearchParamsProps) => {
 export default CommunityPage
 
 const UserListWrapper = async ({ searchParams }: TSearchParamsProps) => {
-  const data: TUser[] | null = await getAllUsers({ searchParams })
+  const localFilterQuery = searchParams?.q
+  const globalFilterQuery = searchParams?.global
 
-  console.log("==== COMMUNITY searchParams", searchParams)
-  console.log("==== COMMUNITY data", data)
+  const data: TUser[] | null = await getAllUsers({
+    params: { localFilterQuery, globalFilterQuery },
+  })
 
   return data && data?.length > 0 ? (
     <ul className="flex w-full flex-wrap justify-start gap-8">
