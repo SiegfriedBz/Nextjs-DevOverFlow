@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect } from "react"
-import Metric from "./shared/Metric"
+import Metric from "./Metric"
 import { voteQuestionAction } from "@/server-actions/question.actions"
 import { voteAnswerAction } from "@/server-actions/answer.actions"
 import { toast } from "sonner"
@@ -14,22 +14,28 @@ type TVotingProps = {
   currentUserMongoId: string
   numUpVotes: number
   numDownVotes: number
-  userHasUpVoted: boolean
-  userHasDownVoted: boolean
+  currentUserHasUpVoted: boolean
+  currentUserHasDownVoted: boolean
   // question case
   questionId?: string
   // answer case
   answerId?: string
 }
 
+/** Voting component to
+ *  1. Handle vote on
+ *  - Question
+ *  - Answer
+ *  2. Create (if not exists) a new view interaction record on component mount
+ */
 const Voting = ({
   children,
   className = "",
   currentUserMongoId,
   numUpVotes,
   numDownVotes,
-  userHasUpVoted,
-  userHasDownVoted,
+  currentUserHasUpVoted,
+  currentUserHasDownVoted,
   // question case
   questionId,
   // answer case
@@ -82,7 +88,7 @@ const Voting = ({
       )
     } catch (error) {
       console.log(`handle${isUpVoting ? "Up" : "Down"}-Vote ERROR`, error)
-      toast.warning(
+      toast.error(
         `Could not ${isUpVoting ? "up" : "down"}vote ${isQuestionVoting ? "question" : "answer"}`
       )
     }
@@ -92,7 +98,7 @@ const Voting = ({
     <div className={className}>
       <button onClick={() => handleVote({ isUpVoting: true })}>
         <Metric
-          imageSrc={`/assets/icons/${userHasUpVoted ? "upvoted" : "upvote"}.svg`}
+          imageSrc={`/assets/icons/${currentUserHasUpVoted ? "upvoted" : "upvote"}.svg`}
           alt="up-votes"
           value={numUpVotes}
           className="cursor-pointer"
@@ -102,7 +108,7 @@ const Voting = ({
 
       <button onClick={() => handleVote({ isUpVoting: false })}>
         <Metric
-          imageSrc={`/assets/icons/${userHasDownVoted ? "downvoted" : "downvote"}.svg`}
+          imageSrc={`/assets/icons/${currentUserHasDownVoted ? "downvoted" : "downvote"}.svg`}
           alt="down-votes"
           value={numDownVotes}
           className="cursor-pointer"

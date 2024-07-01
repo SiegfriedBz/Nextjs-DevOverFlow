@@ -16,7 +16,6 @@ import {
 } from "@/lib/zod/answer.zod"
 import { createAnswerAction } from "@/server-actions/answer.actions"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -25,7 +24,6 @@ type TProps = {
   questionId: string
 }
 const AnswerForm = ({ questionId }: TProps) => {
-  const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const form = useForm<TMutateAnswerInput>({
     resolver: zodResolver(mutateAnswerSchema),
@@ -41,11 +39,8 @@ const AnswerForm = ({ questionId }: TProps) => {
     try {
       await createAnswerAction({ data: values })
 
-      // notify user
+      form.reset()
       toast.success(`Answer created successfully!`)
-
-      // navigate to home page
-      router.push("/")
     } catch (error) {
       console.log(error)
       toast.error(`Could not submit your answer.`)

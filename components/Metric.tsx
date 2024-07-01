@@ -27,7 +27,9 @@ const Metric = ({
   const content = (
     <div
       className={cn(
-        `small-medium text-dark400_light800 flex flex-wrap items-center gap-x-1`,
+        `small-medium text-dark400_light800 flex flex-wrap items-center gap-x-1
+          ${isAuthor && href ? "max-sm:hidden" : ""}
+        `,
         className
       )}
     >
@@ -38,12 +40,7 @@ const Metric = ({
         alt={alt}
         className={`${href ? "rounded-full" : ""} invert-colors`}
       />
-      <p
-        className={cn(
-          `font-light ${isAuthor && href ? "max-sm:hidden" : ""}`,
-          paragraphClassName
-        )}
-      >
+      <p className={cn(`font-light`, paragraphClassName)}>
         <span>{typeof value === "number" ? formatNumber(value) : value}</span>
         {title && <span>{title}</span>}
       </p>

@@ -10,14 +10,7 @@ import Link from "next/link"
 
 type TProps = TTag
 
-const TagCard = ({
-  _id,
-  name,
-  description,
-  questions,
-  // followers,
-  // createdAt,
-}: TProps) => {
+const TagCard = ({ _id, name, description, questions }: TProps) => {
   return (
     <Card
       className="background-light900_dark200

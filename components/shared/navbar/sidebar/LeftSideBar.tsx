@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation"
 import { Dispatch, SetStateAction } from "react"
 import AuthButtons from "../AuthButtons"
 import SideBar from "./Sidebar"
+import { useUser } from "@clerk/nextjs"
 
 type TProps =
   | {
@@ -20,6 +21,9 @@ const LeftSideBar = ({
   isMobileSideBar = false,
   setOpen = () => {},
 }: TProps) => {
+  const { user } = useUser()
+  const clerkId = user?.id
+
   return (
     <SideBar
       className={`h-[calc(100vh-3rem)]
@@ -34,6 +38,12 @@ const LeftSideBar = ({
       {/* left-side-bar links  */}
       <ul className={`flex h-full flex-col gap-4`}>
         {LEFTSIDEBAR_LINKS.map((link) => {
+          if (link.href === "/profile" && clerkId) {
+            link.href = `/profile/${clerkId}`
+          }
+          if (link.href === "/profile" && !clerkId) {
+            return null
+          }
           return (
             <li key={`mobileNavContent-${link.label}`}>
               <CustomNavLink
