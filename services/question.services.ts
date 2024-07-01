@@ -40,18 +40,18 @@ export async function getHotQuestions({
   }
 }
 
-type TParams = {
-  page?: number
-  numOfResultsPerPage?: number
-  searchQuery?: string
-}
+// type TParams = {
+//   page?: number
+//   numOfResultsPerPage?: number
+//   searchQuery?: string
+// }
 export async function getAllQuestions({
   filter,
-  params,
+  searchParams,
   options = {},
 }: {
   filter?: FilterQuery<IQuestionDocument>
-  params?: TParams
+  searchParams?: { [key: string]: string | undefined }
   options?: QueryOptions<any> | null | undefined
 }) {
   try {
