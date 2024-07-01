@@ -28,7 +28,7 @@ const useQueryParams = ({ queryParamName, debounceDelay = 1000 }: TProps) => {
       if (!value) {
         queryParams.delete(name)
       } else {
-        queryParams.set(name, value)
+        queryParams.set(name, value?.toLowerCase())
       }
 
       return queryParams.toString()
