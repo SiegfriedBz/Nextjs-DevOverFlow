@@ -4,9 +4,10 @@ import { Editor } from "@tinymce/tinymce-react"
 import { useEffect, useState, useRef } from "react"
 
 type TProps = {
+  editInitialValue?: string
   handleEditorChange: (content: string) => void
 }
-const TinyEditor = ({ handleEditorChange }: TProps) => {
+const TinyEditor = ({ editInitialValue, handleEditorChange }: TProps) => {
   const [isClient, setIsClient] = useState(false)
   const editorRef = useRef<typeof Editor | null>(null)
 
@@ -23,6 +24,7 @@ const TinyEditor = ({ handleEditorChange }: TProps) => {
         // @ts-ignore
         editorRef.current = editor
       }}
+      initialValue={editInitialValue || ""}
       // onBlur={}
       onEditorChange={handleEditorChange}
       init={{

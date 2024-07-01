@@ -1,5 +1,5 @@
-import QuestionCard from "@/components/QuestionCard"
-import QuestionCardSkeleton from "@/components/QuestionCardSkeleton"
+import { QuestionListWrapperSkeleton } from "@/components/QuestionListWrapperSkeleton"
+import QuestionList from "@/components/questions/QuestionList"
 import NoResult from "@/components/shared/NoResult"
 import CustomFilter from "@/components/shared/search/filter/CustomFilter"
 import LocalSearchBar from "@/components/shared/search/LocalSearchBar"
@@ -46,29 +46,14 @@ export default Home
 const QuestionListWrapper = async ({ searchParams }: TProps) => {
   const data: TQuestion[] | null = await getAllQuestions({ searchParams })
 
-  return data && data?.length > 0 ? (
-    <ul className="flex w-full flex-col gap-8 max-sm:gap-6 [&>*:first-child]:mt-2">
-      {data.map((question) => {
-        return (
-          <li key={question._id}>
-            <QuestionCard {...question} />
-          </li>
-        )
-      })}
-    </ul>
-  ) : (
-    <NoResult
-      resultType="question"
-      paragraphContent="Be the first to break the silence! Ask a question and kickstart a
-            discussion"
-      href="/ask-a-question"
-      linkLabel="Ask a question"
-    />
+  return (
+    <QuestionList data={data}>
+      <NoResult
+        resultType="question"
+        paragraphContent="Be the first to break the silence! Ask a question and kickstart a discussion"
+        href="/ask-question"
+        linkLabel="Ask a question"
+      />
+    </QuestionList>
   )
-}
-
-export const QuestionListWrapperSkeleton = () => {
-  return Array.from({ length: 8 }, (_, index) => {
-    return <QuestionCardSkeleton key={index} />
-  })
 }

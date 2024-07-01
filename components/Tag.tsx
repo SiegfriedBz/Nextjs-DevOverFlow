@@ -22,7 +22,7 @@ const Tag = ({ _id, name, questions, showCount = false }: TProps) => {
       >
         {name}
       </Badge>
-      {showCount && (
+      {showCount && questions && (
         <p className="small-medium text-dark500_light700">
           {questions?.length}
         </p>

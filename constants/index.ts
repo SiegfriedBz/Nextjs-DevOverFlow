@@ -38,14 +38,14 @@ export const LEFTSIDEBAR_LINKS: ISidebarLink[] = [
     label: "Tags",
   },
   {
-    imgURL: "/assets/icons/user.svg",
-    href: "/profile",
-    label: "Profile",
-  },
-  {
     imgURL: "/assets/icons/question.svg",
     href: "/ask-question",
     label: "Ask a question",
+  },
+  {
+    imgURL: "/assets/icons/user.svg",
+    href: "/profile",
+    label: "Profile",
   },
 ]
 

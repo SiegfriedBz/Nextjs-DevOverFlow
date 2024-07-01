@@ -7,3 +7,6 @@ export const getDaysAgo = (createdAt: Date) => {
 export const formatDate = (date: Date) => {
   return format(date, "MMMM dd, yyyy, hh:mm a")
 }
+export const formatShortDate = (date: Date) => {
+  return format(date, "MMMM, yyyy")
+}

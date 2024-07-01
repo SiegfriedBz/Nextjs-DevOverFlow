@@ -4,7 +4,7 @@ import type { TUser } from "@/types"
 import Image from "next/image"
 import Link from "next/link"
 import { Suspense } from "react"
-import Tag from "./shared/Tag"
+import Tag from "./Tag"
 import { Badge } from "./ui/badge"
 import { UserTagListWrapperSkeleton } from "./UserCardSkeleton"
 
@@ -12,7 +12,7 @@ type TProps = TUser
 
 const UserCard = ({
   _id,
-
+  clerkId,
   name,
   userName,
 
@@ -34,7 +34,7 @@ const UserCard = ({
         sm:px-10
       "
     >
-      <Link href={`/users/${_id}`}>
+      <Link href={`/profile/${clerkId}`}>
         <CardHeader>
           <CardTitle className="sm:h3-semibold base-semibold text-dark200_light900 line-clamp-1">
             <div className="flex flex-col items-center">

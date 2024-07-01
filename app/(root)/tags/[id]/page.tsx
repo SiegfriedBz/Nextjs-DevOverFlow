@@ -1,4 +1,5 @@
-import QuestionCard from "@/components/QuestionCard"
+import { QuestionListWrapperSkeleton } from "@/components/QuestionListWrapperSkeleton"
+import QuestionCard from "@/components/questions/QuestionCard"
 import NoResult from "@/components/shared/NoResult"
 import CustomFilter from "@/components/shared/search/filter/CustomFilter"
 import LocalSearchBar from "@/components/shared/search/LocalSearchBar"
@@ -9,13 +10,12 @@ import { currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import { Suspense } from "react"
 import { toast } from "sonner"
-import { QuestionListWrapperSkeleton } from "../../(home)/page"
 
 type TProps = {
   params: { id: string }
   searchParams: { [key: string]: string | undefined }
 }
-const TagDetailsPage = async ({ params, searchParams }: TProps) => {
+const TagDetailsPage = ({ params, searchParams }: TProps) => {
   return (
     <div>
       <Suspense fallback={<TagWrapperSkeleton />}>
@@ -71,9 +71,9 @@ const TagWrapperSkeleton = () => {
 
 const QuestionListWrapper = async ({ params, searchParams }: TProps) => {
   // Get current clerk user
-  const user = await currentUser()
+  const clerkUser = await currentUser()
 
-  if (!user) {
+  if (!clerkUser) {
     toast.info("Please sign in")
     redirect("/sign-in")
   }

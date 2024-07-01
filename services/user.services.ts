@@ -2,7 +2,9 @@
 
 import type { TMutateUserData } from "@/app/api/v1/webhooks/clerk/route"
 import connectToMongoDB from "@/lib/mongoose.utils"
-import Question from "@/models/question.model"
+import { TMutateUserInput } from "@/lib/zod/user.zod"
+import Answer, { IAnswerDocument } from "@/models/answer.model"
+import Question, { IQuestionDocument } from "@/models/question.model"
 import Tag from "@/models/tag.model"
 import User, { type IUserDocument } from "@/models/user.model"
 import type { TQuestion } from "@/types"
@@ -64,6 +66,35 @@ export async function getUser({
   }
 }
 
+export async function getUserForEdit({
+  filter,
+}: {
+  filter: FilterQuery<IUserDocument>
+}): Promise<TMutateUserInput> {
+  try {
+    await connectToMongoDB()
+
+    const userDocument: IUserDocument | null = await User.findOne(filter, {
+      name: 1,
+      userName: 1,
+      portfolio: 1,
+      location: 1,
+      bio: 1,
+    })
+    if (!userDocument?._id) {
+      throw new Error(`User not found`)
+    }
+
+    const user: TMutateUserInput = JSON.parse(JSON.stringify(userDocument))
+
+    return user
+  } catch (error) {
+    const err = error as Error
+    console.log("getUser Error", err.message)
+    throw new Error(`Could not fetch user - ${err.message}`)
+  }
+}
+
 export async function createUser(
   userData: TMutateUserData
 ): Promise<IUserDocument> {
@@ -80,7 +111,7 @@ export async function createUser(
   }
 }
 
-export async function findAndUpdateUser({
+export async function updateUser({
   filter,
   data,
   options = { new: true },
@@ -100,12 +131,12 @@ export async function findAndUpdateUser({
     return updatedUser
   } catch (error) {
     const err = error as Error
-    console.log("findAndUpdateUser Error", err.message)
+    console.log("updateUser Error", err.message)
     throw new Error(`Could not update user - ${err.message}`)
   }
 }
 
-export async function findAndDeleteUser({
+export async function deleteUser({
   filter,
   options = {},
 }: {
@@ -123,8 +154,39 @@ export async function findAndDeleteUser({
     return result
   } catch (error) {
     const err = error as Error
-    console.log("findAndDeleteUser Error", err.message)
+    console.log("deleteUser Error", err.message)
     throw new Error(`Could not delete user - ${err.message}`)
+  }
+}
+
+export async function getFullUserInfo({
+  filter,
+}: {
+  filter: FilterQuery<IUserDocument>
+}): Promise<{
+  user: IUserDocument
+  userTotalQuestions: number
+  userTotalAnswers: number
+}> {
+  try {
+    await connectToMongoDB()
+
+    const user: IUserDocument | null = await User.findOne(filter)
+
+    if (!user?._id) {
+      throw new Error(`User not found`)
+    }
+
+    const userTotalQuestions = await Question.countDocuments({
+      author: user._id,
+    })
+    const userTotalAnswers = await Answer.countDocuments({ author: user._id })
+
+    return { user, userTotalQuestions, userTotalAnswers }
+  } catch (error) {
+    const err = error as Error
+    console.log("getUser Error", err.message)
+    throw new Error(`Could not fetch user - ${err.message}`)
   }
 }
 
@@ -190,5 +252,89 @@ export async function getCurrentUserSavedQuestions({
     const err = error as Error
     console.log("getCurrentUserSavedQuestions Error", err.message)
     throw new Error(`Could not fetch saved questions - ${err.message}`)
+  }
+}
+
+export async function getUserQuestions({
+  userId,
+  searchParams,
+}: {
+  userId: string
+  searchParams?: { [key: string]: string | undefined }
+}): Promise<TQuestion[]> {
+  try {
+    await connectToMongoDB()
+
+    const questionsDoc: IQuestionDocument[] = await Question.find({
+      author: userId,
+    })
+      .populate([
+        {
+          path: "author",
+          model: User,
+          select: "_id clerkId name picture",
+        },
+        {
+          path: "tags",
+          model: Tag,
+          select: "_id name",
+        },
+      ])
+      .sort({ views: -1 })
+
+    const questions: TQuestion[] = JSON.parse(JSON.stringify(questionsDoc))
+
+    return questions
+  } catch (error) {
+    const err = error as Error
+    console.log("getUserQuestions Error", err.message)
+    throw new Error(`Could not fetch user's questions - ${err.message}`)
+  }
+}
+
+export async function getUserAnswers({
+  userId,
+  searchParams,
+}: {
+  userId: string
+  searchParams?: { [key: string]: string | undefined }
+}): Promise<IAnswerDocument[]> {
+  try {
+    await connectToMongoDB()
+
+    // TODO
+    // HANDLE searchParams
+    // const {
+    //   page = 1,
+    //   numOfResultsPerPage = 10,
+    //   filter = "",
+    //   searchQuery = "",
+    // } = searchParams
+
+    const answersDoc: IAnswerDocument[] = await Answer.find(
+      {
+        author: userId,
+      },
+      { content: 1, author: 1, upVoters: 1, createdAt: 1, question: 1 }
+    )
+      .populate([
+        {
+          path: "author",
+          model: User,
+          select: "_id clerkId name picture",
+        },
+        {
+          path: "question",
+          model: Question,
+          select: "_id title",
+        },
+      ])
+      .sort({ createdAt: -1 })
+
+    return answersDoc
+  } catch (error) {
+    const err = error as Error
+    console.log("getUserAnswers Error", err.message)
+    throw new Error(`Could not fetch user's answers - ${err.message}`)
   }
 }

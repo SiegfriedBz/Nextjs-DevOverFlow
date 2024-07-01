@@ -1,4 +1,4 @@
-import Tag from "@/components/shared/Tag"
+import Tag from "@/components/Tag"
 import Image from "next/image"
 import Link from "next/link"
 import SideBar from "./Sidebar"

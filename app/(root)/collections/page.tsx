@@ -1,4 +1,5 @@
-import QuestionCard from "@/components/QuestionCard"
+import { QuestionListWrapperSkeleton } from "@/components/QuestionListWrapperSkeleton"
+import QuestionList from "@/components/questions/QuestionList"
 import NoResult from "@/components/shared/NoResult"
 import CustomFilter from "@/components/shared/search/filter/CustomFilter"
 import LocalSearchBar from "@/components/shared/search/LocalSearchBar"
@@ -9,7 +10,6 @@ import { currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import { Suspense } from "react"
 import { toast } from "sonner"
-import { QuestionListWrapperSkeleton } from "../(home)/page"
 
 type TProps = {
   searchParams?: { [key: string]: string | undefined }
@@ -45,9 +45,9 @@ export default CollectionsPage
 
 const SavedQuestionListWrapper = async ({ searchParams }: TProps) => {
   // Get current clerk user
-  const user = await currentUser()
+  const clerkUser = await currentUser()
 
-  if (!user) {
+  if (!clerkUser) {
     toast.info("Please sign in")
     redirect("/sign-in")
   }
@@ -56,22 +56,14 @@ const SavedQuestionListWrapper = async ({ searchParams }: TProps) => {
     searchParams,
   })
 
-  return data && data?.length > 0 ? (
-    <ul className="flex w-full flex-col gap-8 max-sm:gap-6 [&>*:first-child]:mt-2">
-      {data.map((question) => {
-        return (
-          <li key={question._id}>
-            <QuestionCard {...question} />
-          </li>
-        )
-      })}
-    </ul>
-  ) : (
-    <NoResult
-      resultType="saved question"
-      paragraphContent="Browse questions and start adding them to your favorites"
-      href="/"
-      linkLabel="Browse questions"
-    />
+  return (
+    <QuestionList data={data}>
+      <NoResult
+        resultType="saved question"
+        paragraphContent="Browse questions and start adding them to your favorites"
+        href="/"
+        linkLabel="Browse questions"
+      />
+    </QuestionList>
   )
 }

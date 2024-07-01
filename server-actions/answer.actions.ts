@@ -3,9 +3,17 @@
 import { mutateAnswerSchema, TMutateAnswerInput } from "@/lib/zod/answer.zod"
 import { IQuestionDocument } from "@/models/question.model"
 import { IUserDocument } from "@/models/user.model"
-import { createAnswer, findAndUpdateAnswer } from "@/services/answer.services"
-import { findAndUpdateQuestion } from "@/services/question.services"
-import { findAndUpdateUser, getUser } from "@/services/user.services"
+import {
+  createAnswer,
+  deleteAnswer,
+  updateAnswer,
+} from "@/services/answer.services"
+import { deleteManyInteractions } from "@/services/interaction.services"
+import {
+  updateManyQuestions,
+  updateQuestion,
+} from "@/services/question.services"
+import { updateUser, getUser } from "@/services/user.services"
 import { currentUser } from "@clerk/nextjs/server"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
@@ -44,13 +52,13 @@ export async function createAnswerAction({
 
     // update question with newAnswer
     const questionId = parsedData.data.question
-    await findAndUpdateQuestion({
+    await updateQuestion({
       filter: { _id: questionId },
       data: { $push: { answers: newAnswer._id } },
     })
 
     // update user's reputation
-    await findAndUpdateUser({
+    await updateUser({
       filter: { _id: (author as IUserDocument)._id },
       data: { reputation: (author as IUserDocument).reputation + 5 },
     })
@@ -60,7 +68,35 @@ export async function createAnswerAction({
 
     return JSON.parse(JSON.stringify(newAnswer))
   } catch (error) {
-    console.log(error)
+    console.log("===== createAnswerAction Error", error)
+    return error
+  }
+}
+
+export async function deleteAnswerAction({ _id }: { _id: string }) {
+  try {
+    const answerId = _id
+
+    //  delete answer
+    await deleteAnswer({
+      filter: { _id: answerId },
+    })
+
+    // remove answer from all associated questions
+    await updateManyQuestions({
+      filter: { answers: answerId },
+      data: {
+        $pull: { answers: answerId },
+      },
+    })
+
+    // delete associated interactions
+    await deleteManyInteractions({ filter: { answer: answerId } })
+
+    // revalidate
+    revalidatePath("/")
+  } catch (error) {
+    console.log("===== deleteAnswerAction Error", error)
     return error
   }
 }
@@ -79,7 +115,7 @@ export async function voteAnswerAction({
       ? { $push: { upVoters: voterId }, $pull: { downVoters: voterId } }
       : { $pull: { upVoters: voterId }, $push: { downVoters: voterId } }
 
-    const updatedAnswer = await findAndUpdateAnswer({
+    const updatedAnswer = await updateAnswer({
       filter: { _id: answerId },
       data: query,
     })
@@ -89,7 +125,7 @@ export async function voteAnswerAction({
 
     return JSON.parse(JSON.stringify(updatedAnswer))
   } catch (error) {
-    console.log(error)
+    console.log("===== voteAnswerAction Error", error)
     return error
   }
 }

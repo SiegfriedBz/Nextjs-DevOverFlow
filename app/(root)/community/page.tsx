@@ -48,7 +48,7 @@ const UserListWrapper = async ({ searchParams }: TSearchParamsProps) => {
     <ul className="flex w-full flex-wrap justify-start gap-8">
       {data.map((user) => {
         return (
-          <li key={user._id} className="size-full">
+          <li key={user._id} className="h-full">
             <UserCard {...user} />
           </li>
         )

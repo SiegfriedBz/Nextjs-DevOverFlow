@@ -3,6 +3,7 @@
 import connectToMongoDB from "@/lib/mongoose.utils"
 import type { TMutateAnswerInput } from "@/lib/zod/answer.zod"
 import Answer, { type IAnswerDocument } from "@/models/answer.model"
+import type { IQuestionDocument } from "@/models/question.model"
 import User from "@/models/user.model"
 import type { TAnswer } from "@/types"
 import { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
@@ -72,7 +73,7 @@ export async function createAnswer({
   }
 }
 
-export async function findAndUpdateAnswer({
+export async function updateAnswer({
   filter,
   data,
   options = { new: true },
@@ -90,7 +91,7 @@ export async function findAndUpdateAnswer({
       options
     )
 
-    console.log("findAndUpdateAnswer updatedAnswer", updatedAnswer)
+    console.log("updateAnswer updatedAnswer", updatedAnswer)
 
     // TODO
     // if (!updatedAnswer?._id) {
@@ -100,12 +101,36 @@ export async function findAndUpdateAnswer({
     return updatedAnswer
   } catch (error) {
     const err = error as Error
-    console.log("===== findAndUpdateAnswer Error", err)
+    console.log("===== updateAnswer Error", err)
     throw new Error(`Could not update answer - ${err.message}`)
   }
 }
 
-export async function findAndDeleteManyAnswers({
+export async function deleteAnswer({
+  filter,
+  options = {},
+}: {
+  filter: FilterQuery<IAnswerDocument> | undefined
+  options?: QueryOptions<IAnswerDocument> | null | undefined
+}): Promise<IQuestionDocument | null> {
+  try {
+    await connectToMongoDB()
+
+    const deletedDocument = await Answer.findOneAndDelete(filter, options)
+
+    if (!deletedDocument) {
+      throw new Error(`Answer not found`)
+    }
+
+    return deletedDocument
+  } catch (error) {
+    const err = error as Error
+    console.log("===== deleteAnswer Error", err)
+    throw new Error(`Could not delete answer - ${err.message}`)
+  }
+}
+
+export async function deleteManyAnswers({
   filter,
 }: {
   filter: FilterQuery<IAnswerDocument> | undefined
@@ -115,14 +140,10 @@ export async function findAndDeleteManyAnswers({
 
     const result = await Answer.deleteMany(filter)
 
-    // if (!result.deletedCount) {
-    //   throw new Error(`No answers found for the given filter`)
-    // }
-
     return result
   } catch (error) {
     const err = error as Error
-    console.log("===== findAndDeleteManyAnswers Error", err)
+    console.log("===== deleteManyAnswers Error", err)
     throw new Error(`Could not delete answers - ${err.message}`)
   }
 }
