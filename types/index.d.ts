@@ -7,6 +7,7 @@ import type { IUserDocument } from "@/models/user.model"
 export type TQueryParams = {
   page?: number
   numOfResultsPerPage?: number
+  localSortQuery?: string
   localSearchQuery?: string
   globalSearchQuery?: string
 }
