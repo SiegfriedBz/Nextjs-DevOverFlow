@@ -11,7 +11,7 @@ export const COMMUNITY_FILTER_OPTIONS = [
   "Top Contributors",
 ]
 
-export const TAGS_FILTER_OPTIONS = ["Popular", "Recent", "Name", "Old"]
+export const TAGS_FILTER_OPTIONS = ["Name", "Popular", "Old", "Recent"]
 
 export const ANSWERS_FILTER_OPTIONS = [
   "Highest UpVotes",
