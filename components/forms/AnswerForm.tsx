@@ -16,7 +16,7 @@ import {
 } from "@/lib/zod/answer.zod"
 import { createAnswerAction } from "@/server-actions/answer.actions"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
@@ -38,8 +38,8 @@ const AnswerForm = ({ questionId }: TProps) => {
 
     try {
       await createAnswerAction({ data: values })
-
       form.reset()
+      form.clearErrors()
       toast.success(`Answer created successfully!`)
     } catch (error) {
       console.log(error)
@@ -49,7 +49,9 @@ const AnswerForm = ({ questionId }: TProps) => {
     }
   }
 
-  console.log("WATCH", form.watch("question"))
+  useEffect(() => {
+    form.clearErrors()
+  }, [form])
 
   return (
     <Form {...form}>
@@ -67,6 +69,7 @@ const AnswerForm = ({ questionId }: TProps) => {
               </FormLabel>
               <FormControl className="background-light900_dark300 light-border-2 mt-3.5 ">
                 <TinyEditor
+                  editorInitialValue={field.value}
                   handleEditorChange={(content: string) =>
                     field.onChange(content)
                   }
