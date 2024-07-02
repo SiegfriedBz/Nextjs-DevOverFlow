@@ -37,8 +37,16 @@ const FilterCustomSelect = ({
         <SelectContent>
           {/* <SelectGroup> */}
           {options.map((option) => {
+            const isActiveOption =
+              option.toLowerCase() ===
+              filter?.toLowerCase().split("_").join(" ")
+
             return (
-              <SelectItem key={`option-${option}`} value={option}>
+              <SelectItem
+                className={`${isActiveOption ? "bg-accent text-accent-foreground" : ""}`}
+                key={`option-${option}`}
+                value={option}
+              >
                 {option}
               </SelectItem>
             )
