@@ -12,7 +12,7 @@ import { ANSWERS_FILTER_OPTIONS } from "@/constants/filters"
 import { getDaysAgo } from "@/lib/dates.utils"
 import type { IQuestionDocument } from "@/models/question.model"
 import type { IUserDocument } from "@/models/user.model"
-import { getAllAnswers } from "@/services/answer.services"
+import { getAllAnswersForQuestionById } from "@/services/answer.services"
 import { getQuestion } from "@/services/question.services"
 import { getUser } from "@/services/user.services"
 import type { TAnswer, TTag, TUser } from "@/types"
@@ -178,10 +178,15 @@ const AnswerListWrapper = async ({
   questionId,
   searchParams,
 }: TAnswerListWrapperProps) => {
-  const selectedAnswers: TAnswer[] = await getAllAnswers({
-    filter: { question: questionId },
-    searchParams,
+  const localSortQuery = searchParams?.sort
+  const globalSearchQuery = searchParams?.globalQ
+
+  const selectedAnswers: TAnswer[] = await getAllAnswersForQuestionById({
+    questionId,
+    params: { localSortQuery, globalSearchQuery },
   })
+
+  console.log("==== selectedAnswers", selectedAnswers)
 
   if (!selectedAnswers) return null
   return (

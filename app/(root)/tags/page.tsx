@@ -36,11 +36,12 @@ const TagsPage = ({ searchParams }: TSearchParamsProps) => {
 export default TagsPage
 
 const TagListWrapper = async ({ searchParams }: TSearchParamsProps) => {
+  const localSortQuery = searchParams?.sort
   const localSearchQuery = searchParams?.q
   const globalSearchQuery = searchParams?.globalQ
 
   const data: TTag[] | null = await getAllTags({
-    params: { localSearchQuery, globalSearchQuery },
+    params: { localSortQuery, localSearchQuery, globalSearchQuery },
   })
 
   return data && data?.length > 0 ? (

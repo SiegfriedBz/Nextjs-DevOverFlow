@@ -39,11 +39,12 @@ const CommunityPage = ({ searchParams }: TSearchParamsProps) => {
 export default CommunityPage
 
 const UserListWrapper = async ({ searchParams }: TSearchParamsProps) => {
+  const localSortQuery = searchParams?.sort
   const localSearchQuery = searchParams?.q
   const globalSearchQuery = searchParams?.globalQ
 
   const data: TUser[] | null = await getAllUsers({
-    params: { localSearchQuery, globalSearchQuery },
+    params: { localSortQuery, localSearchQuery, globalSearchQuery },
   })
 
   return data && data?.length > 0 ? (
