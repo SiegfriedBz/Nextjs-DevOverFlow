@@ -156,7 +156,7 @@ const QuestionForm = ({ actionType = "create", questionData }: TProps) => {
               </FormLabel>
               <FormControl className="background-light900_dark300 light-border-2 mt-3.5 ">
                 <TinyEditor
-                  editInitialValue={isCreateForm ? "" : field.value}
+                  editorInitialValue={isCreateForm ? "" : field.value}
                   handleEditorChange={(content: string) =>
                     field.onChange(content)
                   }
