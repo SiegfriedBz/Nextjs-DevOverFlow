@@ -1,5 +1,6 @@
 "use server"
 
+import { NUM_RESULTS_PER_PAGE } from "@/constants"
 import connectToMongoDB from "@/lib/mongoose.utils"
 import type { IQuestionDocument } from "@/models/question.model"
 import Question from "@/models/question.model"
@@ -7,7 +8,7 @@ import Tag, { type ITagDocument } from "@/models/tag.model"
 import User from "@/models/user.model"
 import { getUser } from "@/services/user.services"
 import type { TQueryParams, TQuestion, TTag } from "@/types"
-import type { FilterQuery, UpdateQuery } from "mongoose"
+import type { FilterQuery, PipelineStage, UpdateQuery } from "mongoose"
 
 export async function getHotTags({
   limit,
@@ -48,14 +49,17 @@ export async function getAllTags({ params }: { params: TQueryParams }) {
 
     const {
       page = 1,
-      numOfResultsPerPage = 10,
+      numOfResultsPerPage = NUM_RESULTS_PER_PAGE,
+      localSortQuery = "",
       localSearchQuery = "",
       // globalSearchQuery = "",
     } = params
 
-    const limit = page * numOfResultsPerPage
-    const skip = (page - 1) * numOfResultsPerPage
-    const query: FilterQuery<ITagDocument> = localSearchQuery
+    // Step 1: Build aggregation pipeline
+    const pipelineStages: PipelineStage[] = []
+
+    // Step 2: Match questions by localSearchQuery
+    const searchQueryStage: FilterQuery<ITagDocument> = localSearchQuery
       ? {
           $or: [
             { name: { $regex: localSearchQuery, $options: "i" } },
@@ -63,13 +67,66 @@ export async function getAllTags({ params }: { params: TQueryParams }) {
           ],
         }
       : {}
+    pipelineStages.push({ $match: searchQueryStage })
 
-    const result = await Tag.find(query)
-      .populate([{ path: "questions", model: Question }])
-      .populate([{ path: "followers", model: User }])
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 })
+    // Step 3: Add numQuestions field
+    pipelineStages.push({
+      $addFields: {
+        numQuestions: { $size: "$questions" }, // Compute number of answers
+      },
+    })
+
+    // Step 4: Conditionally sort Tags
+    let sortQueryStage: Record<string, 1 | -1> | undefined
+    switch (localSortQuery) {
+      case "name":
+        sortQueryStage = { name: 1 }
+        break
+      case "popular":
+        sortQueryStage = { numQuestions: -1 }
+        break
+      case "old":
+        sortQueryStage = { createdAt: 1 }
+        break
+      case "recent":
+        sortQueryStage = { createdAt: -1 }
+        break
+      default:
+        sortQueryStage = { createdAt: -1 } // Default to sorting by createdAt in descending order (newest first)
+    }
+
+    sortQueryStage && pipelineStages.push({ $sort: sortQueryStage })
+
+    // Step 5: Add necessary fields
+    const projectStage = {
+      _id: 1,
+      name: 1,
+      description: 1,
+      questions: 1,
+      followers: 1,
+      createdAt: 1,
+    }
+
+    pipelineStages.push({
+      $project: projectStage,
+    })
+
+    // Step 6: add pagination
+    const limit = page * numOfResultsPerPage
+    const skip = (page - 1) * numOfResultsPerPage
+    pipelineStages.push({ $skip: skip })
+    pipelineStages.push({ $limit: limit })
+
+    // Step 7: Perform the aggregation query
+    const tagsAggregation = await Tag.aggregate(pipelineStages).exec()
+
+    // Step 8: Populate
+    const populateFields = [
+      { path: "questions", model: Question },
+      { path: "followers", model: User },
+    ]
+
+    const result = await Question.populate(tagsAggregation, populateFields)
 
     const tags = JSON.parse(JSON.stringify(result))
 
@@ -134,13 +191,12 @@ export async function getQuestionsByTag({
 
     const {
       page = 1,
-      numOfResultsPerPage = 10,
+      numOfResultsPerPage = NUM_RESULTS_PER_PAGE,
       localSearchQuery = "",
       // globalSearchQuery = "",
     } = params
 
-    const limit = page * numOfResultsPerPage
-    const skip = (page - 1) * numOfResultsPerPage
+    // Build search query
     const query: FilterQuery<IQuestionDocument> = localSearchQuery
       ? {
           $or: [
@@ -150,6 +206,11 @@ export async function getQuestionsByTag({
         }
       : {}
 
+    // Add pagination
+    const limit = page * numOfResultsPerPage
+    const skip = (page - 1) * numOfResultsPerPage
+
+    // Perform query
     const result: ITagDocument | null = await Tag.findOne(filter, {
       questions: 1,
     })
@@ -178,8 +239,10 @@ export async function getQuestionsByTag({
       throw new Error("Tag not found")
     }
 
+    // Extract questions
     const questionsDoc = result.questions
 
+    // Format
     const questions = JSON.parse(JSON.stringify(questionsDoc))
 
     return questions

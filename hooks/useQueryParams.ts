@@ -28,7 +28,7 @@ const useQueryParams = ({ queryParamName, debounceDelay = 1000 }: TProps) => {
       if (!value) {
         queryParams.delete(name)
       } else {
-        queryParams.set(name, value?.toLowerCase())
+        queryParams.set(name, value?.toLowerCase().split(" ").join("_"))
       }
 
       return queryParams.toString()
@@ -40,8 +40,8 @@ const useQueryParams = ({ queryParamName, debounceDelay = 1000 }: TProps) => {
   useEffect(() => {
     const queryString = getQueryString({ name: queryParamName, value })
 
-    router.push(`${pathname}?${queryString}`)
-    router.refresh()
+    router.push(`${pathname}?${queryString}`, { scroll: false })
+    // router.refresh()
   }, [queryParamName, value, pathname, getQueryString, router])
 
   return [search, setSearch] as const

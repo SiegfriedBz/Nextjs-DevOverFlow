@@ -52,11 +52,12 @@ const SavedQuestionListWrapper = async ({ searchParams }: TProps) => {
     redirect("/sign-in")
   }
 
+  const localSortQuery = searchParams?.sort
   const localSearchQuery = searchParams?.q
   const globalSearchQuery = searchParams?.globalQ
 
   const data: TQuestion[] | null = await getCurrentUserSavedQuestions({
-    params: { localSearchQuery, globalSearchQuery },
+    params: { localSortQuery, localSearchQuery, globalSearchQuery },
   })
 
   return (

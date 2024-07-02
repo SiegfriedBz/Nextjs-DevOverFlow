@@ -1,47 +1,106 @@
 "use server"
 
+import { NUM_RESULTS_PER_PAGE } from "@/constants"
 import connectToMongoDB from "@/lib/mongoose.utils"
 import type { TMutateAnswerInput } from "@/lib/zod/answer.zod"
 import Answer, { type IAnswerDocument } from "@/models/answer.model"
 import type { IQuestionDocument } from "@/models/question.model"
 import User from "@/models/user.model"
-import type { TAnswer } from "@/types"
-import { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
+import type { TAnswer, TQueryParams } from "@/types"
+import type {
+  FilterQuery,
+  PipelineStage,
+  QueryOptions,
+  UpdateQuery,
+} from "mongoose"
+import mongoose from "mongoose"
 
-export async function getAllAnswers({
-  filter = {}, // to get all answers for question._id
-  searchParams,
-  options = {},
+export async function getAllAnswersForQuestionById({
+  questionId,
+  params,
 }: {
-  filter?: FilterQuery<IAnswerDocument> | undefined
-  searchParams: { [key: string]: string | undefined }
-  options?: QueryOptions<any> | null | undefined
+  questionId: string
+  params: Omit<TQueryParams, "localSearchQuery">
 }) {
   try {
     await connectToMongoDB()
 
-    console.log("getAllAnswers filter", filter)
-    console.log("getAllAnswers searchParams", searchParams)
+    const {
+      page = 1,
+      numOfResultsPerPage = NUM_RESULTS_PER_PAGE,
+      localSortQuery,
+      // globalSearchQuery = "",
+    } = params
 
-    // TODO
-    // HANDLE searchParams
-    // const {
-    //   page = 1,
-    //   numOfResultsPerPage = 10,
-    //   filter = "",
-    //   searchQuery = "",
-    // } = searchParams
+    // Step 1: Build aggregation pipeline
+    const pipelineStages: PipelineStage[] = []
 
-    const answers = await Answer.find({ ...(filter || {}) })
-      .populate([
-        { path: "author", model: User },
-        // { path: "upVoters", model: User },
-        // { path: "downVoters", model: User },
-      ])
-      .sort({ createdAt: -1 })
-    // .lean()
+    // Match questions with _id === questionId
+    pipelineStages.push({
+      $match: { question: new mongoose.Types.ObjectId(questionId) },
+    })
 
-    return JSON.parse(JSON.stringify(answers))
+    // Step 2: Add numUpVotes fields
+    pipelineStages.push({
+      $addFields: {
+        numUpVotes: { $size: "$upVoters" }, // Compute number of upVoters
+      },
+    })
+
+    // Step 3: Conditionally sort Answers
+    let sortQueryStage: Record<string, 1 | -1> | undefined
+    switch (localSortQuery) {
+      case "highest_upvotes":
+        sortQueryStage = { numUpVotes: -1 }
+        break
+      case "lowest_upvotes":
+        sortQueryStage = { numUpVotes: 1 }
+        break
+      case "most_recent":
+        sortQueryStage = { createdAt: -1 }
+        break
+      case "oldest":
+        sortQueryStage = { createdAt: 1 }
+        break
+      default:
+        sortQueryStage = { createdAt: -1 }
+    }
+
+    sortQueryStage && pipelineStages.push({ $sort: sortQueryStage })
+
+    // Step 4: Add necessary fields
+    const projectStage = {
+      _id: 1,
+      author: 1,
+      content: 1,
+      views: 1,
+      question: 1,
+      createdAt: 1,
+      upVoters: 1,
+      downVoters: 1,
+    }
+
+    pipelineStages.push({
+      $project: projectStage,
+    })
+
+    // Step 5: add pagination
+    const limit = page * numOfResultsPerPage
+    const skip = (page - 1) * numOfResultsPerPage
+    pipelineStages.push({ $skip: skip })
+    pipelineStages.push({ $limit: limit })
+
+    // Step 6: Perform the aggregation query
+    const answersAggregation = await Answer.aggregate(pipelineStages).exec()
+
+    // Step 7: Populate
+    const populateFields = [{ path: "author", model: User }]
+
+    const result = await Answer.populate(answersAggregation, populateFields)
+
+    const answers = JSON.parse(JSON.stringify(result))
+
+    return answers
   } catch (error) {
     const err = error as Error
     console.log("getAllAnswers Error", err.message)

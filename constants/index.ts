@@ -1,10 +1,7 @@
-import type { ISidebarLink } from "@/types/index"
+import type { ISidebarLink, TTheme } from "@/types/index"
 
-export type TTheme = {
-  value: "light" | "dark" | "system"
-  label: string
-  icon: string
-}
+export const NUM_RESULTS_PER_PAGE = 10
+
 export const THEMES: TTheme[] = [
   { value: "light", label: "Light", icon: "/assets/icons/sun.svg" },
   { value: "dark", label: "Dark", icon: "/assets/icons/moon.svg" },
