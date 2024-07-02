@@ -1,7 +1,7 @@
 "use client"
 
-import type { TTheme } from "@/constants"
 import useLocalStorage from "@/hooks/useLocalStorage"
+import type { TTheme } from "@/types"
 import React, { createContext, useEffect } from "react"
 
 const LOCALSTORAGE_THEME_KEY = "devflow-theme"

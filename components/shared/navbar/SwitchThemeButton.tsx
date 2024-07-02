@@ -7,9 +7,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { THEMES, type TTheme } from "@/constants"
+import { THEMES } from "@/constants"
 import type { TThemeContext } from "@/context/ThemeContextProvider"
 import useThemeContext from "@/hooks/useThemeContext"
+import type { TTheme } from "@/types"
 import Image from "next/image"
 
 const lightTheme = THEMES.find((t) => t.value === "light") as TTheme
