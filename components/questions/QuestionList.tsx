@@ -12,10 +12,10 @@ const QuestionList = ({
   children: React.ReactNode
 }) => {
   return data && data?.length > 0 ? (
-    <ul className="flex w-full flex-col gap-8 max-sm:gap-6 [&>*:first-child]:mt-2">
+    <ul className="mb-4 flex flex-col gap-8 max-sm:gap-6 [&>*:first-child]:mt-2">
       {data.map((question) => {
         return (
-          <li key={question._id}>
+          <li key={question._id} className="w-full">
             <QuestionCard
               {...question}
               currentUserClerkId={currentUserClerkId}

@@ -52,17 +52,18 @@ const ShortAnswerCard = ({
         shadow-none
         outline-none
         sm:px-10
+        
       "
     >
-      <CardHeader>
+      <CardHeader className="px-0 pb-6 sm:ps-6">
         <span className="mb-2 text-xs opacity-80 sm:hidden">
           {daysAgo === 0
             ? "Today"
             : `${daysAgo} day${daysAgo === 1 ? "" : "s"} ago`}
         </span>
 
-        <div className="flex items-center justify-between">
-          <CardTitle className="sm:h3-semibold base-semibold text-dark200_light900 line-clamp-1">
+        <div className="flex max-sm:flex-col sm:items-center sm:justify-between">
+          <CardTitle className="sm:h3-semibold base-semibold text-dark200_light900 truncate max-lg:max-w-md max-md:max-w-72 lg:max-w-lg">
             <Link href={`/questions/${questionId}`}>{questionTitle}</Link>
           </CardTitle>
 
@@ -77,7 +78,7 @@ const ShortAnswerCard = ({
         </div>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="p-0 pb-6 sm:p-6 sm:pt-0">
         {/* Answer's short Content */}
         <ParsedHtml data={answerContent} />
       </CardContent>

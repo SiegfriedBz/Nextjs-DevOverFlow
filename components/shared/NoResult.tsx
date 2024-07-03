@@ -38,7 +38,7 @@ const NoResult = ({
         alt="No Result illustration"
         className="hidden object-contain dark:block"
       />
-      <h2 className="h2-bold text-dark200_light900 mt-8">
+      <h2 className="h2-bold text-dark200_light900 mt-4">
         There is no {resultType} to show
       </h2>
       <p

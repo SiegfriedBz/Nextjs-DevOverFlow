@@ -7,6 +7,7 @@ import QuestionTags from "@/components/QuestionTags"
 import SaveQuestionButton from "@/components/SaveQuestionButton"
 import Loading from "@/components/shared/Loading"
 import NoResult from "@/components/shared/NoResult"
+import Pagination from "@/components/shared/Pagination"
 import CustomFilter from "@/components/shared/search/filter/CustomFilter"
 import { ANSWERS_FILTER_OPTIONS } from "@/constants/filters"
 import { getDaysAgo } from "@/lib/dates.utils"
@@ -115,7 +116,7 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
       </DetailsQuestionOrAnswerHeader>
 
       {/* Question title */}
-      <h2 className="h2-semibold text-dark200_light900 mt-3.5 w-full text-left">
+      <h2 className="h2-semibold text-dark200_light900 mt-3.5 w-full text-left max-lg:max-w-md max-md:max-w-72 lg:max-w-lg">
         {title}
       </h2>
 
@@ -178,28 +179,36 @@ const AnswerListWrapper = async ({
   questionId,
   searchParams,
 }: TAnswerListWrapperProps) => {
-  const localSortQuery = searchParams?.sort
+  const pageStr = searchParams?.page
+  const page = (pageStr && parseInt(pageStr, 10)) || 1
   const globalSearchQuery = searchParams?.globalQ
+  const localSortQuery = searchParams?.sort
 
-  const selectedAnswers: TAnswer[] = await getAllAnswersForQuestionById({
+  const data = await getAllAnswersForQuestionById({
     questionId,
-    params: { localSortQuery, globalSearchQuery },
+    params: { page, globalSearchQuery, localSortQuery },
   })
 
-  console.log("==== selectedAnswers", selectedAnswers)
+  const answersForQuestion: TAnswer[] | null = data?.answers
+  const hasNextPage = !!data?.hasNextPage
 
-  if (!selectedAnswers) return null
   return (
     <>
-      <AnswerList
-        answers={selectedAnswers}
-        currentUserMongoId={currentUserMongoId}
-      >
-        <NoResult
-          resultType="answer"
-          paragraphContent="Change your selection to display answers, or write a new answer below."
-        />
-      </AnswerList>
+      <div className="w-full">
+        <AnswerList
+          data={answersForQuestion}
+          currentUserMongoId={currentUserMongoId}
+        >
+          <NoResult
+            resultType="answer"
+            paragraphContent="Change your selection to display answers, or write a new answer below."
+          />
+        </AnswerList>
+      </div>
+
+      <div className="mt-2 w-full">
+        <Pagination hasNextPage={hasNextPage} />
+      </div>
     </>
   )
 }

@@ -21,7 +21,8 @@ const TagCard = ({ _id, name, description, questions }: TProps) => {
         px-8
         py-10
         shadow-none outline-none
-        sm:w-[260px]
+        max-sm:w-full
+        sm:w-[280px]
       "
     >
       <Link href={`/tags/${_id}`}>

@@ -1,8 +1,9 @@
 import NoResult from "@/components/shared/NoResult"
+import Pagination from "@/components/shared/Pagination"
 import CustomFilter from "@/components/shared/search/filter/CustomFilter"
 import LocalSearchBar from "@/components/shared/search/LocalSearchBar"
-import TagCard from "@/components/TagCard"
 import TagCardSkeleton from "@/components/TagCardSkeleton"
+import TagList from "@/components/TagList"
 import { TAGS_FILTER_OPTIONS } from "@/constants/filters"
 import { getAllTags } from "@/services/tags.services."
 import type { TSearchParamsProps, TTag } from "@/types"
@@ -36,32 +37,37 @@ const TagsPage = ({ searchParams }: TSearchParamsProps) => {
 export default TagsPage
 
 const TagListWrapper = async ({ searchParams }: TSearchParamsProps) => {
-  const localSortQuery = searchParams?.sort
+  const pageStr = searchParams?.page
+  const page = (pageStr && parseInt(pageStr, 10)) || 1
   const localSearchQuery = searchParams?.q
   const globalSearchQuery = searchParams?.globalQ
+  const localSortQuery = searchParams?.sort
 
-  const data: TTag[] | null = await getAllTags({
-    params: { localSortQuery, localSearchQuery, globalSearchQuery },
+  const data = await getAllTags({
+    params: { page, localSearchQuery, globalSearchQuery, localSortQuery },
   })
 
-  return data && data?.length > 0 ? (
-    <ul className="flex w-full flex-wrap justify-start gap-8">
-      {data.map((tag) => {
-        return (
-          <li key={tag._id} className="h-full">
-            <TagCard {...tag} />
-          </li>
-        )
-      })}
-    </ul>
-  ) : (
-    <NoResult
-      resultType="tag"
-      paragraphContent="It looks like no tag was found"
-      href="/ask-question"
-      linkLabel="Ask a question"
-      className="mt-2 font-bold text-accent-blue"
-    />
+  const tags: TTag[] | null = data?.tags
+  const hasNextPage = !!data?.hasNextPage
+
+  return (
+    <>
+      <div className="w-full">
+        <TagList data={tags}>
+          <NoResult
+            resultType="tag"
+            paragraphContent="It looks like no tag was found"
+            href="/ask-question"
+            linkLabel="Ask a question"
+            className="mt-2 font-bold text-accent-blue"
+          />
+        </TagList>
+      </div>
+
+      <div className="mt-2 w-full">
+        <Pagination hasNextPage={hasNextPage} />
+      </div>
+    </>
   )
 }
 

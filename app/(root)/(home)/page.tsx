@@ -1,6 +1,7 @@
 import { QuestionListWrapperSkeleton } from "@/components/QuestionListWrapperSkeleton"
 import QuestionList from "@/components/questions/QuestionList"
 import NoResult from "@/components/shared/NoResult"
+import Pagination from "@/components/shared/Pagination"
 import CustomFilter from "@/components/shared/search/filter/CustomFilter"
 import LocalSearchBar from "@/components/shared/search/LocalSearchBar"
 import { Button } from "@/components/ui/button"
@@ -15,7 +16,7 @@ type TProps = {
 }
 const Home = ({ searchParams }: TProps) => {
   return (
-    <div>
+    <div className="h-full">
       <div className="flex w-full items-center max-sm:flex-col-reverse sm:justify-between">
         <h1 className="h1-bold text-dark100_light900">All Questions</h1>
         <Button
@@ -32,7 +33,7 @@ const Home = ({ searchParams }: TProps) => {
         <CustomFilter filterName="sort" filterOptions={HOME_FILTER_OPTIONS} />
       </div>
 
-      <div className="mt-4 flex flex-col justify-between gap-8 sm:items-center">
+      <div className="mt-4 flex size-full flex-col justify-between gap-8 sm:items-center">
         <Suspense fallback={<QuestionListWrapperSkeleton />}>
           <QuestionListWrapper searchParams={searchParams} />
         </Suspense>
@@ -44,22 +45,35 @@ const Home = ({ searchParams }: TProps) => {
 export default Home
 
 const QuestionListWrapper = async ({ searchParams }: TProps) => {
-  const localSortQuery = searchParams?.sort
+  const pageStr = searchParams?.page
+  const page = (pageStr && parseInt(pageStr, 10)) || 1
   const localSearchQuery = searchParams?.q
   const globalSearchQuery = searchParams?.globalQ
+  const localSortQuery = searchParams?.sort
 
-  const data: TQuestion[] | null = await getAllQuestions({
-    params: { localSortQuery, localSearchQuery, globalSearchQuery },
+  const data = await getAllQuestions({
+    params: { page, localSearchQuery, globalSearchQuery, localSortQuery },
   })
 
+  const questions: TQuestion[] | null = data?.questions
+  const hasNextPage = !!data?.hasNextPage
+
   return (
-    <QuestionList data={data}>
-      <NoResult
-        resultType="question"
-        paragraphContent="Be the first to break the silence! Ask a question and kickstart a discussion"
-        href="/ask-question"
-        linkLabel="Ask a question"
-      />
-    </QuestionList>
+    <>
+      <div className="w-full">
+        <QuestionList data={questions}>
+          <NoResult
+            resultType="question"
+            paragraphContent="Be the first to break the silence! Ask a question and kickstart a discussion"
+            href="/ask-question"
+            linkLabel="Ask a question"
+          />
+        </QuestionList>
+      </div>
+
+      <div className="mt-2 w-full">
+        <Pagination hasNextPage={hasNextPage} />
+      </div>
+    </>
   )
 }

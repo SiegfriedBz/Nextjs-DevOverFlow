@@ -7,13 +7,7 @@ import Answer, { type IAnswerDocument } from "@/models/answer.model"
 import type { IQuestionDocument } from "@/models/question.model"
 import User from "@/models/user.model"
 import type { TAnswer, TQueryParams } from "@/types"
-import type {
-  FilterQuery,
-  PipelineStage,
-  QueryOptions,
-  UpdateQuery,
-} from "mongoose"
-import mongoose from "mongoose"
+import type { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
 
 export async function getAllAnswersForQuestionById({
   questionId,
@@ -21,86 +15,62 @@ export async function getAllAnswersForQuestionById({
 }: {
   questionId: string
   params: Omit<TQueryParams, "localSearchQuery">
-}) {
+}): Promise<{
+  answers: TAnswer[]
+  hasNextPage: boolean
+}> {
   try {
-    await connectToMongoDB()
-
     const {
       page = 1,
-      numOfResultsPerPage = NUM_RESULTS_PER_PAGE,
-      localSortQuery,
       // globalSearchQuery = "",
+      localSortQuery,
     } = params
 
-    // Step 1: Build aggregation pipeline
-    const pipelineStages: PipelineStage[] = []
+    await connectToMongoDB()
 
-    // Match questions with _id === questionId
-    pipelineStages.push({
-      $match: { question: new mongoose.Types.ObjectId(questionId) },
-    })
+    // Build searchQuery on Answer
+    const searchQuery: FilterQuery<IAnswerDocument> = { question: questionId }
 
-    // Step 2: Add numUpVotes fields
-    pipelineStages.push({
-      $addFields: {
-        numUpVotes: { $size: "$upVoters" }, // Compute number of upVoters
-      },
-    })
-
-    // Step 3: Conditionally sort Answers
-    let sortQueryStage: Record<string, 1 | -1> | undefined
+    // Build sortQuery on Answer
+    let sortQuery: Record<string, 1 | -1> | undefined
     switch (localSortQuery) {
       case "highest_upvotes":
-        sortQueryStage = { numUpVotes: -1 }
+        sortQuery = { upVoters: -1 }
         break
       case "lowest_upvotes":
-        sortQueryStage = { numUpVotes: 1 }
+        sortQuery = { upVoters: 1 }
         break
       case "most_recent":
-        sortQueryStage = { createdAt: -1 }
+        sortQuery = { createdAt: -1 }
         break
       case "oldest":
-        sortQueryStage = { createdAt: 1 }
+        sortQuery = { createdAt: 1 }
         break
       default:
-        sortQueryStage = { createdAt: -1 }
+        sortQuery = { createdAt: -1 }
     }
 
-    sortQueryStage && pipelineStages.push({ $sort: sortQueryStage })
+    // Pagination
+    const limit = NUM_RESULTS_PER_PAGE
+    const skip = (page - 1) * NUM_RESULTS_PER_PAGE
 
-    // Step 4: Add necessary fields
-    const projectStage = {
-      _id: 1,
-      author: 1,
-      content: 1,
-      views: 1,
-      question: 1,
-      createdAt: 1,
-      upVoters: 1,
-      downVoters: 1,
-    }
+    // Perform query
+    const result = await Answer.find(searchQuery)
+      .populate([
+        { path: "author", model: User, select: "_id clerkId name picture" },
+      ])
+      .skip(skip)
+      .limit(limit)
+      .sort(sortQuery)
 
-    pipelineStages.push({
-      $project: projectStage,
-    })
+    // Pagination data
+    const totalDocs = await Answer.countDocuments(searchQuery)
+    const hasNextPage = totalDocs > skip + result.length
 
-    // Step 5: add pagination
-    const limit = page * numOfResultsPerPage
-    const skip = (page - 1) * numOfResultsPerPage
-    pipelineStages.push({ $skip: skip })
-    pipelineStages.push({ $limit: limit })
-
-    // Step 6: Perform the aggregation query
-    const answersAggregation = await Answer.aggregate(pipelineStages).exec()
-
-    // Step 7: Populate
-    const populateFields = [{ path: "author", model: User }]
-
-    const result = await Answer.populate(answersAggregation, populateFields)
-
+    // format
     const answers = JSON.parse(JSON.stringify(result))
 
-    return answers
+    return { answers, hasNextPage }
   } catch (error) {
     const err = error as Error
     console.log("getAllAnswers Error", err.message)

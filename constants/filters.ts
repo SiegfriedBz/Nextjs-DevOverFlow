@@ -14,16 +14,16 @@ export const COMMUNITY_FILTER_OPTIONS = [
 export const TAGS_FILTER_OPTIONS = ["Name", "Popular", "Old", "Recent"]
 
 export const ANSWERS_FILTER_OPTIONS = [
-  "Highest UpVotes",
-  "Lowest UpVotes",
   "Most Recent",
   "Oldest",
+  "Highest UpVotes",
+  "Lowest UpVotes",
 ]
 
-// TODO
-export const SAVED_QUESTIONS_FILTER_OPTIONS = [
-  "Highest UpVotes",
-  "Lowest UpVotes",
+export const QUESTIONS_FILTER_OPTIONS = [
   "Most Recent",
   "Oldest",
+  "Highest UpVotes",
+  "Lowest UpVotes",
+  "Most Viewed",
 ]

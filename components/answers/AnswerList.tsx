@@ -5,13 +5,13 @@ import React from "react"
 
 type TProps = {
   currentUserMongoId: string
-  answers: TAnswer[]
+  data: TAnswer[] | null
   children: React.ReactNode
 }
-const AnswerList = ({ currentUserMongoId, answers, children }: TProps) => {
-  return answers?.length > 0 ? (
-    <ul className="flex w-full flex-col gap-8 max-sm:gap-6 [&>*:first-child]:mt-2">
-      {(answers as TAnswer[])?.map((answer) => {
+const AnswerList = ({ currentUserMongoId, data, children }: TProps) => {
+  return data && data?.length > 0 ? (
+    <ul className="flex w-full flex-col gap-8 pb-8 max-sm:gap-6 [&>*:first-child]:mt-2">
+      {data?.map((answer) => {
         const {
           author, // populated user string[]
           content,

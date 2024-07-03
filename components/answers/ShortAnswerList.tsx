@@ -1,6 +1,5 @@
 import ShortAnswerCard from "@/components/answers/ShortAnswerCard"
-import type { IAnswerDocument } from "@/models/answer.model"
-import type { TQuestion, TUser } from "@/types"
+import type { TAnswer, TQuestion, TUser } from "@/types"
 import React from "react"
 
 const ShortAnswerList = ({
@@ -9,11 +8,11 @@ const ShortAnswerList = ({
   children,
 }: {
   currentUserClerkId?: string
-  data: IAnswerDocument[] | null
+  data: TAnswer[] | null
   children: React.ReactNode
 }) => {
   return data && data?.length > 0 ? (
-    <ul className="flex w-full flex-col gap-8 max-sm:gap-6 [&>*:first-child]:mt-2">
+    <ul className="mb-4 flex w-full flex-col gap-8 max-sm:gap-6 [&>*:first-child]:mt-2">
       {data.map((answer) => {
         const answerId = answer?._id
         const answerContent = answer?.content
@@ -28,7 +27,7 @@ const ShortAnswerList = ({
           question as unknown as TQuestion
 
         return (
-          <li key={answerId as string}>
+          <li key={answerId as string} className="w-full">
             <ShortAnswerCard
               currentUserClerkId={currentUserClerkId}
               answerId={answerId as string}

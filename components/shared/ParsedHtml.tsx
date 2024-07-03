@@ -32,7 +32,7 @@ const ParsedHtml = ({ data }: TProps) => {
     Prism.highlightAll()
   }, [])
 
-  return data ? <div>{parse(data)}</div> : null
+  return data ? <div className="w-full">{parse(data)}</div> : null
 }
 
 export default ParsedHtml
