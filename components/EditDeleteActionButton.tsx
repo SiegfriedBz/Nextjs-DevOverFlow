@@ -64,30 +64,39 @@ const EditDeleteActionButton = ({
 
   return (
     <SignedIn>
-      <div className="flex gap-4">
-        {/* Edit btn */}
-        {isMutateQuestion && (
-          <Button asChild>
-            <Link href={`/questions/${questionId}/edit`}>
+      <div className="flex items-center max-sm:-mb-4 max-sm:mt-2">
+        <div className="flex items-center justify-center max-sm:-ms-6">
+          {/* Edit btn */}
+          {isMutateQuestion && (
+            <Button asChild>
+              <Link
+                href={`/questions/${questionId}/edit`}
+                className="items-center justify-center"
+              >
+                <span className="inline-flex size-8 items-center justify-center">
+                  <Image
+                    src="/assets/icons/edit.svg"
+                    alt="edit icon"
+                    width={16}
+                    height={16}
+                  />
+                </span>
+              </Link>
+            </Button>
+          )}
+
+          {/* Delete btn */}
+          <Button onClick={handleDelete} disabled={isDeleting}>
+            <span className="inline-flex size-8 items-center justify-center">
               <Image
-                src="/assets/icons/edit.svg"
-                alt="edit icon"
+                src="/assets/icons/trash.svg"
+                alt="delete icon"
                 width={16}
                 height={16}
               />
-            </Link>
+            </span>
           </Button>
-        )}
-
-        {/* Delete btn */}
-        <Button onClick={handleDelete} disabled={isDeleting}>
-          <Image
-            src="/assets/icons/trash.svg"
-            alt="delete icon"
-            width={16}
-            height={16}
-          />
-        </Button>
+        </div>
       </div>
     </SignedIn>
   )
