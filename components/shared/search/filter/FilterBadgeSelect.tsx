@@ -25,7 +25,11 @@ const FilterBadgeSelect = ({
           option.toLowerCase() === filter?.toLowerCase().split("_").join(" ")
 
         return (
-          <Button onClick={() => setFilter(option)} key={`badge-${option}`}>
+          <Button
+            size="noPx"
+            onClick={() => setFilter(option)}
+            key={`badge-${option}`}
+          >
             <Badge
               className={`body-medium 
                   ${className} 
@@ -40,6 +44,18 @@ const FilterBadgeSelect = ({
           </Button>
         )
       })}
+      <Button
+        size="noPx"
+        onClick={() => setFilter("")}
+        className="rounded-xl border border-light-500"
+      >
+        <Badge
+          className={`body-medium body-regular light-border flex items-center justify-center rounded-xl border-none bg-light-800 px-4
+            py-2.5 text-light-500 hover:bg-light-700 dark:bg-dark-300 dark:text-light-500 dark:hover:bg-dark-200`}
+        >
+          Clear
+        </Badge>
+      </Button>
     </ul>
   )
 }
