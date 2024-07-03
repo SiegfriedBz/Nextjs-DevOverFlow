@@ -7,13 +7,8 @@ import Answer from "@/models/answer.model"
 import Question, { type IQuestionDocument } from "@/models/question.model"
 import Tag from "@/models/tag.model"
 import User from "@/models/user.model"
-import type { TQueryParams } from "@/types"
-import type {
-  FilterQuery,
-  PipelineStage,
-  QueryOptions,
-  UpdateQuery,
-} from "mongoose"
+import type { TQueryParams, TQuestion } from "@/types"
+import type { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
 
 export async function getHotQuestions({
   limit,
@@ -47,105 +42,80 @@ export async function getHotQuestions({
   }
 }
 
-export async function getAllQuestions({ params }: { params: TQueryParams }) {
+export async function getAllQuestions({
+  params,
+}: {
+  params: TQueryParams
+}): Promise<{
+  questions: TQuestion[]
+  hasNextPage: boolean
+}> {
   try {
-    await connectToMongoDB()
-
     const {
       page = 1,
-      numOfResultsPerPage = NUM_RESULTS_PER_PAGE,
-      localSortQuery,
       localSearchQuery = "",
       // globalSearchQuery = "",
+      localSortQuery,
     } = params
 
-    // Step 1: Build aggregation pipeline
-    const pipelineStages: PipelineStage[] = []
+    await connectToMongoDB()
 
-    // Step 2: Match questions by localSearchQuery
-    const searchQueryStage: FilterQuery<IQuestionDocument> = localSearchQuery
-      ? {
-          $or: [
-            { title: { $regex: localSearchQuery, $options: "i" } },
-            { content: { $regex: localSearchQuery, $options: "i" } },
-          ],
-        }
-      : {}
+    // Build searchQuery on Question
+    const searchQuery: FilterQuery<IQuestionDocument> = {}
 
-    pipelineStages.push({ $match: searchQueryStage })
+    if (localSearchQuery) {
+      searchQuery.$or = [
+        { title: { $regex: new RegExp(localSearchQuery, "i") } },
+        { content: { $regex: new RegExp(localSearchQuery, "i") } },
+      ]
+    }
 
-    // Step 3: Add numAnswers + numUpVotes fields
-    pipelineStages.push({
-      $addFields: {
-        numAnswers: { $size: "$answers" }, // Compute number of answers
-        numUpVotes: { $size: "$upVoters" }, // Compute number of upVoters
-      },
-    })
-
-    // Step 4: Conditionally match questions by numAnswers
-    localSortQuery === "unanswered" &&
-      pipelineStages.push({ $match: { numAnswers: { $eq: 0 } } })
-
-    // Step 5: Conditionally sort questions
-    let sortQueryStage: Record<string, 1 | -1> | undefined
+    // Build sortQuery on Question
+    let sortQuery: Record<string, 1 | -1> | undefined
     switch (localSortQuery) {
+      // OK
       case "newest":
-        sortQueryStage = { createdAt: -1 }
+        sortQuery = { createdAt: -1 }
         break
-      case "recommended":
-        sortQueryStage = { numUpVotes: -1 }
+      // OK
+      case "unanswered":
+        searchQuery.answers = { $size: 0 }
         break
       case "frequent":
-        sortQueryStage = { views: -1 }
+        sortQuery = { views: -1 }
         break
-      // case "unanswered", we don't need to sort by numAnswers explicitly, just filter
+      case "recommended":
+        sortQuery = { upVoters: -1 }
+        break
       default:
-        sortQueryStage = { createdAt: -1 }
+        sortQuery = { createdAt: -1 }
     }
 
-    sortQueryStage && pipelineStages.push({ $sort: sortQueryStage })
+    // Pagination
+    const limit = NUM_RESULTS_PER_PAGE
+    const skip = (page - 1) * NUM_RESULTS_PER_PAGE
 
-    // Step 6: Add necessary fields
-    const projectStage = {
-      _id: 1,
-      title: 1,
-      content: 1,
-      views: 1,
-      createdAt: 1,
-      author: 1,
-      tags: 1,
-      upVoters: 1,
-      downVoters: 1,
-      answers: 1,
-    }
+    // Perform query
+    const result = await Question.find(searchQuery)
+      .populate([
+        { path: "author", model: User },
+        { path: "tags", model: Tag },
+        { path: "upVoters", model: User },
+        { path: "downVoters", model: User },
+        { path: "answers", model: Answer },
+      ])
+      .skip(skip)
+      .limit(limit)
+      .sort(sortQuery)
 
-    pipelineStages.push({
-      $project: projectStage,
-    })
+    // Pagination data
+    const totalDocs = await Question.countDocuments(searchQuery)
+    const hasNextPage = totalDocs > skip + result.length
 
-    // Step 7: add pagination
-    const limit = page * numOfResultsPerPage
-    const skip = (page - 1) * numOfResultsPerPage
-    pipelineStages.push({ $skip: skip })
-    pipelineStages.push({ $limit: limit })
-
-    // Step 8: Perform the aggregation query
-    const questionsAggregation = await Question.aggregate(pipelineStages).exec()
-
-    // Step 9: Populate
-    const populateFields = [
-      { path: "author", model: User },
-      { path: "tags", model: Tag },
-      { path: "upVoters", model: User },
-      { path: "downVoters", model: User },
-      { path: "answers", model: Answer },
-    ]
-
-    const result = await Question.populate(questionsAggregation, populateFields)
-
+    // format
     const questions = JSON.parse(JSON.stringify(result))
 
-    return questions
+    return { questions, hasNextPage }
   } catch (error) {
     const err = error as Error
     console.log("getAllQuestions Error", err.message)

@@ -8,42 +8,42 @@ import Answer, { type IAnswerDocument } from "@/models/answer.model"
 import Question, { type IQuestionDocument } from "@/models/question.model"
 import Tag from "@/models/tag.model"
 import User, { type IUserDocument } from "@/models/user.model"
-import type { TQueryParams, TQuestion } from "@/types"
+import type { TAnswer, TQueryParams, TQuestion, TUser } from "@/types"
 import { currentUser } from "@clerk/nextjs/server"
-import type {
-  FilterQuery,
-  PipelineStage,
-  QueryOptions,
-  UpdateQuery,
-} from "mongoose"
-import mongoose from "mongoose"
+import type { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
 import { redirect } from "next/navigation"
 
-export async function getAllUsers({ params }: { params: TQueryParams }) {
+export async function getAllUsers({
+  params,
+}: {
+  params: TQueryParams
+}): Promise<{
+  users: TUser[]
+  hasNextPage: boolean
+}> {
   try {
-    await connectToMongoDB()
-
     const {
       page = 1,
-      numOfResultsPerPage = NUM_RESULTS_PER_PAGE,
-      localSortQuery,
       localSearchQuery = "",
       // globalSearchQuery = "",
+      localSortQuery,
     } = params
 
-    // build searchQuery
-    const searchQuery: FilterQuery<IUserDocument> = localSearchQuery
-      ? {
-          $or: [
-            { name: { $regex: localSearchQuery, $options: "i" } },
-            { userName: { $regex: localSearchQuery, $options: "i" } },
-            { location: { $regex: localSearchQuery, $options: "i" } },
-            { bio: { $regex: localSearchQuery, $options: "i" } },
-          ],
-        }
-      : {}
+    await connectToMongoDB()
 
-    // build sortQuery
+    // Build searchQuery
+    const searchQuery: FilterQuery<IUserDocument> = {}
+
+    if (localSearchQuery) {
+      searchQuery.$or = [
+        { name: { $regex: localSearchQuery, $options: "i" } },
+        { userName: { $regex: localSearchQuery, $options: "i" } },
+        { location: { $regex: localSearchQuery, $options: "i" } },
+        { bio: { $regex: localSearchQuery, $options: "i" } },
+      ]
+    }
+
+    // Build sortQuery
     let sortQuery: Record<string, 1 | -1>
     switch (localSortQuery) {
       case "new_users":
@@ -60,18 +60,25 @@ export async function getAllUsers({ params }: { params: TQueryParams }) {
       }
     }
 
-    // pagination
-    const limit = page * numOfResultsPerPage
-    const skip = (page - 1) * numOfResultsPerPage
+    // Pagination
+    const limit = NUM_RESULTS_PER_PAGE
+    const skip = (page - 1) * NUM_RESULTS_PER_PAGE
 
     // Perform query
-    const users = await User.find(searchQuery)
+    const result = await User.find(searchQuery)
       .populate([{ path: "savedQuestions", model: Question }])
       .skip(skip)
       .limit(limit)
       .sort(sortQuery)
 
-    return JSON.parse(JSON.stringify(users))
+    // Pagination data
+    const totalDocs = await User.countDocuments(searchQuery)
+    const hasNextPage = totalDocs > skip + result.length
+
+    // format
+    const users = JSON.parse(JSON.stringify(result))
+
+    return { users, hasNextPage }
   } catch (error) {
     const err = error as Error
     console.log("getAllUsers Error", err.message)
@@ -228,9 +235,19 @@ export async function getCurrentUserSavedQuestions({
   params,
 }: {
   params: TQueryParams
-}): Promise<TQuestion[]> {
+}): Promise<{
+  questions: TQuestion[]
+  hasNextPage: boolean
+}> {
   try {
-    // get user from from clerk DB
+    const {
+      page = 1,
+      localSearchQuery = "",
+      // globalSearchQuery = "",
+      localSortQuery = "",
+    } = params
+
+    /** get user from from clerk db */
     const clerckUser = await currentUser()
 
     if (!clerckUser) {
@@ -239,121 +256,77 @@ export async function getCurrentUserSavedQuestions({
 
     const clerkId = clerckUser?.id
 
-    //  connect to mongo db
+    /** connect to mongo db */
     await connectToMongoDB()
 
-    // Extract params
-    const {
-      page = 1,
-      numOfResultsPerPage = NUM_RESULTS_PER_PAGE,
-      localSortQuery = "",
-      localSearchQuery = "",
-      // globalSearchQuery = "",
-    } = params
+    // Build searchQuery on Question
+    const searchQuery: FilterQuery<IQuestionDocument> = {}
 
-    // Query
-    // Step 1: Find the User and get user's savedQuestions array
-    const user = await User.findOne({ clerkId }, { savedQuestions: 1 })
-
-    if (!user) {
-      throw new Error("User not found")
+    if (localSearchQuery) {
+      searchQuery.$or = [
+        { title: { $regex: new RegExp(localSearchQuery, "i") } },
+        { content: { $regex: new RegExp(localSearchQuery, "i") } },
+      ]
     }
 
-    // Step 2: Extract user's savedQuestions (array of IDs)
-    const savedQuestionIds = user.savedQuestions as mongoose.Types.ObjectId[]
-
-    // Step 3: Build aggregation pipeline
-    const pipelineStages: PipelineStage[] = []
-
-    // Step 4: Match the user's savedQuestions by their IDs
-    pipelineStages.push({
-      $match: { _id: { $in: savedQuestionIds } },
-    })
-
-    // Step 5: Match questions by localSearchQuery
-    const searchQueryStage: FilterQuery<IQuestionDocument> = localSearchQuery
-      ? {
-          $or: [
-            { title: { $regex: localSearchQuery, $options: "i" } },
-            { content: { $regex: localSearchQuery, $options: "i" } },
-          ],
-        }
-      : {}
-
-    pipelineStages.push({ $match: searchQueryStage })
-
-    // Step 6: add numUpVotes field, computed number of upVoters
-    pipelineStages.push({
-      $addFields: {
-        numUpVotes: { $size: "$upVoters" },
-      },
-    })
-
-    // Step 7: Sort questions by localSortQuery
-    let sortQueryStage: Record<string, 1 | -1> | undefined
+    // Build sortQuery on Question
+    let sortQuery: Record<string, 1 | -1> | undefined
     switch (localSortQuery) {
       case "most_recent":
-        sortQueryStage = { createdAt: -1 }
+        sortQuery = { createdAt: -1 }
         break
       case "oldest":
-        sortQueryStage = { createdAt: 1 }
+        sortQuery = { createdAt: 1 }
+        break
+      case "most_viewed":
+        sortQuery = { views: -1 }
         break
       case "highest_upvotes":
-        sortQueryStage = { numUpVotes: -1 }
+        sortQuery = { upVoters: -1 }
         break
       case "lowest_upvotes":
-        sortQueryStage = { numUpVotes: 1 }
+        sortQuery = { upVoters: 1 }
         break
       default:
-        sortQueryStage = {
+        sortQuery = {
           createdAt: -1,
         }
     }
 
-    sortQueryStage && pipelineStages.push({ $sort: sortQueryStage })
+    // Pagination
+    const limit = NUM_RESULTS_PER_PAGE
+    const skip = (page - 1) * NUM_RESULTS_PER_PAGE
 
-    // Step 8: Project only the necessary fields
-    const projectStage = {
-      _id: 1,
-      title: 1,
-      content: 1,
-      views: 1,
-      createdAt: 1,
-      author: 1,
-      tags: 1,
-      upVoters: 1,
-      downVoters: 1,
-      answers: 1,
-    }
-
-    pipelineStages.push({
-      $project: projectStage,
+    // Perform query
+    const result = await User.findOne(
+      { clerkId },
+      { savedQuestions: 1 }
+    ).populate({
+      path: "savedQuestions",
+      match: searchQuery as FilterQuery<IQuestionDocument>,
+      options: {
+        skip,
+        limit: limit + 1, // for pagination, fetch and include next page (+1 result)
+        sort: sortQuery,
+      },
+      populate: [
+        { path: "author", model: User, select: "_id clerkId name picture" },
+        { path: "tags", model: Tag, select: "_id name" },
+        { path: "upVoters", model: User },
+        { path: "downVoters", model: User },
+        { path: "answers", model: Answer },
+      ],
     })
 
-    // Step 9: add pagination
-    const limit = page * numOfResultsPerPage
-    const skip = (page - 1) * numOfResultsPerPage
-    pipelineStages.push({ $skip: skip })
-    pipelineStages.push({ $limit: limit })
+    const userSavedQuestions = result?.savedQuestions || []
 
-    // Step 10: Perform the aggregation query with all defined pipeline stages
-    const questionsAggregation = await Question.aggregate(pipelineStages).exec()
-
-    // Step 11: Populate the necessary fields
-    const populateFields = [
-      { path: "author", model: User },
-      { path: "tags", model: Tag },
-      { path: "upVoters", model: User },
-      { path: "downVoters", model: User },
-      { path: "answers", model: Answer },
-    ]
-
-    const result = await Question.populate(questionsAggregation, populateFields)
+    // Pagination data
+    const hasNextPage = userSavedQuestions.length > NUM_RESULTS_PER_PAGE
 
     // format
-    const questions = JSON.parse(JSON.stringify(result))
+    const questions = JSON.parse(JSON.stringify(userSavedQuestions || []))
 
-    return questions
+    return { questions, hasNextPage }
   } catch (error) {
     const err = error as Error
     console.log("getCurrentUserSavedQuestions Error", err.message)
@@ -363,15 +336,33 @@ export async function getCurrentUserSavedQuestions({
 
 export async function getUserQuestions({
   userId,
+  params,
 }: {
   userId: string
-}): Promise<TQuestion[]> {
+  params: Omit<
+    TQueryParams,
+    "localSearchQuery" | "globalSearchQuery" | "localSortQuery"
+  >
+}): Promise<{
+  questions: TQuestion[]
+  hasNextPage: boolean
+}> {
   try {
+    const { page = 1 } = params
+
     await connectToMongoDB()
 
-    const questionsDoc: IQuestionDocument[] = await Question.find({
+    // Pagination
+    const limit = NUM_RESULTS_PER_PAGE
+    const skip = (page - 1) * NUM_RESULTS_PER_PAGE
+
+    // Build searchQuery
+    const searchQuery: FilterQuery<IQuestionDocument> = {
       author: userId,
-    })
+    }
+
+    // Perform query
+    const result: IQuestionDocument[] = await Question.find(searchQuery)
       .populate([
         {
           path: "author",
@@ -384,11 +375,18 @@ export async function getUserQuestions({
           select: "_id name",
         },
       ])
-      .sort({ views: -1 })
+      .skip(skip)
+      .limit(limit)
+      .sort({ views: -1, upVoters: -1 })
 
-    const questions: TQuestion[] = JSON.parse(JSON.stringify(questionsDoc))
+    // Pagination data
+    const totalDocs = await Question.countDocuments(searchQuery)
+    const hasNextPage = totalDocs > skip + result.length
 
-    return questions
+    // format
+    const questions: TQuestion[] = JSON.parse(JSON.stringify(result))
+
+    return { questions, hasNextPage }
   } catch (error) {
     const err = error as Error
     console.log("getUserQuestions Error", err.message)
@@ -398,18 +396,39 @@ export async function getUserQuestions({
 
 export async function getUserAnswers({
   userId,
+  params,
 }: {
   userId: string
-}): Promise<IAnswerDocument[]> {
+  params: Omit<
+    TQueryParams,
+    "localSearchQuery" | "globalSearchQuery" | "localSortQuery"
+  >
+}): Promise<{
+  answers: TAnswer[]
+  hasNextPage: boolean
+}> {
   try {
+    const { page = 1 } = params
+
     await connectToMongoDB()
 
-    const answersDoc: IAnswerDocument[] = await Answer.find(
-      {
-        author: userId,
-      },
-      { content: 1, author: 1, upVoters: 1, createdAt: 1, question: 1 }
-    )
+    // Pagination
+    const limit = NUM_RESULTS_PER_PAGE
+    const skip = (page - 1) * NUM_RESULTS_PER_PAGE
+
+    // Build searchQuery
+    const searchQuery: FilterQuery<IAnswerDocument> = {
+      author: userId,
+    }
+
+    // Perform query
+    const result: IAnswerDocument[] = await Answer.find(searchQuery, {
+      content: 1,
+      author: 1,
+      upVoters: 1,
+      createdAt: 1,
+      question: 1,
+    })
       .populate([
         {
           path: "author",
@@ -422,9 +441,18 @@ export async function getUserAnswers({
           select: "_id title",
         },
       ])
-      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .sort({ views: -1, upVoters: -1 })
 
-    return answersDoc
+    // Pagination data
+    const totalDocs = await Answer.countDocuments(searchQuery)
+    const hasNextPage = totalDocs > skip + result.length
+
+    // format
+    const answers: TAnswer[] = JSON.parse(JSON.stringify(result))
+
+    return { answers, hasNextPage }
   } catch (error) {
     const err = error as Error
     console.log("getUserAnswers Error", err.message)
