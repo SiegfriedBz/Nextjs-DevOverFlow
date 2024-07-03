@@ -14,7 +14,7 @@ const GlobalSearchBar = () => {
       setSearch={setSearch}
       placeholder="Search globally"
       isLocal={false}
-      wrapperClassName="flex-1"
+      wrapperClassName="flex-1 max-md:hidden"
     />
   )
 }
