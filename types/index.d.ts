@@ -11,11 +11,10 @@ export type TTheme = {
 }
 
 export type TQueryParams = {
-  page?: number
-  numOfResultsPerPage?: number
-  localSortQuery?: string
-  localSearchQuery?: string
-  globalSearchQuery?: string
+  page: number
+  localSearchQuery?: string // ?q=
+  globalSearchQuery?: string // ?globalQ=
+  localSortQuery?: string // ?sort=
 }
 
 export type TUser = {
