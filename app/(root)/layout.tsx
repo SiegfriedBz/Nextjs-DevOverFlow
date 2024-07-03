@@ -4,7 +4,11 @@ import RightSidebar from "@/components/shared/navbar/sidebar/RightSidebar"
 
 import React from "react"
 
-const layout = ({ children }: { children: React.ReactNode }) => {
+type TProps = {
+  children: React.ReactNode
+}
+
+const layout = ({ children }: TProps) => {
   return (
     <main className="background-light850_dark100 relative min-h-screen">
       <Navbar />
@@ -13,8 +17,8 @@ const layout = ({ children }: { children: React.ReactNode }) => {
           <LeftSideBar />
         </div>
 
-        <section className="flex h-screen flex-1 flex-col px-6 pb-6 pt-36 max-md:pb-14 sm:px-14">
-          <div className="mx-auto w-full max-w-5xl overflow-y-auto">
+        <section className="flex h-screen w-full flex-1 flex-col px-6 pb-6 pt-36 max-md:pb-14 sm:px-14">
+          <div className="no-scrollbar mx-auto size-full max-w-5xl overflow-y-auto">
             {children}
           </div>
         </section>
