@@ -1,21 +1,23 @@
+import ShortAnswerList from "@/components/answers/ShortAnswerList"
+import ProfileLink from "@/components/ProfileLink"
 import {
   QuestionListWrapperSkeleton,
   ShortQuestionListWrapperSkeleton,
 } from "@/components/QuestionListWrapperSkeleton"
-import NoResult from "@/components/shared/NoResult"
-import ProfileLink from "@/components/ProfileLink"
 import QuestionList from "@/components/questions/QuestionList"
-import ShortAnswerList from "@/components/answers/ShortAnswerList"
+import NoResult from "@/components/shared/NoResult"
+import Pagination from "@/components/shared/Pagination"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import UserStats from "@/components/UserStats"
 import { formatShortDate } from "@/lib/dates.utils"
-import type { IAnswerDocument } from "@/models/answer.model"
+
 import {
   getFullUserInfo,
   getUserAnswers,
   getUserQuestions,
 } from "@/services/user.services"
+import type { TAnswer, TQuestion } from "@/types"
 import { SignedIn } from "@clerk/nextjs"
 import { currentUser } from "@clerk/nextjs/server"
 import Image from "next/image"
@@ -25,8 +27,9 @@ import { Suspense } from "react"
 
 type TProps = {
   params: { clerkId: string }
+  searchParams: { [key: string]: string | undefined }
 }
-const ProfilePage = async ({ params }: TProps) => {
+const ProfilePage = async ({ params, searchParams }: TProps) => {
   const clerkId = params.clerkId
 
   const { user, userTotalQuestions, userTotalAnswers } = await getFullUserInfo({
@@ -42,7 +45,7 @@ const ProfilePage = async ({ params }: TProps) => {
   const isCurrentUserProfile = currentUserClerkId === clerkId
 
   return (
-    <>
+    <div className="max-w-full">
       <div className="flex flex-col-reverse items-start justify-between sm:flex-row">
         <div className="flex flex-col-reverse items-start gap-4 lg:flex-row">
           <Image
@@ -102,13 +105,15 @@ const ProfilePage = async ({ params }: TProps) => {
       </div>
 
       {/* Stats */}
-      <UserStats
-        totalQuestions={userTotalQuestions}
-        totalAnswers={userTotalAnswers}
-      />
+      <div>
+        <UserStats
+          totalQuestions={userTotalQuestions}
+          totalAnswers={userTotalAnswers}
+        />
+      </div>
 
       {/* Tabs */}
-      <div className="mt-10 flex w-full gap-10">
+      <div className="mt-10 flex h-full gap-10">
         <Tabs defaultValue="top-posts" className="w-full">
           <TabsList className="background-light800_dark400 text-dark300_light900 min-h-12 space-x-2 rounded-xl">
             <TabsTrigger className="tab rounded-xl px-4 py-2" value="top-posts">
@@ -121,6 +126,7 @@ const ProfilePage = async ({ params }: TProps) => {
           <TabsContent value="top-posts">
             <Suspense fallback={<QuestionListWrapperSkeleton />}>
               <QuestionListWrapper
+                searchParams={searchParams}
                 currentUserClerkId={currentUserClerkId}
                 userName={user.name}
                 userId={user._id as string}
@@ -130,6 +136,7 @@ const ProfilePage = async ({ params }: TProps) => {
           <TabsContent value="answers">
             <Suspense fallback={<ShortQuestionListWrapperSkeleton />}>
               <AnswerListWrapper
+                searchParams={searchParams}
                 currentUserClerkId={currentUserClerkId}
                 userName={user.name}
                 userId={user._id as string}
@@ -141,13 +148,14 @@ const ProfilePage = async ({ params }: TProps) => {
 
       {/* Top Tags */}
       <div>Top Tags</div>
-    </>
+    </div>
   )
 }
 
 export default ProfilePage
 
 type TTabsProps = {
+  searchParams: { [key: string]: string | undefined }
   currentUserClerkId?: string
   userId: string
   userName: string
@@ -155,44 +163,82 @@ type TTabsProps = {
 
 // fetch all user's questions
 const QuestionListWrapper = async ({
+  searchParams,
   currentUserClerkId,
   userId,
   userName,
 }: TTabsProps) => {
+  const pageStr = searchParams?.page
+  const page = (pageStr && parseInt(pageStr, 10)) || 1
+
   const data = await getUserQuestions({
     userId,
+    params: { page },
   })
 
+  const userQuestions: TQuestion[] | null = data?.questions
+  const hasNextPage = !!data?.hasNextPage
+
   return (
-    <QuestionList data={data} currentUserClerkId={currentUserClerkId}>
-      <NoResult
-        resultType="question"
-        paragraphContent={`${userName} did not ask questions yet.`}
-        href="/community"
-        linkLabel="Visit other profiles"
-      />
-    </QuestionList>
+    <>
+      <div className="w-full">
+        <QuestionList
+          data={userQuestions}
+          currentUserClerkId={currentUserClerkId}
+        >
+          <NoResult
+            resultType="question"
+            paragraphContent={`${userName} did not post questions yet.`}
+            href="/community"
+            linkLabel="Visit other profiles"
+          />
+        </QuestionList>
+      </div>
+
+      <div className="mt-2 w-full">
+        <Pagination hasNextPage={hasNextPage} />
+      </div>
+    </>
   )
 }
 
 // fetch all user's answers populated with answer's author and answer's question
 const AnswerListWrapper = async ({
+  searchParams,
   currentUserClerkId,
   userId,
   userName,
 }: TTabsProps) => {
-  const data: IAnswerDocument[] = await getUserAnswers({
+  const pageStr = searchParams?.page
+  const page = (pageStr && parseInt(pageStr, 10)) || 1
+
+  const data = await getUserAnswers({
     userId,
+    params: { page },
   })
 
+  const userAnswers: TAnswer[] | null = data?.answers
+  const hasNextPage = !!data?.hasNextPage
+
   return (
-    <ShortAnswerList data={data} currentUserClerkId={currentUserClerkId}>
-      <NoResult
-        resultType="answer"
-        paragraphContent={`${userName} did not post answers yet.`}
-        href="/community"
-        linkLabel="Visit other profiles"
-      />
-    </ShortAnswerList>
+    <>
+      <div className="w-full">
+        <ShortAnswerList
+          data={userAnswers}
+          currentUserClerkId={currentUserClerkId}
+        >
+          <NoResult
+            resultType="answer"
+            paragraphContent={`${userName} did not post answers yet.`}
+            href="/community"
+            linkLabel="Visit other profiles"
+          />
+        </ShortAnswerList>
+      </div>
+
+      <div className="mt-2 w-full">
+        <Pagination hasNextPage={hasNextPage} />
+      </div>
+    </>
   )
 }

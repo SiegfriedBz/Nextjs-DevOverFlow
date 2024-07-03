@@ -1,11 +1,13 @@
 import { QuestionListWrapperSkeleton } from "@/components/QuestionListWrapperSkeleton"
-import QuestionCard from "@/components/questions/QuestionCard"
+import QuestionList from "@/components/questions/QuestionList"
 import NoResult from "@/components/shared/NoResult"
+import Pagination from "@/components/shared/Pagination"
 import CustomFilter from "@/components/shared/search/filter/CustomFilter"
 import LocalSearchBar from "@/components/shared/search/LocalSearchBar"
 import { Skeleton } from "@/components/ui/skeleton"
-import { SAVED_QUESTIONS_FILTER_OPTIONS } from "@/constants/filters"
+import { QUESTIONS_FILTER_OPTIONS } from "@/constants/filters"
 import { getQuestionsByTag, getTag } from "@/services/tags.services."
+import { TQuestion } from "@/types"
 import { currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import { Suspense } from "react"
@@ -30,8 +32,7 @@ const TagDetailsPage = ({ params, searchParams }: TProps) => {
 
         <CustomFilter
           filterName="sort"
-          // TODO
-          filterOptions={SAVED_QUESTIONS_FILTER_OPTIONS}
+          filterOptions={QUESTIONS_FILTER_OPTIONS}
         />
       </div>
 
@@ -80,33 +81,39 @@ const QuestionListWrapper = async ({ params, searchParams }: TProps) => {
 
   const tagId = params?.id
 
+  const pageStr = searchParams?.page
+  const page = (pageStr && parseInt(pageStr, 10)) || 1
   const localSearchQuery = searchParams?.q
   const globalSearchQuery = searchParams?.globalQ
+  const localSortQuery = searchParams?.sort
 
   // fetch questions pointing to this tag
   const data = await getQuestionsByTag({
     filter: {
       _id: tagId,
     },
-    params: { localSearchQuery, globalSearchQuery },
+    params: { page, localSearchQuery, globalSearchQuery, localSortQuery },
   })
 
-  return data && data?.length > 0 ? (
-    <ul className="flex w-full flex-col gap-8 max-sm:gap-6 [&>*:first-child]:mt-2">
-      {data.map((question) => {
-        return (
-          <li key={question._id}>
-            <QuestionCard {...question} />
-          </li>
-        )
-      })}
-    </ul>
-  ) : (
-    <NoResult
-      resultType="tag's question"
-      paragraphContent="Start browsing other tags"
-      href="/tags"
-      linkLabel="Browse tags"
-    />
+  const questions: TQuestion[] | null = data?.questions
+  const hasNextPage = !!data?.hasNextPage
+
+  return (
+    <>
+      <div className="w-full">
+        <QuestionList data={questions}>
+          <NoResult
+            resultType="tag's question"
+            paragraphContent="Start browsing other tags"
+            href="/tags"
+            linkLabel="Browse tags"
+          />
+        </QuestionList>
+      </div>
+
+      <div className="mt-2 w-full">
+        <Pagination hasNextPage={hasNextPage} />
+      </div>
+    </>
   )
 }

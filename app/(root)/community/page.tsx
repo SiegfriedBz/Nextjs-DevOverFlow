@@ -1,8 +1,9 @@
 import NoResult from "@/components/shared/NoResult"
+import Pagination from "@/components/shared/Pagination"
 import CustomFilter from "@/components/shared/search/filter/CustomFilter"
 import LocalSearchBar from "@/components/shared/search/LocalSearchBar"
-import UserCard from "@/components/UserCard"
 import UserCardSkeleton from "@/components/UserCardSkeleton"
+import UserList from "@/components/UserList"
 import { COMMUNITY_FILTER_OPTIONS } from "@/constants/filters"
 import { getAllUsers } from "@/services/user.services"
 import type { TSearchParamsProps, TUser } from "@/types"
@@ -10,7 +11,7 @@ import { Suspense } from "react"
 
 const CommunityPage = ({ searchParams }: TSearchParamsProps) => {
   return (
-    <div>
+    <>
       <div className="flex w-full items-center max-sm:flex-col-reverse sm:justify-between">
         <h1 className="h1-bold text-dark100_light900">All Users</h1>
       </div>
@@ -32,39 +33,44 @@ const CommunityPage = ({ searchParams }: TSearchParamsProps) => {
           <UserListWrapper searchParams={searchParams} />
         </Suspense>
       </div>
-    </div>
+    </>
   )
 }
 
 export default CommunityPage
 
 const UserListWrapper = async ({ searchParams }: TSearchParamsProps) => {
-  const localSortQuery = searchParams?.sort
+  const pageStr = searchParams?.page
+  const page = (pageStr && parseInt(pageStr, 10)) || 1
   const localSearchQuery = searchParams?.q
   const globalSearchQuery = searchParams?.globalQ
+  const localSortQuery = searchParams?.sort
 
-  const data: TUser[] | null = await getAllUsers({
-    params: { localSortQuery, localSearchQuery, globalSearchQuery },
+  const data = await getAllUsers({
+    params: { page, localSearchQuery, globalSearchQuery, localSortQuery },
   })
 
-  return data && data?.length > 0 ? (
-    <ul className="flex w-full flex-wrap justify-start gap-8">
-      {data.map((user) => {
-        return (
-          <li key={user._id} className="h-full">
-            <UserCard {...user} />
-          </li>
-        )
-      })}
-    </ul>
-  ) : (
-    <NoResult
-      resultType="user"
-      paragraphContent="Join now to help our Community grow ! 🚀"
-      href="/sign-up"
-      linkLabel="Join now to be the first !"
-      className="mt-2 font-bold text-accent-blue"
-    />
+  const users: TUser[] | null = data?.users
+  const hasNextPage = !!data?.hasNextPage
+
+  return (
+    <>
+      <div className="w-full">
+        <UserList data={users}>
+          <NoResult
+            resultType="user"
+            paragraphContent="Join now to help our Community grow ! 🚀"
+            href="/sign-up"
+            linkLabel="Join now to be the first !"
+            className="mt-2 font-bold text-accent-blue"
+          />
+        </UserList>
+      </div>
+
+      <div className="mt-2 w-full">
+        <Pagination hasNextPage={hasNextPage} />
+      </div>
+    </>
   )
 }
 
