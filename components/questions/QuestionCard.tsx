@@ -27,7 +27,7 @@ const QuestionCard = ({
   createdAt,
 }: TProps) => {
   const isQuestionAuthor =
-    currentUserClerkId === (author as unknown as TUser).clerkId
+    currentUserClerkId === (author as unknown as TUser)?.clerkId
   const numOfVotes = upVoters?.length + downVoters?.length ?? 0
   const numOfAnswers = answers?.length ?? 0
   const daysAgo = getDaysAgo(createdAt)
@@ -52,13 +52,13 @@ const QuestionCard = ({
             : `${daysAgo} day${daysAgo === 1 ? "" : "s"} ago`}
         </span>
 
-        <div className="flex items-center justify-between">
-          <CardTitle className="sm:h3-semibold base-semibold text-dark200_light900 line-clamp-1">
+        <div className="flex max-sm:flex-col sm:items-center sm:justify-between">
+          <CardTitle className="sm:h3-semibold base-semibold text-dark200_light900 truncate max-lg:max-w-md max-md:max-w-72 lg:max-w-lg">
             <Link href={`/questions/${questionId}`}>{title}</Link>
           </CardTitle>
 
           {/* Signed-in Update & Delete Question Btn */}
-          {isQuestionAuthor && (
+          {isQuestionAuthor && questionId && (
             // Client-Component
             <EditDeleteActionButton
               actionType="mutateQuestion"
