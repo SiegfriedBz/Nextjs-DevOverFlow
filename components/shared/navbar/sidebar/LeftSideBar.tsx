@@ -1,14 +1,15 @@
 "use client"
 
+import { Button } from "@/components/ui/button"
 import { LEFTSIDEBAR_LINKS } from "@/constants"
 import type { ISidebarLink } from "@/types"
+import { useUser } from "@clerk/nextjs"
 import Image from "next/image"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { Dispatch, SetStateAction } from "react"
 import AuthButtons from "../AuthButtons"
 import SideBar from "./Sidebar"
-import { useUser } from "@clerk/nextjs"
 
 type TProps =
   | {
@@ -73,19 +74,32 @@ const CustomNavLink = ({
 }: TCustomNavLinkProps) => {
   const { imgURL, href, label } = link
   const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const router = useRouter()
 
   const isActive =
     (href !== "/" && pathname.includes(href)) || pathname === href
 
+  const deleteSearchParams = () => {
+    // TODO REINIT PAGE TO "1"
+    const newSearchParams = new URLSearchParams(searchParams)
+    for (const [param, value] of newSearchParams) {
+      value && newSearchParams.delete(param)
+    }
+  }
+
   return (
-    <Link
-      onClick={() =>
-        isMobileSideBar
-          ? (setOpen as Dispatch<SetStateAction<boolean>>)(false)
-          : {}
-      }
-      href={href}
-      className={`flex w-full items-center justify-start gap-4
+    <Link href={href}>
+      <Button
+        onClick={() => {
+          deleteSearchParams()
+          router.push(isActive ? pathname : href)
+          router.refresh()
+          return isMobileSideBar
+            ? (setOpen as Dispatch<SetStateAction<boolean>>)(false)
+            : {}
+        }}
+        className={`flex w-full items-center justify-start gap-4
         bg-transparent
         ${isMobileSideBar ? "p-2" : "p-4"}
         ${
@@ -93,19 +107,20 @@ const CustomNavLink = ({
             ? "primary-gradient rounded-xl text-light-900"
             : "text-dark300_light900"
         }`}
-    >
-      <Image
-        src={imgURL}
-        width={20}
-        height={20}
-        alt={label}
-        className={isActive ? "" : "invert-colors"}
-      />
-      <p
-        className={`whitespace-nowrap ${!isMobileSideBar && "max-lg:hidden"} ${isActive ? "base-bold" : "base-medium"}`}
       >
-        {label}
-      </p>
+        <Image
+          src={imgURL}
+          width={20}
+          height={20}
+          alt={label}
+          className={isActive ? "" : "invert-colors"}
+        />
+        <p
+          className={`whitespace-nowrap ${!isMobileSideBar && "max-lg:hidden"} ${isActive ? "base-bold" : "base-medium"}`}
+        >
+          {label}
+        </p>
+      </Button>
     </Link>
   )
 }
