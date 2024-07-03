@@ -1,7 +1,7 @@
 "use client"
 
-import { useSearchParams, usePathname, useRouter } from "next/navigation"
-import { useState, useCallback, useEffect } from "react"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useCallback, useEffect, useState } from "react"
 import { useDebounce } from "use-debounce"
 
 type TProps = {
@@ -14,21 +14,29 @@ const useQueryParams = ({ queryParamName, debounceDelay = 1000 }: TProps) => {
   const pathname = usePathname()
   const router = useRouter()
 
-  const [search, setSearch] = useState(() => {
+  const [searchParam, setSearchParam] = useState(() => {
     // init input field value on component mount (fetch value from URL)
     const queryParams = new URLSearchParams(searchParams)
     const initSearch = queryParams.get(queryParamName)
     return initSearch || ""
   })
-  const [value] = useDebounce(search, debounceDelay)
+
+  const [value] = useDebounce(searchParam, debounceDelay)
 
   const getQueryString = useCallback(
     ({ name, value }: { name: string; value: string }) => {
       const queryParams = new URLSearchParams(searchParams)
       if (!value) {
         queryParams.delete(name)
+        setSearchParam("")
       } else {
-        queryParams.set(name, value?.toLowerCase().split(" ").join("_"))
+        // if ?page=1 delete from url
+        if (name === "page" && value === "1") {
+          queryParams.delete(name)
+        } else {
+          queryParams.set(name, value?.toLowerCase().split(" ").join("_"))
+        }
+        setSearchParam(value)
       }
 
       return queryParams.toString()
@@ -40,11 +48,14 @@ const useQueryParams = ({ queryParamName, debounceDelay = 1000 }: TProps) => {
   useEffect(() => {
     const queryString = getQueryString({ name: queryParamName, value })
 
-    router.push(`${pathname}?${queryString}`, { scroll: false })
+    // TODO FIX - scroll: true if queryParamName === "page"
+    router.push(`${pathname}?${queryString}`, {
+      scroll: false,
+    })
     // router.refresh()
   }, [queryParamName, value, pathname, getQueryString, router])
 
-  return [search, setSearch] as const
+  return { searchParam, setSearchParam } as const
 }
 
 export default useQueryParams

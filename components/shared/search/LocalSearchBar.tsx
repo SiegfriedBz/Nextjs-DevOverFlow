@@ -8,7 +8,9 @@ type TProps = {
   placeholder: string
 }
 const LocalSearchBar = ({ queryParamName, placeholder }: TProps) => {
-  const [search, setSearch] = useQueryParams({ queryParamName })
+  const { searchParam: search, setSearchParam: setSearch } = useQueryParams({
+    queryParamName,
+  })
 
   return (
     <SearchBarInput

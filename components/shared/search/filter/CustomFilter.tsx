@@ -8,7 +8,7 @@ type TFilterWrapperProps = {
   filterOptions: string[]
 }
 const CustomFilter = ({ filterName, filterOptions }: TFilterWrapperProps) => {
-  const [filter, setFilter] = useQueryParams({
+  const { searchParam: filter, setSearchParam: setFilter } = useQueryParams({
     queryParamName: filterName,
     debounceDelay: 0,
   })
@@ -19,7 +19,7 @@ const CustomFilter = ({ filterName, filterOptions }: TFilterWrapperProps) => {
         filter={filter}
         setFilter={setFilter}
         options={filterOptions}
-        wrapperClassName="flex w-full max-md:hidden md:my-4 -ms-8"
+        wrapperClassName="w-full flex flex-wrap max-md:hidden md:my-4 gap-4"
         className="max-md:h-16 md:h-10"
       />
 
