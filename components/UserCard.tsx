@@ -18,9 +18,6 @@ const UserCard = ({
 
   picture,
 }: TProps) => {
-  // TODO
-  // const isAuthor = true
-
   return (
     <Card
       className="background-light800_darkgradient 
@@ -28,9 +25,9 @@ const UserCard = ({
         rounded-xl border-none px-4
         py-2
         shadow-none
-        outline-none max-xs:w-full
+        outline-none max-sm:w-full
         xs:min-w-[280px]
-        xs:max-w-[324px]
+        sm:max-w-[324px]
         sm:px-10
       "
     >
