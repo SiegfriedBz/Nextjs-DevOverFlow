@@ -1,10 +1,5 @@
 import type { ISidebarLink, TTheme } from "@/types/index"
 
-export const NUM_RESULTS_PER_PAGE =
-  (process.env.NEXT_PUBLIC_NUM_RESULTS_PER_PAGE &&
-    +process.env.NEXT_PUBLIC_NUM_RESULTS_PER_PAGE) ||
-  2
-
 export const THEMES: TTheme[] = [
   { value: "light", label: "Light", icon: "/assets/icons/sun.svg" },
   { value: "dark", label: "Dark", icon: "/assets/icons/moon.svg" },
