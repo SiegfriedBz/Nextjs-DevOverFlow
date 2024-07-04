@@ -163,7 +163,7 @@ export async function createAnswer({
   data: TMutateAnswerInput & {
     author: IAnswerDocument["author"]
   }
-}): Promise<TAnswer> {
+}): Promise<IAnswerDocument> {
   try {
     await connectToMongoDB()
 
@@ -171,9 +171,9 @@ export async function createAnswer({
       ...data,
     })
 
-    const newAnswer = JSON.parse(JSON.stringify(newAnswerDoc))
+    // const newAnswer = JSON.parse(JSON.stringify(newAnswerDoc))
 
-    return newAnswer
+    return newAnswerDoc
   } catch (error) {
     const err = error as Error
     console.log("createAnswer Error", err)

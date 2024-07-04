@@ -7,7 +7,10 @@ import {
 import type { IQuestionDocument } from "@/models/question.model"
 import type { IUserDocument } from "@/models/user.model"
 import { deleteManyAnswers } from "@/services/answer.services"
-import { deleteManyInteractions } from "@/services/interaction.services"
+import {
+  createInteraction,
+  deleteManyInteractions,
+} from "@/services/interaction.services"
 import {
   createQuestion,
   deleteQuestion,
@@ -20,6 +23,7 @@ import {
 } from "@/services/tags.services."
 import { getUser, updateUser } from "@/services/user.services"
 import { currentUser } from "@clerk/nextjs/server"
+import mongoose from "mongoose"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
@@ -57,6 +61,10 @@ export async function createQuestionAction({
       },
     })
 
+    if (!newQuestion) {
+      throw new Error("Could not create question")
+    }
+
     // get tags or create them if do not exist
     const tagsIds = await upsertTagsOnMutateQuestion({
       question: newQuestion as IQuestionDocument,
@@ -69,10 +77,20 @@ export async function createQuestionAction({
       data: { $push: { tags: { $each: tagsIds } } },
     })
 
+    // create user interaction
+    await createInteraction({
+      data: {
+        user: author?._id as mongoose.Schema.Types.ObjectId,
+        actionType: "ask_question",
+        question: newQuestion._id as mongoose.Schema.Types.ObjectId,
+        tags: tagsIds as mongoose.Schema.Types.ObjectId[],
+      },
+    })
+
     // update user's reputation
     await updateUser({
       filter: { _id: (author as IUserDocument)._id },
-      data: { reputation: (author as IUserDocument).reputation + 5 },
+      data: { $inc: { reputation: 5 } },
     })
 
     // revalidate
@@ -184,9 +202,25 @@ export async function voteQuestionAction({
       ? { $push: { upVoters: voterId }, $pull: { downVoters: voterId } }
       : { $pull: { upVoters: voterId }, $push: { downVoters: voterId } }
 
-    await updateQuestion({
+    const updatedQuestion = await updateQuestion({
       filter: { _id: questionId },
       data: query,
+    })
+
+    // update user's reputation
+    await updateUser({
+      filter: { _id: voterId },
+      data: {
+        $inc: { reputation: isUpVoting ? 1 : -1 },
+      },
+    })
+
+    // update question's author reputation
+    await updateUser({
+      filter: { _id: updatedQuestion?.author },
+      data: {
+        $inc: { reputation: isUpVoting ? 10 : -10 },
+      },
     })
 
     // revalidate

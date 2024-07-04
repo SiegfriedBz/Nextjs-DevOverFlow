@@ -19,7 +19,7 @@ export async function getInteraction({
 
     // we do not throw
 
-    return interaction
+    return JSON.parse(JSON.stringify(interaction))
   } catch (error) {
     const err = error as Error
     console.log("getInteraction Error", err.message)
