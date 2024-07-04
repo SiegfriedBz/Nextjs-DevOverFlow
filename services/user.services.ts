@@ -1,7 +1,6 @@
 "use server"
 
 import type { TMutateUserData } from "@/app/api/v1/webhooks/clerk/route"
-import { NUM_RESULTS_PER_PAGE } from "@/constants"
 import connectToMongoDB from "@/lib/mongoose.utils"
 import type { TMutateUserInput } from "@/lib/zod/user.zod"
 import Answer, { type IAnswerDocument } from "@/models/answer.model"
@@ -14,38 +13,52 @@ import type { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
 import { redirect } from "next/navigation"
 
 export async function getAllUsers({
+  maxPageSize = 1000,
   params,
 }: {
+  maxPageSize?: number
   params: TQueryParams
 }): Promise<{
   users: TUser[]
   hasNextPage: boolean
 }> {
   try {
-    const {
-      page = 1,
-      localSearchQuery = "",
-      // globalSearchQuery = "",
-      localSortQuery,
-    } = params
+    const { page = 1, searchQueryParam = "", sortQueryParam } = params
 
     await connectToMongoDB()
 
     // Build searchQuery
     const searchQuery: FilterQuery<IUserDocument> = {}
 
-    if (localSearchQuery) {
+    if (searchQueryParam) {
       searchQuery.$or = [
-        { name: { $regex: localSearchQuery, $options: "i" } },
-        { userName: { $regex: localSearchQuery, $options: "i" } },
-        { location: { $regex: localSearchQuery, $options: "i" } },
-        { bio: { $regex: localSearchQuery, $options: "i" } },
+        {
+          name: {
+            $regex: new RegExp(searchQueryParam, "i"),
+          },
+        },
+
+        {
+          userName: {
+            $regex: new RegExp(searchQueryParam, "i"),
+          },
+        },
+        {
+          location: {
+            $regex: new RegExp(searchQueryParam, "i"),
+          },
+        },
+        {
+          bio: {
+            $regex: new RegExp(searchQueryParam, "i"),
+          },
+        },
       ]
     }
 
     // Build sortQuery
     let sortQuery: Record<string, 1 | -1>
-    switch (localSortQuery) {
+    switch (sortQueryParam) {
       case "new_users":
         sortQuery = { createdAt: -1 }
         break
@@ -61,8 +74,10 @@ export async function getAllUsers({
     }
 
     // Pagination
-    const limit = NUM_RESULTS_PER_PAGE
-    const skip = (page - 1) * NUM_RESULTS_PER_PAGE
+    const limit = maxPageSize
+    const skip = (page - 1) * maxPageSize
+
+    console.log("searchQuery", searchQuery)
 
     // Perform query
     const result = await User.find(searchQuery)
@@ -77,6 +92,8 @@ export async function getAllUsers({
 
     // format
     const users = JSON.parse(JSON.stringify(result))
+
+    console.log("===== getAllUsers -> users", users)
 
     return { users, hasNextPage }
   } catch (error) {
@@ -232,20 +249,17 @@ export async function getFullUserInfo({
 }
 
 export async function getCurrentUserSavedQuestions({
+  maxPageSize = 1000,
   params,
 }: {
+  maxPageSize?: number
   params: TQueryParams
 }): Promise<{
   questions: TQuestion[]
   hasNextPage: boolean
 }> {
   try {
-    const {
-      page = 1,
-      localSearchQuery = "",
-      // globalSearchQuery = "",
-      localSortQuery = "",
-    } = params
+    const { page = 1, searchQueryParam = "", sortQueryParam = "" } = params
 
     /** get user from from clerk db */
     const clerckUser = await currentUser()
@@ -262,16 +276,16 @@ export async function getCurrentUserSavedQuestions({
     // Build searchQuery on Question
     const searchQuery: FilterQuery<IQuestionDocument> = {}
 
-    if (localSearchQuery) {
+    if (searchQueryParam) {
       searchQuery.$or = [
-        { title: { $regex: new RegExp(localSearchQuery, "i") } },
-        { content: { $regex: new RegExp(localSearchQuery, "i") } },
+        { title: { $regex: new RegExp(searchQueryParam, "i") } },
+        { content: { $regex: new RegExp(searchQueryParam, "i") } },
       ]
     }
 
     // Build sortQuery on Question
     let sortQuery: Record<string, 1 | -1> | undefined
-    switch (localSortQuery) {
+    switch (sortQueryParam) {
       case "most_recent":
         sortQuery = { createdAt: -1 }
         break
@@ -294,8 +308,8 @@ export async function getCurrentUserSavedQuestions({
     }
 
     // Pagination
-    const limit = NUM_RESULTS_PER_PAGE
-    const skip = (page - 1) * NUM_RESULTS_PER_PAGE
+    const limit = maxPageSize
+    const skip = (page - 1) * maxPageSize
 
     // Perform query
     const result = await User.findOne(
@@ -321,7 +335,7 @@ export async function getCurrentUserSavedQuestions({
     const userSavedQuestions = result?.savedQuestions || []
 
     // Pagination data
-    const hasNextPage = userSavedQuestions.length > NUM_RESULTS_PER_PAGE
+    const hasNextPage = userSavedQuestions.length > maxPageSize
 
     // format
     const questions = JSON.parse(JSON.stringify(userSavedQuestions || []))
@@ -335,13 +349,15 @@ export async function getCurrentUserSavedQuestions({
 }
 
 export async function getUserQuestions({
+  maxPageSize = 1000,
   userId,
   params,
 }: {
+  maxPageSize?: number
   userId: string
   params: Omit<
     TQueryParams,
-    "localSearchQuery" | "globalSearchQuery" | "localSortQuery"
+    "searchQueryParam" | "globalSearchQuery" | "sortQueryParam"
   >
 }): Promise<{
   questions: TQuestion[]
@@ -353,8 +369,8 @@ export async function getUserQuestions({
     await connectToMongoDB()
 
     // Pagination
-    const limit = NUM_RESULTS_PER_PAGE
-    const skip = (page - 1) * NUM_RESULTS_PER_PAGE
+    const limit = maxPageSize
+    const skip = (page - 1) * maxPageSize
 
     // Build searchQuery
     const searchQuery: FilterQuery<IQuestionDocument> = {
@@ -395,13 +411,15 @@ export async function getUserQuestions({
 }
 
 export async function getUserAnswers({
+  maxPageSize = 1000,
   userId,
   params,
 }: {
+  maxPageSize?: number
   userId: string
   params: Omit<
     TQueryParams,
-    "localSearchQuery" | "globalSearchQuery" | "localSortQuery"
+    "searchQueryParam" | "globalSearchQuery" | "sortQueryParam"
   >
 }): Promise<{
   answers: TAnswer[]
@@ -413,8 +431,8 @@ export async function getUserAnswers({
     await connectToMongoDB()
 
     // Pagination
-    const limit = NUM_RESULTS_PER_PAGE
-    const skip = (page - 1) * NUM_RESULTS_PER_PAGE
+    const limit = maxPageSize
+    const skip = (page - 1) * maxPageSize
 
     // Build searchQuery
     const searchQuery: FilterQuery<IAnswerDocument> = {

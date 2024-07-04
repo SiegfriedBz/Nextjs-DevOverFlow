@@ -1,30 +1,109 @@
 "use server"
 
-import { NUM_RESULTS_PER_PAGE } from "@/constants"
 import connectToMongoDB from "@/lib/mongoose.utils"
 import type { TMutateAnswerInput } from "@/lib/zod/answer.zod"
-import Answer, { type IAnswerDocument } from "@/models/answer.model"
+import Answer, { IAnswerDocument } from "@/models/answer.model"
 import type { IQuestionDocument } from "@/models/question.model"
 import User from "@/models/user.model"
 import type { TAnswer, TQueryParams } from "@/types"
 import type { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
 
-export async function getAllAnswersForQuestionById({
-  questionId,
+export async function getAllAnswers({
+  maxPageSize = 1000,
   params,
 }: {
-  questionId: string
-  params: Omit<TQueryParams, "localSearchQuery">
+  maxPageSize?: number
+  params: TQueryParams
 }): Promise<{
   answers: TAnswer[]
   hasNextPage: boolean
 }> {
   try {
-    const {
-      page = 1,
-      // globalSearchQuery = "",
-      localSortQuery,
-    } = params
+    const { page = 1, searchQueryParam = "", sortQueryParam } = params
+
+    await connectToMongoDB()
+
+    // Build searchQuery on Answer
+    const searchQuery: FilterQuery<IAnswerDocument> = {}
+
+    if (searchQueryParam) {
+      searchQuery.$or = [
+        {
+          title: {
+            $regex: new RegExp(searchQueryParam, "i"),
+          },
+        },
+        {
+          content: {
+            $regex: new RegExp(searchQueryParam, "i"),
+          },
+        },
+      ]
+    }
+
+    // Build sortQuery on Answer
+    let sortQuery: Record<string, 1 | -1> | undefined
+    switch (sortQueryParam) {
+      // OK
+      case "newest":
+        sortQuery = { createdAt: -1 }
+        break
+      // OK
+      case "unanswered":
+        searchQuery.answers = { $size: 0 }
+        break
+      case "frequent":
+        sortQuery = { views: -1 }
+        break
+      case "recommended":
+        sortQuery = { upVoters: -1 }
+        break
+      default:
+        sortQuery = { createdAt: -1 }
+    }
+
+    // Pagination
+    const limit = maxPageSize
+    const skip = (page - 1) * maxPageSize
+
+    // Perform query
+    const result = await Answer.find(searchQuery)
+      .populate([
+        { path: "author", model: User, select: "_id clerkId name picture" },
+      ])
+      .skip(skip)
+      .limit(limit)
+      .sort(sortQuery)
+
+    // Pagination data
+    const totalDocs = await Answer.countDocuments(searchQuery)
+    const hasNextPage = totalDocs > skip + result.length
+
+    // format
+    const answers = JSON.parse(JSON.stringify(result))
+
+    return { answers, hasNextPage }
+  } catch (error) {
+    const err = error as Error
+    console.log("getAllAnswers Error", err.message)
+    throw new Error(`Could not fetch answers - ${err.message}`)
+  }
+}
+
+export async function getAllAnswersForQuestionById({
+  maxPageSize = 1000,
+  questionId,
+  params,
+}: {
+  maxPageSize?: number
+  questionId: string
+  params: Omit<TQueryParams, "searchQueryParam">
+}): Promise<{
+  answers: TAnswer[]
+  hasNextPage: boolean
+}> {
+  try {
+    const { page = 1, sortQueryParam } = params
 
     await connectToMongoDB()
 
@@ -33,7 +112,7 @@ export async function getAllAnswersForQuestionById({
 
     // Build sortQuery on Answer
     let sortQuery: Record<string, 1 | -1> | undefined
-    switch (localSortQuery) {
+    switch (sortQueryParam) {
       case "highest_upvotes":
         sortQuery = { upVoters: -1 }
         break
@@ -51,8 +130,8 @@ export async function getAllAnswersForQuestionById({
     }
 
     // Pagination
-    const limit = NUM_RESULTS_PER_PAGE
-    const skip = (page - 1) * NUM_RESULTS_PER_PAGE
+    const limit = maxPageSize
+    const skip = (page - 1) * maxPageSize
 
     // Perform query
     const result = await Answer.find(searchQuery)

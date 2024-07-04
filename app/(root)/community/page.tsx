@@ -42,12 +42,15 @@ export default CommunityPage
 const UserListWrapper = async ({ searchParams }: TSearchParamsProps) => {
   const pageStr = searchParams?.page
   const page = (pageStr && parseInt(pageStr, 10)) || 1
-  const localSearchQuery = searchParams?.q
-  const globalSearchQuery = searchParams?.globalQ
-  const localSortQuery = searchParams?.sort
+  const searchQueryParam = searchParams?.q
+  const sortQueryParam = searchParams?.sort
 
   const data = await getAllUsers({
-    params: { page, localSearchQuery, globalSearchQuery, localSortQuery },
+    maxPageSize:
+      (process.env.NEXT_PUBLIC_NUM_RESULTS_PER_PAGE &&
+        +process.env.NEXT_PUBLIC_NUM_RESULTS_PER_PAGE) ||
+      20,
+    params: { page, searchQueryParam, sortQueryParam },
   })
 
   const users: TUser[] | null = data?.users

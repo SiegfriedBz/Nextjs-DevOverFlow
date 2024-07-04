@@ -54,13 +54,16 @@ const SavedQuestionListWrapper = async ({ searchParams }: TProps) => {
   }
 
   const pageStr = searchParams?.page
-  const page = (pageStr && parseInt(pageStr, 10)) || 1
-  const localSortQuery = searchParams?.sort
-  const localSearchQuery = searchParams?.q
-  const globalSearchQuery = searchParams?.globalQ
+  const page = (pageStr && +pageStr) || 1
+  const searchQueryParam = searchParams?.q
+  const sortQueryParam = searchParams?.sort
 
   const data = await getCurrentUserSavedQuestions({
-    params: { page, localSortQuery, localSearchQuery, globalSearchQuery },
+    maxPageSize:
+      (process.env.NEXT_PUBLIC_NUM_RESULTS_PER_PAGE &&
+        +process.env.NEXT_PUBLIC_NUM_RESULTS_PER_PAGE) ||
+      20,
+    params: { page, sortQueryParam, searchQueryParam },
   })
 
   const questions: TQuestion[] | null = data?.questions

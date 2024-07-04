@@ -1,6 +1,5 @@
 "use server"
 
-import { NUM_RESULTS_PER_PAGE } from "@/constants"
 import connectToMongoDB from "@/lib/mongoose.utils"
 import type { TMutateQuestionInput } from "@/lib/zod/question.zod"
 import Answer from "@/models/answer.model"
@@ -43,36 +42,41 @@ export async function getHotQuestions({
 }
 
 export async function getAllQuestions({
+  maxPageSize = 1000,
   params,
 }: {
+  maxPageSize?: number
   params: TQueryParams
 }): Promise<{
   questions: TQuestion[]
   hasNextPage: boolean
 }> {
   try {
-    const {
-      page = 1,
-      localSearchQuery = "",
-      // globalSearchQuery = "",
-      localSortQuery,
-    } = params
+    const { page = 1, searchQueryParam = "", sortQueryParam } = params
 
     await connectToMongoDB()
 
     // Build searchQuery on Question
     const searchQuery: FilterQuery<IQuestionDocument> = {}
 
-    if (localSearchQuery) {
+    if (searchQueryParam) {
       searchQuery.$or = [
-        { title: { $regex: new RegExp(localSearchQuery, "i") } },
-        { content: { $regex: new RegExp(localSearchQuery, "i") } },
+        {
+          title: {
+            $regex: new RegExp(searchQueryParam, "i"),
+          },
+        },
+        {
+          content: {
+            $regex: new RegExp(searchQueryParam, "i"),
+          },
+        },
       ]
     }
 
     // Build sortQuery on Question
     let sortQuery: Record<string, 1 | -1> | undefined
-    switch (localSortQuery) {
+    switch (sortQueryParam) {
       // OK
       case "newest":
         sortQuery = { createdAt: -1 }
@@ -92,8 +96,8 @@ export async function getAllQuestions({
     }
 
     // Pagination
-    const limit = NUM_RESULTS_PER_PAGE
-    const skip = (page - 1) * NUM_RESULTS_PER_PAGE
+    const limit = maxPageSize
+    const skip = (page - 1) * maxPageSize
 
     // Perform query
     const result = await Question.find(searchQuery)

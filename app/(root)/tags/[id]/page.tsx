@@ -82,17 +82,20 @@ const QuestionListWrapper = async ({ params, searchParams }: TProps) => {
   const tagId = params?.id
 
   const pageStr = searchParams?.page
-  const page = (pageStr && parseInt(pageStr, 10)) || 1
-  const localSearchQuery = searchParams?.q
-  const globalSearchQuery = searchParams?.globalQ
-  const localSortQuery = searchParams?.sort
+  const page = (pageStr && +pageStr) || 1
+  const searchQueryParam = searchParams?.q
+  const sortQueryParam = searchParams?.sort
 
   // fetch questions pointing to this tag
   const data = await getQuestionsByTag({
     filter: {
       _id: tagId,
     },
-    params: { page, localSearchQuery, globalSearchQuery, localSortQuery },
+    maxPageSize:
+      (process.env.NEXT_PUBLIC_NUM_RESULTS_PER_PAGE &&
+        +process.env.NEXT_PUBLIC_NUM_RESULTS_PER_PAGE) ||
+      20,
+    params: { page, searchQueryParam, sortQueryParam },
   })
 
   const questions: TQuestion[] | null = data?.questions

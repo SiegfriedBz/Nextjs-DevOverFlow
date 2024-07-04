@@ -1,6 +1,5 @@
 "use server"
 
-import { NUM_RESULTS_PER_PAGE } from "@/constants"
 import connectToMongoDB from "@/lib/mongoose.utils"
 import type { IQuestionDocument } from "@/models/question.model"
 import Question from "@/models/question.model"
@@ -44,36 +43,41 @@ export async function getHotTags({
 }
 
 export async function getAllTags({
+  maxPageSize = 1000,
   params,
 }: {
+  maxPageSize?: number
   params: TQueryParams
 }): Promise<{
   tags: TTag[]
   hasNextPage: boolean
 }> {
   try {
-    const {
-      page = 1,
-      localSearchQuery = "",
-      // globalSearchQuery = "",
-      localSortQuery = "",
-    } = params
+    const { page = 1, searchQueryParam = "", sortQueryParam = "" } = params
 
     await connectToMongoDB()
 
     // Build searchQuery on Tag
     const searchQuery: FilterQuery<ITagDocument> = {}
 
-    if (localSearchQuery) {
+    if (searchQueryParam) {
       searchQuery.$or = [
-        { name: { $regex: new RegExp(localSearchQuery, "i") } },
-        { description: { $regex: new RegExp(localSearchQuery, "i") } },
+        {
+          name: {
+            $regex: new RegExp(searchQueryParam, "i"),
+          },
+        },
+        {
+          description: {
+            $regex: new RegExp(searchQueryParam, "i"),
+          },
+        },
       ]
     }
 
     // Build sortQuery on Tag
     let sortQuery: Record<string, 1 | -1> | undefined
-    switch (localSortQuery) {
+    switch (sortQueryParam) {
       case "name":
         sortQuery = { name: 1 }
         break
@@ -91,8 +95,8 @@ export async function getAllTags({
     }
 
     // Pagination
-    const limit = NUM_RESULTS_PER_PAGE
-    const skip = (page - 1) * NUM_RESULTS_PER_PAGE
+    const limit = maxPageSize
+    const skip = (page - 1) * maxPageSize
 
     // Perform query
     const result = await Tag.find(searchQuery)
@@ -157,9 +161,11 @@ export async function updateManyTags({
 }
 
 export async function getQuestionsByTag({
+  maxPageSize = 1000,
   filter,
   params,
 }: {
+  maxPageSize?: number
   filter: FilterQuery<ITagDocument>
   params: TQueryParams
 }): Promise<{
@@ -167,28 +173,23 @@ export async function getQuestionsByTag({
   hasNextPage: boolean
 }> {
   try {
-    const {
-      page = 1,
-      localSearchQuery = "",
-      // globalSearchQuery = "",
-      localSortQuery,
-    } = params
+    const { page = 1, searchQueryParam = "", sortQueryParam } = params
 
     await connectToMongoDB()
 
     // Build searchQuery on Question
     const searchQuery: FilterQuery<IQuestionDocument> = {}
 
-    if (localSearchQuery) {
+    if (searchQueryParam) {
       searchQuery.$or = [
-        { title: { $regex: localSearchQuery, $options: "i" } },
-        { content: { $regex: localSearchQuery, $options: "i" } },
+        { title: { $regex: new RegExp(searchQueryParam, "i") } },
+        { content: { $regex: new RegExp(searchQueryParam, "i") } },
       ]
     }
 
     // Build sortQuery on Question
     let sortQuery: Record<string, 1 | -1> | undefined
-    switch (localSortQuery) {
+    switch (sortQueryParam) {
       case "most_recent":
         sortQuery = { createdAt: -1 }
         break
@@ -211,8 +212,8 @@ export async function getQuestionsByTag({
     }
 
     // Pagination
-    const limit = NUM_RESULTS_PER_PAGE
-    const skip = (page - 1) * NUM_RESULTS_PER_PAGE
+    const limit = maxPageSize
+    const skip = (page - 1) * maxPageSize
 
     // Perform query
     const result: ITagDocument | null = await Tag.findOne(filter, {
@@ -248,7 +249,7 @@ export async function getQuestionsByTag({
     const questionsDoc = result.questions
 
     // Pagination data
-    const hasNextPage = result.questions.length > NUM_RESULTS_PER_PAGE
+    const hasNextPage = result.questions.length > maxPageSize
 
     // format
     const questions = JSON.parse(JSON.stringify(questionsDoc))
