@@ -8,13 +8,17 @@ import {
   deleteAnswer,
   updateAnswer,
 } from "@/services/answer.services"
-import { deleteManyInteractions } from "@/services/interaction.services"
+import {
+  createInteraction,
+  deleteManyInteractions,
+} from "@/services/interaction.services"
 import {
   updateManyQuestions,
   updateQuestion,
 } from "@/services/question.services"
 import { updateUser, getUser } from "@/services/user.services"
 import { currentUser } from "@clerk/nextjs/server"
+import mongoose from "mongoose"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
@@ -52,15 +56,30 @@ export async function createAnswerAction({
 
     // update question with newAnswer
     const questionId = parsedData.data.question
-    await updateQuestion({
+    const updatedQuestion = await updateQuestion({
       filter: { _id: questionId },
       data: { $push: { answers: newAnswer._id } },
+    })
+
+    if (!updatedQuestion) {
+      throw new Error("Could not update question")
+    }
+
+    // create user interaction
+    await createInteraction({
+      data: {
+        user: author?._id as mongoose.Schema.Types.ObjectId,
+        actionType: "answer",
+        answer: newAnswer._id as mongoose.Schema.Types.ObjectId,
+        question: updatedQuestion._id as mongoose.Schema.Types.ObjectId,
+        tags: updatedQuestion.tags,
+      },
     })
 
     // update user's reputation
     await updateUser({
       filter: { _id: (author as IUserDocument)._id },
-      data: { reputation: (author as IUserDocument).reputation + 5 },
+      data: { $inc: { reputation: 10 } },
     })
 
     // revalidate
@@ -118,6 +137,22 @@ export async function voteAnswerAction({
     const updatedAnswer = await updateAnswer({
       filter: { _id: answerId },
       data: query,
+    })
+
+    // update user's reputation
+    await updateUser({
+      filter: { _id: voterId },
+      data: {
+        $inc: { reputation: isUpVoting ? 1 : -1 },
+      },
+    })
+
+    // update answer's author reputation
+    await updateUser({
+      filter: { _id: updatedAnswer?.author },
+      data: {
+        $inc: { reputation: isUpVoting ? 10 : -10 },
+      },
     })
 
     // revalidate
