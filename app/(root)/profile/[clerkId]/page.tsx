@@ -32,9 +32,10 @@ type TProps = {
 const ProfilePage = async ({ params, searchParams }: TProps) => {
   const clerkId = params.clerkId
 
-  const { user, userTotalQuestions, userTotalAnswers } = await getFullUserInfo({
-    filter: { clerkId },
-  })
+  const { user, userTotalQuestions, userTotalAnswers, badgeCounts } =
+    await getFullUserInfo({
+      filter: { clerkId },
+    })
 
   if (!user) {
     redirect("/community")
@@ -105,10 +106,12 @@ const ProfilePage = async ({ params, searchParams }: TProps) => {
       </div>
 
       {/* Stats */}
-      <div>
+      <div className="max-w-full">
         <UserStats
+          reputation={user?.reputation || 0}
           totalQuestions={userTotalQuestions}
           totalAnswers={userTotalAnswers}
+          badgeCounts={badgeCounts}
         />
       </div>
 

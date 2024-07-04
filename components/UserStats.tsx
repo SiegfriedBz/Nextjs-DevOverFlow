@@ -1,15 +1,25 @@
 import { formatNumber } from "@/lib/utils"
+import type { TBadgeCounts } from "@/types"
 import Image from "next/image"
 import React from "react"
 
 type TProps = {
+  reputation: number
   totalQuestions: number
   totalAnswers: number
+  badgeCounts: TBadgeCounts
 }
-const UserStats = ({ totalQuestions, totalAnswers }: TProps) => {
+const UserStats = ({
+  reputation,
+  totalQuestions,
+  totalAnswers,
+  badgeCounts,
+}: TProps) => {
   return (
     <div className="mt-10">
-      <h3 className="h3-semibold text-dark200_light900">Stats</h3>
+      <h3 className="h3-semibold text-dark200_light900">
+        Stats - {reputation}
+      </h3>
 
       <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-4">
         <div className="light-border background-light900_dark300 flex flex-wrap items-center justify-evenly gap-4 rounded-md border p-6 shadow-light-300 dark:shadow-dark-200">
@@ -26,9 +36,21 @@ const UserStats = ({ totalQuestions, totalAnswers }: TProps) => {
             <p className="body-medium text-dark400_light700">{`Answer${totalAnswers > 1 ? "s" : ""}`}</p>
           </div>
         </div>
-        <StatCard iconName="gold-medal" value={144} label="Gold Badge" />
-        <StatCard iconName="silver-medal" value={144} label="Silver Badge" />
-        <StatCard iconName="bronze-medal" value={0} label="Bronze Badge" />
+        <StatCard
+          iconName="gold-medal"
+          value={badgeCounts.GOLD}
+          label="Gold Badge"
+        />
+        <StatCard
+          iconName="silver-medal"
+          value={badgeCounts.SILVER}
+          label="Silver Badge"
+        />
+        <StatCard
+          iconName="bronze-medal"
+          value={badgeCounts.BRONZE}
+          label="Bronze Badge"
+        />
       </div>
     </div>
   )
@@ -51,7 +73,7 @@ const StatCard = ({ iconName, value, label }: TStatCardProps) => {
         height={50}
       />
 
-      <div>
+      <div className="flex flex-col gap-2">
         <p className="paragraph-semibold text-dark200_light900 text-center">
           {value ? formatNumber(value) : 0}
         </p>
