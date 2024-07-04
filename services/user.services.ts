@@ -7,7 +7,14 @@ import Answer, { type IAnswerDocument } from "@/models/answer.model"
 import Question, { type IQuestionDocument } from "@/models/question.model"
 import Tag from "@/models/tag.model"
 import User, { type IUserDocument } from "@/models/user.model"
-import type { TAnswer, TQueryParams, TQuestion, TUser } from "@/types"
+import type {
+  TAnswer,
+  TBadgeCriteria,
+  TQueryParams,
+  TQuestion,
+  TUser,
+} from "@/types"
+import { assignBadges } from "@/utils"
 import { currentUser } from "@clerk/nextjs/server"
 import type { FilterQuery, QueryOptions, UpdateQuery } from "mongoose"
 import { redirect } from "next/navigation"
@@ -219,11 +226,7 @@ export async function getFullUserInfo({
   filter,
 }: {
   filter: FilterQuery<IUserDocument>
-}): Promise<{
-  user: IUserDocument
-  userTotalQuestions: number
-  userTotalAnswers: number
-}> {
+}) {
   try {
     await connectToMongoDB()
 
@@ -236,9 +239,58 @@ export async function getFullUserInfo({
     const userTotalQuestions = await Question.countDocuments({
       author: user._id,
     })
+
     const userTotalAnswers = await Answer.countDocuments({ author: user._id })
 
-    return { user, userTotalQuestions, userTotalAnswers }
+    const [questionUpVotes] = await Question.aggregate([
+      { $match: { author: user._id } },
+      { $project: { _id: 0, upVotes: { $size: "$upVoters" } } },
+      { $group: { _id: null, totalUpVotes: { $sum: "$upVotes" } } },
+    ])
+
+    const [answerUpVotes] = await Answer.aggregate([
+      { $match: { author: user._id } },
+      { $project: { _id: 0, upVotes: { $size: "$upVoters" } } },
+      { $group: { _id: null, totalUpVotes: { $sum: "$upVotes" } } },
+    ])
+
+    // TODO TO CHECK
+    const [questionViews] = await Question.aggregate([
+      { $match: { author: user._id } },
+      { $group: { _id: null, totalViews: { $sum: "$views" } } },
+    ])
+
+    const criteria = [
+      {
+        type: "QUESTION_COUNT" as TBadgeCriteria,
+        count: userTotalQuestions,
+      },
+      {
+        type: "ANSWER_COUNT" as TBadgeCriteria,
+        count: userTotalAnswers,
+      },
+      {
+        type: "QUESTION_UPVOTES" as TBadgeCriteria,
+        count: questionUpVotes?.totalUpVotes || 0,
+      },
+      {
+        type: "QUESTION_UPVOTES" as TBadgeCriteria,
+        count: answerUpVotes?.totalUpVotes || 0,
+      },
+      {
+        type: "TOTAL_VIEWS" as TBadgeCriteria,
+        count: questionViews?.totalViews || 0,
+      },
+    ]
+
+    const badgeCounts = assignBadges({ criteria })
+
+    return {
+      user,
+      userTotalQuestions,
+      userTotalAnswers,
+      badgeCounts,
+    }
   } catch (error) {
     const err = error as Error
     console.log("getUser Error", err.message)
