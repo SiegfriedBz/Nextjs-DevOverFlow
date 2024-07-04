@@ -11,10 +11,9 @@ export type TTheme = {
 }
 
 export type TQueryParams = {
-  page: number
-  localSearchQuery?: string // ?q=
-  globalSearchQuery?: string // ?globalQ=
-  localSortQuery?: string // ?sort=
+  page?: number
+  searchQueryParam?: string // ?q= || ?globalQ=
+  sortQueryParam?: string // ?sort=
 }
 
 export type TUser = {
@@ -68,6 +67,13 @@ export type TQuestion = {
   answers: IAnswerDocument[] | string[]
   createdAt: Date
 }
+
+export type TGlobalResultData =
+  | { questions: TQuestion[] }
+  | { answers: TAnswer[] }
+  | { tags: TTag[] }
+  | { users: TUser[] }
+  | null
 
 export interface ISidebarLink {
   imgURL: string
