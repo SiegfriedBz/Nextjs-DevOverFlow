@@ -5,7 +5,7 @@ type TProps = {
   className?: string
 }
 const Loading = ({ className = "" }: TProps) => {
-  return <div className={(cn("loader my-8"), className)} />
+  return <div className={cn("z-[9999] loader my-8", className)} />
 }
 
 export default Loading
