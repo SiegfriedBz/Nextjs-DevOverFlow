@@ -239,8 +239,6 @@ export async function updateQuestion({
       throw new Error(`Question not found`)
     }
 
-    console.log("updateQuestion -> result", result)
-
     return result
   } catch (error) {
     const err = error as Error
