@@ -77,8 +77,6 @@ export async function getAllUsers({
     const limit = maxPageSize
     const skip = (page - 1) * maxPageSize
 
-    console.log("searchQuery", searchQuery)
-
     // Perform query
     const result = await User.find(searchQuery)
       .populate([{ path: "savedQuestions", model: Question }])
@@ -393,7 +391,7 @@ export async function getUserQuestions({
       ])
       .skip(skip)
       .limit(limit)
-      .sort({ views: -1, upVoters: -1 })
+      .sort({ createdAt: -1, views: -1, upVoters: -1 })
 
     // Pagination data
     const totalDocs = await Question.countDocuments(searchQuery)
@@ -461,7 +459,7 @@ export async function getUserAnswers({
       ])
       .skip(skip)
       .limit(limit)
-      .sort({ views: -1, upVoters: -1 })
+      .sort({ createdAt: -1, views: -1, upVoters: -1 })
 
     // Pagination data
     const totalDocs = await Answer.countDocuments(searchQuery)
