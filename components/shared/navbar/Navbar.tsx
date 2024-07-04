@@ -4,6 +4,7 @@ import LogoLink from "./LogoLink"
 import MobileNavBar from "./MobileNavBar"
 import SwitchThemeButton from "./SwitchThemeButton"
 
+/* Server-Component */
 const Navbar = () => {
   return (
     <header className="background-light900_dark200 flex-between shadow-light300_darknone fixed z-50 h-24 w-full gap-x-4 p-6 sm:px-12">

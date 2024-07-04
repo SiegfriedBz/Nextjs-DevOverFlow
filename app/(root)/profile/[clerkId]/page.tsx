@@ -169,9 +169,13 @@ const QuestionListWrapper = async ({
   userName,
 }: TTabsProps) => {
   const pageStr = searchParams?.page
-  const page = (pageStr && parseInt(pageStr, 10)) || 1
+  const page = (pageStr && +pageStr) || 1
 
   const data = await getUserQuestions({
+    maxPageSize:
+      (process.env.NEXT_PUBLIC_NUM_RESULTS_PER_PAGE &&
+        +process.env.NEXT_PUBLIC_NUM_RESULTS_PER_PAGE) ||
+      20,
     userId,
     params: { page },
   })
@@ -210,9 +214,13 @@ const AnswerListWrapper = async ({
   userName,
 }: TTabsProps) => {
   const pageStr = searchParams?.page
-  const page = (pageStr && parseInt(pageStr, 10)) || 1
+  const page = (pageStr && +pageStr) || 1
 
   const data = await getUserAnswers({
+    maxPageSize:
+      (process.env.NEXT_PUBLIC_NUM_RESULTS_PER_PAGE &&
+        +process.env.NEXT_PUBLIC_NUM_RESULTS_PER_PAGE) ||
+      20,
     userId,
     params: { page },
   })

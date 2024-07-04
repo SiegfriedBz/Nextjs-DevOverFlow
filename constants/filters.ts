@@ -1,3 +1,6 @@
+/* eslint-disable camelcase */
+export const GLOBAL_FILTER_OPTIONS = ["Question", "Answer", "Tag", "Profile"]
+
 export const HOME_FILTER_OPTIONS = [
   "Newest",
   "Recommended",

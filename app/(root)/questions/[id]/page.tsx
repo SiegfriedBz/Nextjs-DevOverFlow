@@ -180,13 +180,16 @@ const AnswerListWrapper = async ({
   searchParams,
 }: TAnswerListWrapperProps) => {
   const pageStr = searchParams?.page
-  const page = (pageStr && parseInt(pageStr, 10)) || 1
-  const globalSearchQuery = searchParams?.globalQ
-  const localSortQuery = searchParams?.sort
+  const page = (pageStr && +pageStr) || 1
+  const sortQueryParam = searchParams?.sort
 
   const data = await getAllAnswersForQuestionById({
     questionId,
-    params: { page, globalSearchQuery, localSortQuery },
+    maxPageSize:
+      (process.env.NEXT_PUBLIC_NUM_RESULTS_PER_PAGE &&
+        +process.env.NEXT_PUBLIC_NUM_RESULTS_PER_PAGE) ||
+      20,
+    params: { page, sortQueryParam },
   })
 
   const answersForQuestion: TAnswer[] | null = data?.answers

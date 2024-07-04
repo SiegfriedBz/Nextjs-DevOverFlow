@@ -4,20 +4,26 @@ import Image from "next/image"
 import React from "react"
 
 type TProps = {
+  // GlobalSearchBar props
+  isGlobalSearch?: boolean
+  globalDialogIsOpen?: boolean
+  setGlobalDialogIsOpen?: React.Dispatch<React.SetStateAction<boolean>>
+  // rest of props
   search: string
   setSearch: React.Dispatch<React.SetStateAction<string>>
   placeholder: string
-  isLocal?: boolean
   iconName?: string
   iconPosition?: "left" | "right"
   wrapperClassName?: string
   className?: string
 }
 const SearchBarInput = ({
+  isGlobalSearch = false,
+  globalDialogIsOpen,
+  setGlobalDialogIsOpen,
   search,
   setSearch,
   placeholder,
-  isLocal = true,
   iconName = "search",
   iconPosition = "left",
   wrapperClassName = "",
@@ -42,7 +48,25 @@ const SearchBarInput = ({
         />
         <Input
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value)
+
+            if (isGlobalSearch) {
+              if (!globalDialogIsOpen) {
+                return (
+                  setGlobalDialogIsOpen as React.Dispatch<
+                    React.SetStateAction<boolean>
+                  >
+                )(true)
+              } else if (globalDialogIsOpen && e.target.value.trim() === "") {
+                return (
+                  setGlobalDialogIsOpen as React.Dispatch<
+                    React.SetStateAction<boolean>
+                  >
+                )(false)
+              }
+            }
+          }}
           type="text"
           placeholder={placeholder}
           className="paragraph-regular 
