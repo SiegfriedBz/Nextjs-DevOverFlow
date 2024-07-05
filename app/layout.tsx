@@ -22,6 +22,22 @@ export const metadata: Metadata = {
   icons: {
     icon: "/assets/images/site-logo.svg",
   },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: process.env.NEXT_PUBLIC_URL,
+    siteName: "Dev OverFlow",
+    title: "Dev OverFlow",
+    description: "A community-driven platform for developers",
+    images: [
+      {
+        url: process.env.NEXT_PUBLIC_IMG_CLOUDINARY_URL as string,
+        width: 1200,
+        height: 630,
+        alt: "Dev OverFlow",
+      },
+    ],
+  },
 }
 
 export default function RootLayout({

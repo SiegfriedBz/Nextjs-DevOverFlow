@@ -62,16 +62,13 @@ const AnswerForm = ({ questionId, questionforAI }: TProps) => {
 
     try {
       setIsSubmittingAI(true)
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/ai`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(questionforAI),
-        }
-      )
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/v1/ai`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(questionforAI),
+      })
 
       if (!response.ok) {
         throw new Error("Could not get answer from EdenAI")
