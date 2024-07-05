@@ -1,4 +1,5 @@
 import Providers from "@/context/Providers"
+import { Analytics } from "@vercel/analytics/react"
 import type { Metadata } from "next"
 import { Inter, Space_Grotesk as spaceGrotesk } from "next/font/google"
 import React from "react"
@@ -49,6 +50,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} ${grotesk.variable}`}>
         <Providers>{children}</Providers>
+        <Analytics />
       </body>
     </html>
   )
