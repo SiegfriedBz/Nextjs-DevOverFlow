@@ -34,7 +34,7 @@ const FilterCustomSelect = ({
             <SelectValue placeholder="Select a filter" />
           </div>
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="background-light800_dark300 z-[9999] rounded-xl">
           {/* <SelectGroup> */}
           {options.map((option) => {
             const isActiveOption =
@@ -43,7 +43,7 @@ const FilterCustomSelect = ({
 
             return (
               <SelectItem
-                className={`${isActiveOption ? "bg-accent text-accent-foreground" : ""}`}
+                className={`text-dark500_light700 ${isActiveOption ? "text-primary-500 dark:text-primary-500" : ""}`}
                 key={`option-${option}`}
                 value={option}
               >

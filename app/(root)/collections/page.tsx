@@ -18,7 +18,7 @@ type TProps = {
 const CollectionsPage = ({ searchParams }: TProps) => {
   return (
     <div className="h-full">
-      <h1 className="h1-bold text-dark100_light900">Your Saved Questions</h1>
+      <h1 className="h1-bold text-dark100_light900">Saved Questions</h1>
 
       <div className="mt-4 flex justify-between gap-5 max-sm:flex-col sm:items-center md:flex-col">
         <LocalSearchBar
@@ -26,12 +26,10 @@ const CollectionsPage = ({ searchParams }: TProps) => {
           placeholder="Search saved questions..."
         />
 
-        <div className="flex w-full justify-start">
-          <CustomFilter
-            filterName="sort"
-            filterOptions={QUESTIONS_FILTER_OPTIONS}
-          />
-        </div>
+        <CustomFilter
+          filterName="sort"
+          filterOptions={QUESTIONS_FILTER_OPTIONS}
+        />
       </div>
 
       <div className="mt-4 flex size-full flex-col justify-between gap-8 sm:items-center">
