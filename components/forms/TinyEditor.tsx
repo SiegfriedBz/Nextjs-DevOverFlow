@@ -4,21 +4,35 @@ import { Editor } from "@tinymce/tinymce-react"
 import { useEffect, useState, useRef } from "react"
 
 type TProps = {
-  editorValue: string
+  editorValue?: string
   editorInitialValue?: string
   handleEditorChange: (content: string) => void
 }
+
 const TinyEditor = ({
   editorValue,
   editorInitialValue,
   handleEditorChange,
 }: TProps) => {
   const [isClient, setIsClient] = useState(false)
-  const editorRef = useRef<typeof Editor | null>(null)
+  const [content, setContent] = useState(editorInitialValue || "")
+  const editorRef = useRef<any>(null)
 
   useEffect(() => {
     setIsClient(true)
   }, [])
+
+  // Sync editorValue with the internal content state
+  useEffect(() => {
+    if (editorValue !== undefined && editorValue !== content) {
+      setContent(editorValue)
+    }
+  }, [editorValue, content])
+
+  const handleEditorChangeInternal = (newContent: string) => {
+    setContent(newContent)
+    handleEditorChange(newContent)
+  }
 
   if (!isClient) return null
 
@@ -26,12 +40,13 @@ const TinyEditor = ({
     <Editor
       apiKey={process.env.NEXT_PUBLIC_TINYEDITOR_APIKEY}
       onInit={(_evt, editor) => {
-        // @ts-ignore
         editorRef.current = editor
+        if (editorInitialValue) {
+          editor.setContent(editorInitialValue)
+        }
       }}
-      initialValue={editorInitialValue || ""}
-      value={editorValue}
-      onEditorChange={handleEditorChange}
+      value={content}
+      onEditorChange={handleEditorChangeInternal}
       init={{
         height: 300,
         menubar: false,
