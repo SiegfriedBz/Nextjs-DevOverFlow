@@ -22,11 +22,11 @@ export const LEFTSIDEBAR_LINKS: ISidebarLink[] = [
     href: "/collections",
     label: "Collections",
   },
-  {
-    imgURL: "/assets/icons/suitcase.svg",
-    href: "/jobs",
-    label: "Find Jobs",
-  },
+  // {
+  //   imgURL: "/assets/icons/suitcase.svg",
+  //   href: "/jobs",
+  //   label: "Find Jobs",
+  // },
   {
     imgURL: "/assets/icons/tag.svg",
     href: "/tags",
