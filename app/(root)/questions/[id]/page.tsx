@@ -84,6 +84,7 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
     createdAt,
   } = question
 
+  const questionforAI = { title, content } // for AnswerForm
   const questionNumUpVotes = upVoters?.length ?? 0
   const questionNumDownVotes = downVoters?.length ?? 0
   const userHasUpVotedQuestion = JSON.parse(JSON.stringify(upVoters)).some(
@@ -161,7 +162,7 @@ const QuestionDetailsPage = async ({ params, searchParams }: TProps) => {
       </Suspense>
 
       {/* Answer form */}
-      <AnswerForm questionId={questionId} />
+      <AnswerForm questionId={questionId} questionforAI={questionforAI} />
     </section>
   )
 }

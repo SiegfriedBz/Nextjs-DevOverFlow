@@ -92,14 +92,12 @@ const QuestionForm = ({ actionType = "create", questionData }: TProps) => {
     setIsSubmitting(true)
 
     try {
-      const response = isCreateForm
+      isCreateForm
         ? await createQuestionAction({ data: values })
         : await updateQuestionAction({
             questionId: questionId as string,
             data: values,
           })
-
-      console.log("response", response)
 
       // notify user
       toast.success(
@@ -156,6 +154,7 @@ const QuestionForm = ({ actionType = "create", questionData }: TProps) => {
               </FormLabel>
               <FormControl className="background-light900_dark300 light-border-2 mt-3.5 ">
                 <TinyEditor
+                  editorValue={field.value}
                   editorInitialValue={isCreateForm ? "" : field.value}
                   handleEditorChange={(content: string) =>
                     field.onChange(content)
