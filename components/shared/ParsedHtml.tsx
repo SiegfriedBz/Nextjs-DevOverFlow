@@ -27,12 +27,24 @@ import { useEffect } from "react"
 
 type TProps = { data: string }
 
+const containsPreTagWithClass = (str: string) => {
+  return /<pre class=/.test(str)
+}
+
 const ParsedHtml = ({ data }: TProps) => {
   useEffect(() => {
-    Prism.highlightAll()
-  }, [])
+    if (containsPreTagWithClass(data)) {
+      Prism.highlightAll()
+    }
+  }, [data])
 
-  return data ? <div className="w-full">{parse(data)}</div> : null
+  return data ? (
+    <div
+      className={`w-full ${containsPreTagWithClass(data) ? "" : "text-dark500_light700"}`}
+    >
+      {parse(data)}
+    </div>
+  ) : null
 }
 
 export default ParsedHtml
