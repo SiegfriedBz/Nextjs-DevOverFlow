@@ -4,10 +4,15 @@ import { Editor } from "@tinymce/tinymce-react"
 import { useEffect, useState, useRef } from "react"
 
 type TProps = {
+  editorValue: string
   editorInitialValue?: string
   handleEditorChange: (content: string) => void
 }
-const TinyEditor = ({ editorInitialValue, handleEditorChange }: TProps) => {
+const TinyEditor = ({
+  editorValue,
+  editorInitialValue,
+  handleEditorChange,
+}: TProps) => {
   const [isClient, setIsClient] = useState(false)
   const editorRef = useRef<typeof Editor | null>(null)
 
@@ -25,7 +30,7 @@ const TinyEditor = ({ editorInitialValue, handleEditorChange }: TProps) => {
         editorRef.current = editor
       }}
       initialValue={editorInitialValue || ""}
-      // onBlur={}
+      value={editorValue}
       onEditorChange={handleEditorChange}
       init={{
         height: 300,
@@ -51,10 +56,6 @@ const TinyEditor = ({ editorInitialValue, handleEditorChange }: TProps) => {
           | bullits numlist
           `,
         content_style: `body { font-family:Inter; font-size:16px }`,
-        // ai_request: (request, respondWith) =>
-        //   respondWith.string(() =>
-        //     Promise.reject(new Error("See docs to implement AI Assistant"))
-        //   ),
       }}
     />
   )
