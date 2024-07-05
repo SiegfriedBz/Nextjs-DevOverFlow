@@ -39,11 +39,7 @@ const ParsedHtml = ({ data }: TProps) => {
   }, [data])
 
   return data ? (
-    <div
-      className={`w-full ${containsPreTagWithClass(data) ? "" : "text-dark500_light700"}`}
-    >
-      {parse(data)}
-    </div>
+    <div className="text-dark500_light700 w-full">{parse(data)}</div>
   ) : null
 }
 
