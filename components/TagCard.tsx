@@ -13,9 +13,9 @@ type TProps = TTag
 const TagCard = ({ _id, name, description, questions }: TProps) => {
   return (
     <Card
-      className="background-light900_dark200
-        text-dark400_light700   
-        shadow-light100_darknone 
+      className="background-light800_darkgradient 
+        text-dark400_light700     
+        shadow-light300_darknone 
         light-border rounded-xl
         border
         px-8
@@ -28,8 +28,8 @@ const TagCard = ({ _id, name, description, questions }: TProps) => {
       <Link href={`/tags/${_id}`}>
         <CardHeader>
           <CardTitle className="flex w-full justify-center">
-            <div className="background-light800_dark400 w-fit rounded-sm px-5 py-1.5">
-              <p className="paragraph-semibold text-dark300_light900 whitespace-nowrap">
+            <div className="background-light700_dark400 w-fit rounded-sm px-5 py-1.5">
+              <p className="paragraph-semibold text-light400_light500 whitespace-nowrap">
                 {name}
               </p>
             </div>
