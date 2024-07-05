@@ -262,6 +262,7 @@ export async function getQuestionsByTag({
   }
 }
 
+//  TODO
 export async function getUserTopTags({
   userId,
   limit = 3,
@@ -279,30 +280,8 @@ export async function getUserTopTags({
       throw new Error("User not found")
     }
 
-    // TODO
-    return [
-      {
-        _id: "1",
-        name: "Stuff",
-        questions: ["kkv", "kjgl"],
-        description: "jblgvlvlv",
-        followers: ["kkv", "kjgl"],
-      },
-      {
-        _id: "2",
-        name: "Stuff 2",
-        questions: ["kkv", "kjgl"],
-        description: "jblgvlvlv",
-        followers: ["kkv", "kjgl"],
-      },
-      {
-        _id: "3",
-        name: "Stuff 3",
-        questions: ["kkv", "kjgl"],
-        description: "jblgvlvlv",
-        followers: ["kkv", "kjgl"],
-      },
-    ]
+    // get user tags
+    return result
   } catch (error) {
     const err = error as Error
     console.log("getUserTopTags Error", err.message)

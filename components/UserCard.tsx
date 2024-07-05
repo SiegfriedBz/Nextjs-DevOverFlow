@@ -1,12 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { getUserTopTags } from "@/services/tags.services."
+import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import type { TUser } from "@/types"
 import Image from "next/image"
 import Link from "next/link"
-import { Suspense } from "react"
-import Tag from "./Tag"
-import { Badge } from "./ui/badge"
-import { UserTagListWrapperSkeleton } from "./UserCardSkeleton"
 
 type TProps = TUser
 
@@ -48,31 +43,33 @@ const UserCard = ({
           </CardTitle>
         </CardHeader>
       </Link>
-      <CardContent>
+      {/* TODO */}
+      {/* <CardContent>
         <Suspense fallback={<UserTagListWrapperSkeleton />}>
           <TagListWrapper userId={_id} />
         </Suspense>
-      </CardContent>
+      </CardContent> */}
     </Card>
   )
 }
 
 export default UserCard
 
-const TagListWrapper = async ({ userId }: { userId: string }) => {
-  const favoredTags = await getUserTopTags({ userId, limit: 3 })
+// TODO
+// const TagListWrapper = async ({ userId }: { userId: string }) => {
+//   const favoredTags = await getUserTopTags({ userId, limit: 3 })
 
-  return favoredTags?.length > 0 ? (
-    <ul className="flex w-full justify-center gap-x-4">
-      {favoredTags?.map((tag, index) => {
-        return (
-          <li key={`user-${userId}-tag-${index}`}>
-            <Tag {...tag} />
-          </li>
-        )
-      })}
-    </ul>
-  ) : (
-    <Badge className="flex w-full justify-center">No tags yet</Badge>
-  )
-}
+//   return favoredTags?.length > 0 ? (
+//     <ul className="flex w-full justify-center gap-x-4">
+//       {favoredTags?.map((tag, index) => {
+//         return (
+//           <li key={`user-${userId}-tag-${index}`}>
+//             <Tag {...tag} />
+//           </li>
+//         )
+//       })}
+//     </ul>
+//   ) : (
+//     <Badge className="flex w-full justify-center">No tags yet</Badge>
+//   )
+// }
